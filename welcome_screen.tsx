@@ -31,7 +31,7 @@ export default function WelcomeScreen() {
         {/* Create Account Button */}
         <TouchableOpacity
           style={styles.createAccountButton}
-          onPress={() => router.push('/create-account')}
+          onPress={() => router.push('/signUpPage')}
         >
           <ThemedText style={styles.createAccountButtonText}>Create Account</ThemedText>
         </TouchableOpacity>
