@@ -39,7 +39,7 @@ export default function WelcomeScreen() {
         {/* Log In Button */}
         <TouchableOpacity
           style={styles.loginButton}
-          onPress={() => router.push('/signin')}
+          onPress={() => router.push('/Login')}
         >
           <ThemedText style={styles.loginButtonText}>Log In</ThemedText>
         </TouchableOpacity>

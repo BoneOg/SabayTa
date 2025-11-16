@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { Linking, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import MapView from 'react-native-maps';
 
 export default function EnableLocationScreen() {
   const router = useRouter();
@@ -17,14 +18,12 @@ export default function EnableLocationScreen() {
         console.log('User location:', location.coords);
         router.push('/welcome_screen');
       } else if (status === Location.PermissionStatus.DENIED) {
-        // Open device settings if previously denied
         if (Platform.OS === 'ios') {
-          Linking.openURL('app-settings:'); // iOS settings
+          Linking.openURL('app-settings:');
         } else {
-          Linking.openSettings(); // Android settings
+          Linking.openSettings();
         }
       } else {
-        // Undetermined or other -> request permission
         const { status: newStatus } = await Location.requestForegroundPermissionsAsync();
         if (newStatus === Location.PermissionStatus.GRANTED) {
           const location = await Location.getCurrentPositionAsync({});
@@ -39,15 +38,25 @@ export default function EnableLocationScreen() {
     }
   };
 
+  const region = {
+    latitude: 8.4822,
+    longitude: 124.6472,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  };
+
   return (
     <ThemedView style={styles.container}>
-      <Image
-        source={require('@/assets/images/Map.png')}
-        style={styles.backgroundImage}
-        contentFit="cover"
+      {/* Live map as background */}
+      <MapView
+        style={StyleSheet.absoluteFill}
+        region={region}
+        showsUserLocation={true}
+        showsMyLocationButton={true}
       />
       <View style={styles.overlay} />
       <View style={styles.modal}>
+        {/* Location illustration (keep this for branding) */}
         <Image
           source={require('@/assets/images/Location.png')}
           style={styles.locationImage}
@@ -72,8 +81,7 @@ export default function EnableLocationScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-  backgroundImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
-  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.5)' },
+  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.28)' },
   modal: {
     position: 'absolute',
     top: '20%',
