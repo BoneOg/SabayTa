@@ -9,34 +9,37 @@ import MapView from 'react-native-maps';
 export default function EnableLocationScreen() {
   const router = useRouter();
 
-  const requestLocation = async () => {
-    try {
-      const { status } = await Location.getForegroundPermissionsAsync();
+const requestLocation = async () => {
+  try {
+    // 1. Check existing permission
+    let { status } = await Location.getForegroundPermissionsAsync();
 
-      if (status === Location.PermissionStatus.GRANTED) {
-        const location = await Location.getCurrentPositionAsync({});
-        console.log('User location:', location.coords);
-        router.push('/welcome_screen');
-      } else if (status === Location.PermissionStatus.DENIED) {
-        if (Platform.OS === 'ios') {
-          Linking.openURL('app-settings:');
-        } else {
-          Linking.openSettings();
-        }
-      } else {
-        const { status: newStatus } = await Location.requestForegroundPermissionsAsync();
-        if (newStatus === Location.PermissionStatus.GRANTED) {
-          const location = await Location.getCurrentPositionAsync({});
-          console.log('User location:', location.coords);
-          router.push('/welcome_screen');
-        } else {
-          console.log('Permission still denied');
-        }
-      }
-    } catch (error) {
-      console.log('Error fetching location:', error);
+    // 2. If NOT granted, request permission
+    if (status !== Location.PermissionStatus.GRANTED) {
+      const permission = await Location.requestForegroundPermissionsAsync();
+      status = permission.status;
     }
-  };
+
+    // 3. After checking and possibly requesting, if GRANTED → navigate
+    if (status === Location.PermissionStatus.GRANTED) {
+      const location = await Location.getCurrentPositionAsync({});
+      console.log("User location:", location.coords);
+      router.push("/welcome_screen");
+      return;
+    }
+
+    // 4. If denied permanently → open settings
+    if (status === Location.PermissionStatus.DENIED) {
+      if (Platform.OS === "ios") {
+        Linking.openURL("app-settings:");
+      } else {
+        Linking.openSettings();
+      }
+    }
+  } catch (error) {
+    console.log("Error fetching location:", error);
+  }
+};
 
   const region = {
     latitude: 8.4822,

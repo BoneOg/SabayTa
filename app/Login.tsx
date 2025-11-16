@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
-import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
+import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function Login() {
   const router = useRouter();
@@ -10,11 +10,16 @@ export default function Login() {
 
   return (
     <View style={styles.container}>
+      {/* Back */}
       <Pressable style={styles.backButton} onPress={() => router.back()}>
         <MaterialIcons name="arrow-back-ios" size={20} color="#414141" />
         <Text style={styles.backText}>Back</Text>
       </Pressable>
+
+      {/* Title */}
       <Text style={styles.title}>Sign in with your email or phone number</Text>
+
+      {/* Username */}
       <TextInput
         style={styles.input}
         placeholder="Email or Phone Number"
@@ -22,6 +27,8 @@ export default function Login() {
         value={username}
         onChangeText={setUsername}
       />
+
+      {/* Password */}
       <TextInput
         style={styles.input}
         placeholder="Enter Your Password"
@@ -30,30 +37,40 @@ export default function Login() {
         value={password}
         onChangeText={setPassword}
       />
+
+      {/* Forgot Password */}
       <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 12 }}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push('/PhoneVerificationLogin')}>
           <Text style={styles.forgotText}>Forgot password?</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Sign In */}
       <TouchableOpacity
         style={styles.signInButton}
-        onPress={() => router.push('/PhoneVerificationLogin')}
+        onPress={() => router.push('/tabs/home')}
       >
         <Text style={styles.buttonText}>Sign in</Text>
       </TouchableOpacity>
+
       <Text style={styles.orText}>or</Text>
+
+      {/* Social Buttons */}
       <TouchableOpacity style={styles.socialButton}>
         <FontAwesome name="google" size={20} color="#414141" />
         <Text style={styles.socialText}>Sign up with Gmail</Text>
       </TouchableOpacity>
+
       <TouchableOpacity style={styles.socialButton}>
         <FontAwesome name="facebook" size={20} color="#414141" />
         <Text style={styles.socialText}>Sign up with Facebook</Text>
       </TouchableOpacity>
+
       <TouchableOpacity style={styles.socialButton}>
         <FontAwesome name="apple" size={20} color="#414141" />
         <Text style={styles.socialText}>Sign up with Apple</Text>
       </TouchableOpacity>
+
       <Text style={styles.footerText}>
         Don't have an account? <Text style={styles.signUpLink}>Sign Up</Text>
       </Text>

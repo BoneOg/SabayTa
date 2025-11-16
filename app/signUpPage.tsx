@@ -1,19 +1,21 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
-import { FontAwesome, MaterialIcons, Entypo } from '@expo/vector-icons';
+import { Entypo, FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import React from 'react';
+import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function SignUpPage() {
   const router = useRouter();
 
   return (
     <View style={styles.container}>
+
       {/* Back Button */}
       <Pressable style={styles.backButton} onPress={() => router.replace('/welcome_screen')}>
         <MaterialIcons name="arrow-back-ios" size={20} color="#414141" />
         <Text style={styles.backText}>Back</Text>
       </Pressable>
 
+      {/* Title */}
       <Text style={styles.title}>Sign up with your email or phone number</Text>
 
       {/* Inputs */}
@@ -22,6 +24,7 @@ export default function SignUpPage() {
         placeholder="Name"
         placeholderTextColor="#D0D0D0"
       />
+
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -29,11 +32,12 @@ export default function SignUpPage() {
         keyboardType="email-address"
       />
 
-      {/* Mobile input with country code */}
+      {/* Mobile Input */}
       <View style={styles.rowInput}>
         <View style={styles.countryCodeBox}>
           <Text style={styles.countryCode}>🇵🇭 +63</Text>
         </View>
+
         <TextInput
           style={[styles.input, styles.mobileInput]}
           placeholder="Your mobile number"
@@ -42,21 +46,20 @@ export default function SignUpPage() {
         />
       </View>
 
-      {/* Gender input for demo */}
+      {/* Gender */}
       <TextInput
         style={styles.input}
         placeholder="Gender"
         placeholderTextColor="#D0D0D0"
       />
 
-      {/* Terms and Policy */}
+      {/* Terms */}
       <View style={styles.termsRow}>
         <Entypo name="check" size={16} color="#540383" />
         <Text style={styles.termsText}>
           By signing up, you agree to the{' '}
-          <Text style={styles.linkText}>Terms of service</Text>
-          {' '}and{' '}
-          <Text style={styles.linkText}>Privacy policy.</Text>
+          <Text style={styles.linkText}>Terms of service</Text> and{' '}
+          <Text style={styles.linkText}>Privacy policy</Text>.
         </Text>
       </View>
 
@@ -68,7 +71,6 @@ export default function SignUpPage() {
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
 
-      {/* OR Separator */}
       <Text style={styles.orText}>or</Text>
 
       {/* Social Buttons */}
@@ -76,20 +78,26 @@ export default function SignUpPage() {
         <FontAwesome name="google" size={20} color="#414141" />
         <Text style={styles.socialText}>Sign up with Gmail</Text>
       </TouchableOpacity>
+
       <TouchableOpacity style={styles.socialButton}>
         <FontAwesome name="facebook" size={20} color="#414141" />
         <Text style={styles.socialText}>Sign up with Facebook</Text>
       </TouchableOpacity>
+
       <TouchableOpacity style={styles.socialButton}>
         <Entypo name="apple" size={20} color="#414141" />
         <Text style={styles.socialText}>Sign up with Apple</Text>
       </TouchableOpacity>
 
-      {/* Sign In Link */}
-      <Text style={styles.footerText}>
-        Already have an account?{' '}
-        <Text style={styles.signInLink}>Sign in</Text>
-      </Text>
+      {/* Clickable Sign In Link */}
+      <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 18 }}>
+        <Text style={styles.footerText}>Already have an account? </Text>
+
+        <Pressable onPress={() => router.push('/Login')}>
+          <Text style={styles.signInLink}>Sign in</Text>
+        </Pressable>
+      </View>
+
     </View>
   );
 }
@@ -152,7 +160,6 @@ const styles = StyleSheet.create({
   },
   mobileInput: {
     flex: 1,
-    marginLeft: 0,
   },
   termsRow: {
     flexDirection: 'row',
@@ -207,11 +214,9 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
   footerText: {
-    textAlign: 'center',
     fontFamily: 'Poppins',
     fontSize: 13,
     color: '#414141',
-    marginTop: 18,
   },
   signInLink: {
     color: '#540383',

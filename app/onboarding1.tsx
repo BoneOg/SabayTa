@@ -20,7 +20,7 @@ export default function HomeScreen() {
 
       {/* Image on top */}
       <Image
-        source={require('@/assets/images/onboarding2.png')}
+        source={require('@/assets/images/5.png')}
         style={styles.image}
         contentFit="contain"
       />

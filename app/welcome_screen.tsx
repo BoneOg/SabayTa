@@ -28,6 +28,7 @@ export default function WelcomeScreen() {
 
       {/* Buttons Container */}
       <View style={styles.buttonsContainer}>
+
         {/* Create Account Button */}
         <TouchableOpacity
           style={styles.createAccountButton}
@@ -36,13 +37,14 @@ export default function WelcomeScreen() {
           <ThemedText style={styles.createAccountButtonText}>Create Account</ThemedText>
         </TouchableOpacity>
 
-        {/* Log In Button */}
+        {/* Login Button */}
         <TouchableOpacity
           style={styles.loginButton}
           onPress={() => router.push('/Login')}
         >
           <ThemedText style={styles.loginButtonText}>Log In</ThemedText>
         </TouchableOpacity>
+
       </View>
     </ThemedView>
   );
@@ -77,13 +79,15 @@ const styles = StyleSheet.create({
   buttonsContainer: {
     width: '100%',
     alignItems: 'center',
+    gap: 15,
   },
+
+  /* BUTTONS SAME WIDTH + RADIUS 10 */
   createAccountButton: {
     backgroundColor: '#622C9B',
+    width: '100%', // full same width
     paddingVertical: 14,
-    paddingHorizontal: 60,
-    borderRadius: 30,
-    marginBottom: 15,
+    borderRadius: 10, // changed
   },
   createAccountButtonText: {
     color: '#fff',
@@ -91,12 +95,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
+
   loginButton: {
+    width: '100%', // full same width
     borderColor: '#622C9B',
     borderWidth: 2,
     paddingVertical: 14,
-    paddingHorizontal: 60,
-    borderRadius: 30,
+    borderRadius: 10, // changed
   },
   loginButtonText: {
     color: '#622C9B',
