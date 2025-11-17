@@ -1,8 +1,9 @@
+import BackButton from '@/components/BackButton';
 import Button from '@/components/Button';
-import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function Login() {
   const router = useRouter();
@@ -11,11 +12,7 @@ export default function Login() {
 
   return (
     <View style={styles.container}>
-      {/* Back */}
-      <Pressable style={styles.backButton} onPress={() => router.back()}>
-        <MaterialIcons name="arrow-back-ios" size={20} color="#414141" />
-        <Text style={styles.backText}>Back</Text>
-      </Pressable>
+      <BackButton />
 
       {/* Title */}
       <Text style={styles.title}>Sign in with your email or phone number</Text>
@@ -79,9 +76,7 @@ export default function Login() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24, backgroundColor: '#fff', marginTop: 20 },
-  backButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, marginBottom: 4 },
-  backText: { fontFamily: 'Poppins', color: '#414141', fontSize: 17, marginLeft: 2 },
+  container: { flex: 1, padding: 24, backgroundColor: '#fff', paddingTop: Platform.OS === 'android' ? 50 : 20 },
   title: { fontFamily: 'Poppins', fontSize: 20, color: '#414141', marginVertical: 16, fontWeight: '600' },
   input: {
     fontFamily: 'Poppins', fontSize: 15, color: '#414141', borderWidth: 1,
@@ -89,7 +84,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12, paddingHorizontal: 14, marginVertical: 7,
   },
   signInButton: {},
-  forgotText: { color: '#E35A5A', fontFamily: 'Poppins', fontSize: 13 },
+  forgotText: { color: '#E35A5A', fontFamily: 'Poppins', fontSize: 13, marginBottom: 24 },
   orText: { textAlign: 'center', color: '#B8B8B8', marginVertical: 8, fontFamily: 'Poppins' },
   socialButton: {
     flexDirection: 'row',

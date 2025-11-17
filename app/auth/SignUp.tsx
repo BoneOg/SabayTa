@@ -1,8 +1,9 @@
+import BackButton from '@/components/BackButton';
 import Button from '@/components/Button';
-import { Entypo, FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { Entypo, FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -11,10 +12,7 @@ export default function SignUpPage() {
     <View style={styles.container}>
 
       {/* Back Button */}
-      <Pressable style={styles.backButton} onPress={() => router.replace('/auth/Welcome')}>
-        <MaterialIcons name="arrow-back-ios" size={20} color="#414141" />
-        <Text style={styles.backText}>Back</Text>
-      </Pressable>
+      <BackButton onPress={() => router.replace('/auth/Welcome')} />
 
       {/* Title */}
       <Text style={styles.title}>Sign up with your email or phone number</Text>
@@ -103,19 +101,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 24,
     backgroundColor: '#fff',
-    marginTop: 20,
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
-    marginBottom: 4,
-  },
-  backText: {
-    fontFamily: 'Poppins',
-    color: '#414141',
-    fontSize: 17,
-    marginLeft: 2,
+    paddingTop: Platform.OS === 'android' ? 50 : 20, 
   },
   title: {
     fontFamily: 'Poppins',

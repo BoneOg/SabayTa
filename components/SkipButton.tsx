@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { Platform, StyleSheet, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type SkipButtonProps = {
   onPress: () => void;
@@ -7,8 +8,17 @@ type SkipButtonProps = {
 };
 
 export default function SkipButton({ onPress, children }: SkipButtonProps) {
+  const insets = useSafeAreaInsets();
+  
+  const topSpacing = Platform.OS === 'ios' 
+    ? 10   
+    : Math.max(insets.top, 20) + 12;  
+
   return (
-    <TouchableOpacity style={styles.button} onPress={onPress}>
+    <TouchableOpacity 
+      style={[styles.button, { top: topSpacing }]} 
+      onPress={onPress}
+    >
       {children}
     </TouchableOpacity>
   );
@@ -17,9 +27,7 @@ export default function SkipButton({ onPress, children }: SkipButtonProps) {
 const styles = StyleSheet.create({
   button: {
     position: 'absolute',
-    top: 50,
     right: 20,
     zIndex: 1,
   },
 });
-

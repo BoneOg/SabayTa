@@ -8,8 +8,8 @@ export default function LoginSuccess() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.replace('/tabs/home'); // Navigates to home tab after login
-    }, 1000); // 1-second delay
+      router.replace('/tabs/home');
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, [router]);
@@ -23,7 +23,7 @@ export default function LoginSuccess() {
         style={{ alignSelf: 'center', marginBottom: 25 }}
       />
       <Text style={styles.title}>Login Successful!</Text>
-      <Text style={styles.subtitle}>Welcome back, your password is updated.</Text>
+      <Text style={styles.subtitle}>Welcome back, User</Text>
     </View>
   );
 }

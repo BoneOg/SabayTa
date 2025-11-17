@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import BackButton from '@/components/BackButton';
 import Button from '@/components/Button';
-import { View, Text, TextInput, StyleSheet, Pressable, Image } from 'react-native';
-import { MaterialIcons, Entypo } from '@expo/vector-icons';
+import { View, Text, TextInput, StyleSheet, Image, Platform } from 'react-native';
+import { Entypo } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 export default function CompleteProfile() {
@@ -17,10 +18,7 @@ export default function CompleteProfile() {
 
   return (
     <View style={styles.container}>
-      <Pressable style={styles.backButton} onPress={() => router.back()}>
-        <MaterialIcons name="arrow-back-ios" size={20} color="#414141" />
-        <Text style={styles.backText}>Back</Text>
-      </Pressable>
+      <BackButton />
       <Text style={styles.title}>Profile</Text>
       <View style={styles.avatarWrapper}>
         <View style={styles.avatar}>
@@ -96,9 +94,12 @@ export default function CompleteProfile() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24, backgroundColor: '#fff' },
-  backButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: 30, marginBottom: 4 },
-  backText: { fontFamily: 'Poppins', color: '#414141', fontSize: 17, marginLeft: 2 },
+  container: {
+    flex: 1,
+    padding: 24,
+    backgroundColor: '#fff',
+    paddingTop: Platform.OS === 'android' ? 50 : 20,
+  },
   title: { fontFamily: 'Poppins', fontSize: 22, color: '#414141', fontWeight: '600', marginBottom: 4, marginTop: 4, textAlign: 'center' },
   avatarWrapper: { alignItems: 'center', marginBottom: 16 },
   avatar: { width: 80, height: 80, backgroundColor: '#D0D0D0', borderRadius: 40, justifyContent: 'center', alignItems: 'center' },
