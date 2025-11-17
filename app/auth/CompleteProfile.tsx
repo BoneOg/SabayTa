@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Pressable, Image } from 'react-native';
+import Button from '@/components/Button';
+import { View, Text, TextInput, StyleSheet, Pressable, Image } from 'react-native';
 import { MaterialIcons, Entypo } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
@@ -78,12 +79,17 @@ export default function CompleteProfile() {
       />
 
       <View style={styles.buttonRow}>
-        <TouchableOpacity style={styles.cancelButton}>
-          <Text style={styles.cancelText}>Cancel</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.saveButton}>
-          <Text style={styles.saveText}>Save</Text>
-        </TouchableOpacity>
+        <Button
+          label="Cancel"
+          variant="outline"
+          style={styles.halfButton}
+          onPress={() => router.back()}
+        />
+        <Button
+          label="Save"
+          style={styles.halfButton}
+          onPress={() => router.push('/auth/Login')}
+        />
       </View>
     </View>
   );
@@ -106,9 +112,6 @@ const styles = StyleSheet.create({
   countryCodeBox: { borderWidth: 1, borderColor: '#D0D0D0', borderRadius: 6, paddingVertical: 10, paddingHorizontal: 10, marginRight: 8, backgroundColor: '#fff' },
   countryCode: { fontFamily: 'Poppins', color: '#414141', fontSize: 15 },
   mobileInput: { flex: 1, marginLeft: 0 },
-  buttonRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 },
-  cancelButton: { flex: 1, borderWidth: 1, borderColor: '#534889', borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginRight: 10 },
-  saveButton: { flex: 1, backgroundColor: '#534889', borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginLeft: 10 },
-  cancelText: { color: '#534889', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 15 },
-  saveText: { color: '#fff', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 15 },
+  buttonRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 20, gap: 12 },
+  halfButton: { flex: 1 },
 });

@@ -1,8 +1,9 @@
+import Button from '@/components/Button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -30,20 +31,14 @@ export default function WelcomeScreen() {
       <View style={styles.buttonsContainer}>
 
         {/* Create Account Button */}
-        <TouchableOpacity
-          style={styles.createAccountButton}
-          onPress={() => router.push('/auth/signUpPage')}
-        >
-          <ThemedText style={styles.createAccountButtonText}>Create Account</ThemedText>
-        </TouchableOpacity>
+        <Button label="Create Account" onPress={() => router.push('/auth/SignUp')} />
 
         {/* Login Button */}
-        <TouchableOpacity
-          style={styles.loginButton}
+        <Button
+          label="Log In"
+          variant="outline"
           onPress={() => router.push('/auth/Login')}
-        >
-          <ThemedText style={styles.loginButtonText}>Log In</ThemedText>
-        </TouchableOpacity>
+        />
 
       </View>
     </ThemedView>
@@ -82,31 +77,4 @@ const styles = StyleSheet.create({
     gap: 15,
   },
 
-  /* BUTTONS SAME WIDTH + RADIUS 10 */
-  createAccountButton: {
-    backgroundColor: '#534889',
-    width: '100%', // full same width
-    paddingVertical: 14,
-    borderRadius: 10, // changed
-  },
-  createAccountButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-
-  loginButton: {
-    width: '100%', // full same width
-    borderColor: '#534889',
-    borderWidth: 2,
-    paddingVertical: 14,
-    borderRadius: 10, // changed
-  },
-  loginButtonText: {
-    color: '#534889',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
 });

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import Button from '@/components/Button';
-import { View, Text, StyleSheet, Pressable, TextInput } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import Button from '@/components/Button';
 import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
-export default function PhoneVerification() {
+export default function PhoneVerificationLogin() {
   const router = useRouter();
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
 
@@ -35,17 +35,16 @@ export default function PhoneVerification() {
         ))}
       </View>
       <Text style={styles.resendContainer}>
-        Didn’t receive code?{' '}
-        <Text style={styles.resendLink}>Resend again</Text>
+        Didn’t receive code? <Text style={styles.resendLink}>Resend again</Text>
       </Text>
-      <Button label="Verify" onPress={() => router.push('/auth/SetPassword')} />
+      <Button label="Verify" onPress={() => router.push('/auth/SetNewPassword')} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 24, backgroundColor: '#fff' },
-  backButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: 30, marginBottom: 4 },
+  backButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, marginBottom: 4 },
   backText: { fontFamily: 'Poppins', color: '#414141', fontSize: 17, marginLeft: 2 },
   title: { fontFamily: 'Poppins', fontSize: 22, color: '#414141', fontWeight: '600', marginBottom: 8, marginTop: 4 },
   subtitle: { fontFamily: 'Poppins', fontSize: 15, color: '#B8B8B8', marginBottom: 16 },
@@ -54,6 +53,6 @@ const styles = StyleSheet.create({
     width: 44, height: 44, borderWidth: 1, borderColor: '#D0D0D0', borderRadius: 8,
     textAlign: 'center', fontSize: 18, color: '#414141', fontFamily: 'Poppins', backgroundColor: '#fff'
   },
-  resendContainer: { fontFamily: 'Poppins', color: '#B8B8B8', fontSize: 14, marginBottom: 28 },
+  resendContainer: { fontFamily: 'Poppins', color: '#534889', fontSize: 14, marginBottom: 28 },
   resendLink: { color: '#534889', textDecorationLine: 'underline' },
 });

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
+import Button from '@/components/Button';
+import { View, Text, TextInput, StyleSheet, Pressable } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
@@ -33,12 +34,7 @@ export default function SetPassword() {
         onChangeText={setConfirmPassword}
       />
       <Text style={styles.hint}>Atleast 1 number or a special character</Text>
-      <TouchableOpacity
-        style={styles.actionButton}
-        onPress={() => router.push('/auth/CompleteProfile')}
-      >
-        <Text style={styles.buttonText}>Register</Text>
-      </TouchableOpacity>
+      <Button label="Register" onPress={() => router.push('/auth/CompleteProfile')} />
     </View>
   );
 }
@@ -55,6 +51,4 @@ const styles = StyleSheet.create({
     paddingVertical: 12, paddingHorizontal: 14, marginVertical: 7,
   },
   hint: { fontFamily: 'Poppins', color: '#B8B8B8', fontSize: 12, marginBottom: 18, marginTop: 2 },
-  actionButton: { backgroundColor: '#534889', borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginTop: 10 },
-  buttonText: { color: '#fff', fontFamily: 'Poppins', fontWeight: '700', fontSize: 16 },
 });

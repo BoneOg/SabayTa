@@ -24,7 +24,7 @@ const requestLocation = async () => {
     if (status === Location.PermissionStatus.GRANTED) {
       const location = await Location.getCurrentPositionAsync({});
       console.log("User location:", location.coords);
-      router.push("/auth/welcome_screen");
+      router.push("/auth/Welcome");
       return;
     }
 
@@ -74,7 +74,7 @@ const requestLocation = async () => {
         <TouchableOpacity style={styles.enableButton} onPress={requestLocation}>
           <ThemedText style={styles.enableButtonText}>Enable my location</ThemedText>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push('/auth/welcome_screen')}>
+        <TouchableOpacity onPress={() => router.push('/auth/Welcome')}>
           <ThemedText style={styles.skipText}>Skip for now</ThemedText>
         </TouchableOpacity>
       </View>

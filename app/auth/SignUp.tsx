@@ -1,3 +1,4 @@
+import Button from '@/components/Button';
 import { Entypo, FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -10,7 +11,7 @@ export default function SignUpPage() {
     <View style={styles.container}>
 
       {/* Back Button */}
-      <Pressable style={styles.backButton} onPress={() => router.replace('/auth/welcome_screen')}>
+      <Pressable style={styles.backButton} onPress={() => router.replace('/auth/Welcome')}>
         <MaterialIcons name="arrow-back-ios" size={20} color="#414141" />
         <Text style={styles.backText}>Back</Text>
       </Pressable>
@@ -64,12 +65,7 @@ export default function SignUpPage() {
       </View>
 
       {/* Sign Up Button */}
-      <TouchableOpacity
-        style={styles.signUpButton}
-        onPress={() => router.push('/auth/PhoneVerification')}
-      >
-        <Text style={styles.buttonText}>Sign Up</Text>
-      </TouchableOpacity>
+      <Button label="Sign Up" onPress={() => router.push('/auth/PhoneVerification')} style={{ marginVertical: 10 }} />
 
       <Text style={styles.orText}>or</Text>
 
@@ -107,11 +103,12 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 24,
     backgroundColor: '#fff',
+    marginTop: 20,
   },
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 30,
+    paddingVertical: 10,
     marginBottom: 4,
   },
   backText: {
@@ -175,20 +172,6 @@ const styles = StyleSheet.create({
   linkText: {
     color: '#534889',
     textDecorationLine: 'underline',
-  },
-  signUpButton: {
-    backgroundColor: '#534889',
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 10,
-  },
-  buttonText: {
-    color: '#fff',
-    fontFamily: 'Poppins',
-    fontWeight: '700',
-    fontSize: 15,
   },
   orText: {
     textAlign: 'center',

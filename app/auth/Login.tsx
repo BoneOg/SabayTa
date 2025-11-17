@@ -1,3 +1,4 @@
+import Button from '@/components/Button';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -40,18 +41,13 @@ export default function Login() {
 
       {/* Forgot Password */}
       <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 12 }}>
-        <TouchableOpacity onPress={() => router.push('/auth/PhoneVerificationLogin')}>
+        <Pressable onPress={() => router.push('/auth/ForgotPassword')}>
           <Text style={styles.forgotText}>Forgot password?</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       {/* Sign In */}
-      <TouchableOpacity
-        style={styles.signInButton}
-        onPress={() => router.push('/tabs/home')}
-      >
-        <Text style={styles.buttonText}>Sign in</Text>
-      </TouchableOpacity>
+      <Button label="Sign in" onPress={() => router.push('/auth/LoginSuccess')} />
 
       <Text style={styles.orText}>or</Text>
 
@@ -71,15 +67,19 @@ export default function Login() {
         <Text style={styles.socialText}>Sign up with Apple</Text>
       </TouchableOpacity>
 
-      <Text style={styles.footerText}>
-        Don't have an account? <Text style={styles.signUpLink}>Sign Up</Text>
-      </Text>
+      <View style={styles.footerRow}>
+        <Text style={styles.footerText}>Don't have an account? </Text>
+        <Pressable onPress={() => router.push('/auth/SignUp')}>
+          <Text style={styles.signUpLink}>Sign up</Text>
+        </Pressable>
+      </View>
+
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24, backgroundColor: '#fff' },
+  container: { flex: 1, padding: 24, backgroundColor: '#fff', marginTop: 20 },
   backButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, marginBottom: 4 },
   backText: { fontFamily: 'Poppins', color: '#414141', fontSize: 17, marginLeft: 2 },
   title: { fontFamily: 'Poppins', fontSize: 20, color: '#414141', marginVertical: 16, fontWeight: '600' },
@@ -88,15 +88,7 @@ const styles = StyleSheet.create({
     borderColor: '#D0D0D0', backgroundColor: '#fff', borderRadius: 6,
     paddingVertical: 12, paddingHorizontal: 14, marginVertical: 7,
   },
-  signInButton: {
-    backgroundColor: '#534889',
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 10,
-  },
-  buttonText: { color: '#fff', fontFamily: 'Poppins', fontWeight: '700', fontSize: 15 },
+  signInButton: {},
   forgotText: { color: '#E35A5A', fontFamily: 'Poppins', fontSize: 13 },
   orText: { textAlign: 'center', color: '#B8B8B8', marginVertical: 8, fontFamily: 'Poppins' },
   socialButton: {
@@ -111,6 +103,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   socialText: { fontFamily: 'Poppins', fontSize: 15, color: '#414141', marginLeft: 15 },
-  footerText: { textAlign: 'center', fontFamily: 'Poppins', fontSize: 13, color: '#414141', marginTop: 18 },
-  signUpLink: { color: '#534889', textDecorationLine: 'underline', fontFamily: 'Poppins' },
+  footerRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 18,
+    gap: 4,
+  },
+  footerText: { fontFamily: 'Poppins', fontSize: 13, color: '#414141' },
+  signUpLink: { color: '#534889', textDecorationLine: 'underline', fontFamily: 'Poppins', fontSize: 13 },
 });

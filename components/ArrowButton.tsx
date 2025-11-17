@@ -4,7 +4,7 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
 const OUTER_SIZE = 90;
-const OUTER_STROKE = 7;
+const OUTER_STROKE = 5;
 const OUTER_RADIUS = (OUTER_SIZE - OUTER_STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * OUTER_RADIUS;
 

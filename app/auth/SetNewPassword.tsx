@@ -1,7 +1,8 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import Button from '@/components/Button';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export default function SetNewPassword() {
   const router = useRouter();
@@ -33,12 +34,7 @@ export default function SetNewPassword() {
         onChangeText={setConfirmPassword}
       />
       <Text style={styles.hint}>Atleast 1 number or a special character</Text>
-      <TouchableOpacity
-        style={styles.actionButton}
-        onPress={() => router.push('/auth/LoginSuccess')} // Replace with your next page
-      >
-        <Text style={styles.buttonText}>Save</Text>
-      </TouchableOpacity>
+      <Button label="Save" onPress={() => router.push('/auth/Login')} />
     </View>
   );
 }
@@ -55,6 +51,4 @@ const styles = StyleSheet.create({
     paddingVertical: 12, paddingHorizontal: 14, marginVertical: 7,
   },
   hint: { fontFamily: 'Poppins', color: '#B8B8B8', fontSize: 12, marginBottom: 18, marginTop: 2 },
-  actionButton: { backgroundColor: '#534889', borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginTop: 10 },
-  buttonText: { color: '#fff', fontFamily: 'Poppins', fontWeight: '700', fontSize: 16 },
 });

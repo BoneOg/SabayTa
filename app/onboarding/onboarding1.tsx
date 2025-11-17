@@ -12,7 +12,7 @@ export default function OnboardingOne() {
   return (
     <ThemedView style={styles.container}>
       {/* Skip button (top-right) */}
-      <SkipButton onPress={() => router.push('/auth/enable_location')}>
+      <SkipButton onPress={() => router.push('/auth/Location')}>
         <ThemedText style={styles.skipText}>Skip</ThemedText>
       </SkipButton>
 

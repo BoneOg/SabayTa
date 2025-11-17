@@ -12,7 +12,7 @@ export default function OnboardingThree() {
   return (
     <ThemedView style={styles.container}>
       {/* Skip button (top-right) */}
-      <SkipButton onPress={() => router.push('/auth/enable_location')}>
+      <SkipButton onPress={() => router.push('/auth/Location')}>
         <ThemedText style={styles.skipText}>Skip</ThemedText>
       </SkipButton>
 
@@ -31,7 +31,7 @@ export default function OnboardingThree() {
       </ThemedText>
 
       {/* Go Button */}
-      <ArrowButton ringProgress={1} onPress={() => router.push('/auth/enable_location')}>
+      <ArrowButton ringProgress={1} onPress={() => router.push('/auth/Location')}>
         <ThemedText style={styles.goText}>Go</ThemedText>
       </ArrowButton>
     </ThemedView>
