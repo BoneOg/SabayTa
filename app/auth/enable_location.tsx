@@ -24,7 +24,7 @@ const requestLocation = async () => {
     if (status === Location.PermissionStatus.GRANTED) {
       const location = await Location.getCurrentPositionAsync({});
       console.log("User location:", location.coords);
-      router.push("/welcome_screen");
+      router.push("/auth/welcome_screen");
       return;
     }
 
@@ -74,7 +74,7 @@ const requestLocation = async () => {
         <TouchableOpacity style={styles.enableButton} onPress={requestLocation}>
           <ThemedText style={styles.enableButtonText}>Enable my location</ThemedText>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push('/welcome_screen')}>
+        <TouchableOpacity onPress={() => router.push('/auth/welcome_screen')}>
           <ThemedText style={styles.skipText}>Skip for now</ThemedText>
         </TouchableOpacity>
       </View>
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   locationImage: { width: 120, height: 170, marginBottom: 20 },
   title: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 10, color: '#000' },
   subtitle: { fontSize: 16, textAlign: 'center', color: '#555', lineHeight: 22, marginBottom: 25 },
-  enableButton: { backgroundColor: '#622C9B', paddingVertical: 14, paddingHorizontal: 40, borderRadius: 30, marginBottom: 15 },
+  enableButton: { backgroundColor: '#534889', paddingVertical: 14, paddingHorizontal: 40, borderRadius: 30, marginBottom: 15 },
   enableButtonText: { color: '#fff', fontSize: 18, fontWeight: 'bold', textAlign: 'center' },
-  skipText: { fontSize: 16, color: '#622C9B', textDecorationLine: 'underline', textAlign: 'center' },
+  skipText: { fontSize: 16, color: '#534889', textDecorationLine: 'underline', textAlign: 'center' },
 });

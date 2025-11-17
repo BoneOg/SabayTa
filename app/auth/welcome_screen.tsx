@@ -32,7 +32,7 @@ export default function WelcomeScreen() {
         {/* Create Account Button */}
         <TouchableOpacity
           style={styles.createAccountButton}
-          onPress={() => router.push('/signUpPage')}
+          onPress={() => router.push('/auth/signUpPage')}
         >
           <ThemedText style={styles.createAccountButtonText}>Create Account</ThemedText>
         </TouchableOpacity>
@@ -40,7 +40,7 @@ export default function WelcomeScreen() {
         {/* Login Button */}
         <TouchableOpacity
           style={styles.loginButton}
-          onPress={() => router.push('/Login')}
+          onPress={() => router.push('/auth/Login')}
         >
           <ThemedText style={styles.loginButtonText}>Log In</ThemedText>
         </TouchableOpacity>
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
 
   /* BUTTONS SAME WIDTH + RADIUS 10 */
   createAccountButton: {
-    backgroundColor: '#622C9B',
+    backgroundColor: '#534889',
     width: '100%', // full same width
     paddingVertical: 14,
     borderRadius: 10, // changed
@@ -98,13 +98,13 @@ const styles = StyleSheet.create({
 
   loginButton: {
     width: '100%', // full same width
-    borderColor: '#622C9B',
+    borderColor: '#534889',
     borderWidth: 2,
     paddingVertical: 14,
     borderRadius: 10, // changed
   },
   loginButtonText: {
-    color: '#622C9B',
+    color: '#534889',
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',

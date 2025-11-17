@@ -35,7 +35,7 @@ export default function SetPassword() {
       <Text style={styles.hint}>Atleast 1 number or a special character</Text>
       <TouchableOpacity
         style={styles.actionButton}
-        onPress={() => router.push('/CompleteProfile')}
+        onPress={() => router.push('/auth/CompleteProfile')}
       >
         <Text style={styles.buttonText}>Register</Text>
       </TouchableOpacity>
@@ -55,6 +55,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12, paddingHorizontal: 14, marginVertical: 7,
   },
   hint: { fontFamily: 'Poppins', color: '#B8B8B8', fontSize: 12, marginBottom: 18, marginTop: 2 },
-  actionButton: { backgroundColor: '#540383', borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginTop: 10 },
+  actionButton: { backgroundColor: '#534889', borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginTop: 10 },
   buttonText: { color: '#fff', fontFamily: 'Poppins', fontWeight: '700', fontSize: 16 },
 });

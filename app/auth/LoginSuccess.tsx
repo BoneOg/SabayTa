@@ -19,7 +19,7 @@ export default function LoginSuccess() {
       <MaterialIcons
         name="check-circle"
         size={60}
-        color="#540383"
+        color="#534889"
         style={{ alignSelf: 'center', marginBottom: 25 }}
       />
       <Text style={styles.title}>Login Successful!</Text>

@@ -83,7 +83,7 @@ export default function ProfileScreen() {
           style={styles.logoutButton}
           onPress={() => {
             // Handle log out
-            router.push('/Login'); 
+            router.push('/auth/Login'); 
           }}
         >
           <Text style={styles.logoutText}>Log Out</Text>

@@ -24,7 +24,7 @@ export default function CompleteProfile() {
       <View style={styles.avatarWrapper}>
         <View style={styles.avatar}>
           {/* If you want to allow changing the profile pic, add logic here */}
-          <Entypo name="camera" size={20} color="#540383" style={styles.cameraIcon} />
+        <Entypo name="camera" size={20} color="#534889" style={styles.cameraIcon} />
         </View>
       </View>
       <TextInput
@@ -107,8 +107,8 @@ const styles = StyleSheet.create({
   countryCode: { fontFamily: 'Poppins', color: '#414141', fontSize: 15 },
   mobileInput: { flex: 1, marginLeft: 0 },
   buttonRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 },
-  cancelButton: { flex: 1, borderWidth: 1, borderColor: '#622C9B', borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginRight: 10 },
-  saveButton: { flex: 1, backgroundColor: '#540383', borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginLeft: 10 },
-  cancelText: { color: '#622C9B', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 15 },
+  cancelButton: { flex: 1, borderWidth: 1, borderColor: '#534889', borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginRight: 10 },
+  saveButton: { flex: 1, backgroundColor: '#534889', borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginLeft: 10 },
+  cancelText: { color: '#534889', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 15 },
   saveText: { color: '#fff', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 15 },
 });

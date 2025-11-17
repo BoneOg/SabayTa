@@ -7,7 +7,7 @@ export default function PhoneVerification() {
   const router = useRouter();
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
 
-  const handleOtpChange = (value, idx) => {
+  const handleOtpChange = (value: string, idx: number) => {
     let arr = [...otp];
     arr[idx] = value;
     setOtp(arr);
@@ -39,7 +39,7 @@ export default function PhoneVerification() {
       </Text>
       <TouchableOpacity
         style={styles.actionButton}
-        onPress={() => router.push('/SetPassword')}
+        onPress={() => router.push('/auth/SetPassword')}
       >
         <Text style={styles.buttonText}>Verify</Text>
       </TouchableOpacity>
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     textAlign: 'center', fontSize: 18, color: '#414141', fontFamily: 'Poppins', backgroundColor: '#fff'
   },
   resendContainer: { fontFamily: 'Poppins', color: '#B8B8B8', fontSize: 14, marginBottom: 28 },
-  resendLink: { color: '#540383', textDecorationLine: 'underline' },
-  actionButton: { backgroundColor: '#540383', borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginTop: 10 },
+  resendLink: { color: '#534889', textDecorationLine: 'underline' },
+  actionButton: { backgroundColor: '#534889', borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginTop: 10 },
   buttonText: { color: '#fff', fontFamily: 'Poppins', fontWeight: '700', fontSize: 16 },
 });

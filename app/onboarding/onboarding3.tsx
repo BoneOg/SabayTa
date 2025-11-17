@@ -1,9 +1,10 @@
+import ArrowButton from '@/components/ArrowButton';
+import SkipButton from '@/components/SkipButton';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import ArrowButton from '@/components/ArrowButton';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 export default function OnboardingThree() {
   const router = useRouter();
@@ -11,9 +12,9 @@ export default function OnboardingThree() {
   return (
     <ThemedView style={styles.container}>
       {/* Skip button (top-right) */}
-      <TouchableOpacity style={styles.skipButton} onPress={() => router.push('/enable_location')}>
+      <SkipButton onPress={() => router.push('/auth/enable_location')}>
         <ThemedText style={styles.skipText}>Skip</ThemedText>
-      </TouchableOpacity>
+      </SkipButton>
 
       {/* SabayTa Logo */}
       <Image source={require('@/assets/images/SabayTa_logo...png')} style={styles.image} contentFit="contain" />
@@ -30,7 +31,7 @@ export default function OnboardingThree() {
       </ThemedText>
 
       {/* Go Button */}
-      <ArrowButton onPress={() => router.push('/enable_location')}>
+      <ArrowButton ringProgress={1} onPress={() => router.push('/auth/enable_location')}>
         <ThemedText style={styles.goText}>Go</ThemedText>
       </ArrowButton>
     </ThemedView>
@@ -46,16 +47,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: '#fff',
   },
-  skipButton: {
-    position: 'absolute',
-    top: 50,
-    right: 20,
-    zIndex: 1,
-  },
   skipText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#555',
+    color: '#534889',
   },
   image: {
     width: 500, // bigger logo

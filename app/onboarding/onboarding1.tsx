@@ -1,9 +1,10 @@
 import ArrowButton from '@/components/ArrowButton';
+import SkipButton from '@/components/SkipButton';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 export default function OnboardingOne() {
   const router = useRouter();
@@ -11,9 +12,9 @@ export default function OnboardingOne() {
   return (
     <ThemedView style={styles.container}>
       {/* Skip button (top-right) */}
-      <TouchableOpacity style={styles.skipButton} onPress={() => router.push('/enable_location')}>
+      <SkipButton onPress={() => router.push('/auth/enable_location')}>
         <ThemedText style={styles.skipText}>Skip</ThemedText>
-      </TouchableOpacity>
+      </SkipButton>
 
       {/* Image on top */}
       <Image source={require('@/assets/images/4.png')} style={styles.image} contentFit="contain" />
@@ -30,7 +31,7 @@ export default function OnboardingOne() {
       </ThemedText>
 
       {/* Arrow Button */}
-      <ArrowButton onPress={() => router.push('/onboarding/onboarding2')} />
+      <ArrowButton ringProgress={0.35} onPress={() => router.push('/onboarding/onboarding2')} />
     </ThemedView>
   );
 }
@@ -43,16 +44,10 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#fff',
   },
-  skipButton: {
-    position: 'absolute',
-    top: 50,
-    right: 20,
-    zIndex: 1,
-  },
   skipText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000000ff',
+    color: '#534889',
   },
   image: {
     width: 300,

@@ -41,26 +41,26 @@ export default function HomeScreen() {
       </MapView>
       {/* Hamburger menu */}
       <TouchableOpacity style={styles.menuButton} onPress={() => {/* open drawer/modal */}}>
-        <MaterialIcons name="menu" size={30} color="#622C9B" />
+        <MaterialIcons name="menu" size={30} color="#534889" />
       </TouchableOpacity>
       {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <Ionicons name="search" size={22} color="#540383" style={styles.searchIcon} />
+        <Ionicons name="search" size={22} color="#534889" style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Where would you go?"
           placeholderTextColor="#D0D0D0"
         />
         <TouchableOpacity>
-          <MaterialIcons name="arrow-forward-ios" size={16} color="#540383" style={styles.arrowIcon} />
+          <MaterialIcons name="arrow-forward-ios" size={16} color="#534889" style={styles.arrowIcon} />
         </TouchableOpacity>
       </View>
       <View style={{ flex: 1 }} />
       {/* Bottom Navigation */}
       <View style={styles.tabBar}>
         <TouchableOpacity style={styles.tabItem}>
-          <Ionicons name="home" size={22} color="#540383" />
-          <Text style={[styles.tabLabel, { color: '#540383' }]}>Home</Text>
+          <Ionicons name="home" size={22} color="#534889" />
+          <Text style={[styles.tabLabel, { color: '#534889' }]}>Home</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabItem}>
           <Ionicons name="heart-outline" size={22} color="#B8B8B8" />
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     width: 44, height: 44, borderRadius: 22, backgroundColor: '#CCB2F2', alignItems: 'center', justifyContent: 'center'
   },
   locationCircleInner: {
-    width: 30, height: 30, borderRadius: 15, backgroundColor: '#622C9B', alignItems: 'center', justifyContent: 'center'
+    width: 30, height: 30, borderRadius: 15, backgroundColor: '#534889', alignItems: 'center', justifyContent: 'center'
   },
   tabBar: {
     flexDirection: 'row',

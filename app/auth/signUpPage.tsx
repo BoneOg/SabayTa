@@ -10,7 +10,7 @@ export default function SignUpPage() {
     <View style={styles.container}>
 
       {/* Back Button */}
-      <Pressable style={styles.backButton} onPress={() => router.replace('/welcome_screen')}>
+      <Pressable style={styles.backButton} onPress={() => router.replace('/auth/welcome_screen')}>
         <MaterialIcons name="arrow-back-ios" size={20} color="#414141" />
         <Text style={styles.backText}>Back</Text>
       </Pressable>
@@ -55,7 +55,7 @@ export default function SignUpPage() {
 
       {/* Terms */}
       <View style={styles.termsRow}>
-        <Entypo name="check" size={16} color="#540383" />
+        <Entypo name="check" size={16} color="#534889" />
         <Text style={styles.termsText}>
           By signing up, you agree to the{' '}
           <Text style={styles.linkText}>Terms of service</Text> and{' '}
@@ -66,7 +66,7 @@ export default function SignUpPage() {
       {/* Sign Up Button */}
       <TouchableOpacity
         style={styles.signUpButton}
-        onPress={() => router.push('/PhoneVerification')}
+        onPress={() => router.push('/auth/PhoneVerification')}
       >
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
@@ -85,7 +85,7 @@ export default function SignUpPage() {
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.socialButton}>
-        <Entypo name="apple" size={20} color="#414141" />
+        <FontAwesome name="apple" size={20} color="#414141" />
         <Text style={styles.socialText}>Sign up with Apple</Text>
       </TouchableOpacity>
 
@@ -93,7 +93,7 @@ export default function SignUpPage() {
       <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 18 }}>
         <Text style={styles.footerText}>Already have an account? </Text>
 
-        <Pressable onPress={() => router.push('/Login')}>
+        <Pressable onPress={() => router.push('/auth/Login')}>
           <Text style={styles.signInLink}>Sign in</Text>
         </Pressable>
       </View>
@@ -173,11 +173,11 @@ const styles = StyleSheet.create({
     marginLeft: 7,
   },
   linkText: {
-    color: '#540383',
+    color: '#534889',
     textDecorationLine: 'underline',
   },
   signUpButton: {
-    backgroundColor: '#540383',
+    backgroundColor: '#534889',
     borderRadius: 8,
     paddingVertical: 14,
     alignItems: 'center',
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     color: '#414141',
   },
   signInLink: {
-    color: '#540383',
+    color: '#534889',
     textDecorationLine: 'underline',
     fontFamily: 'Poppins',
   },

@@ -40,7 +40,7 @@ export default function Login() {
 
       {/* Forgot Password */}
       <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 12 }}>
-        <TouchableOpacity onPress={() => router.push('/PhoneVerificationLogin')}>
+        <TouchableOpacity onPress={() => router.push('/auth/PhoneVerificationLogin')}>
           <Text style={styles.forgotText}>Forgot password?</Text>
         </TouchableOpacity>
       </View>
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12, paddingHorizontal: 14, marginVertical: 7,
   },
   signInButton: {
-    backgroundColor: '#540383',
+    backgroundColor: '#534889',
     borderRadius: 8,
     paddingVertical: 14,
     alignItems: 'center',
@@ -112,5 +112,5 @@ const styles = StyleSheet.create({
   },
   socialText: { fontFamily: 'Poppins', fontSize: 15, color: '#414141', marginLeft: 15 },
   footerText: { textAlign: 'center', fontFamily: 'Poppins', fontSize: 13, color: '#414141', marginTop: 18 },
-  signUpLink: { color: '#540383', textDecorationLine: 'underline', fontFamily: 'Poppins' },
+  signUpLink: { color: '#534889', textDecorationLine: 'underline', fontFamily: 'Poppins' },
 });
