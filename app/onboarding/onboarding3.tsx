@@ -1,28 +1,22 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import ArrowButton from '@/components/ArrowButton';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 
-export default function HomeScreen() {
+export default function OnboardingThree() {
   const router = useRouter();
 
   return (
     <ThemedView style={styles.container}>
       {/* Skip button (top-right) */}
-      <TouchableOpacity
-        style={styles.skipButton}
-        onPress={() => router.push('/enable_location')}
-      >
+      <TouchableOpacity style={styles.skipButton} onPress={() => router.push('/enable_location')}>
         <ThemedText style={styles.skipText}>Skip</ThemedText>
       </TouchableOpacity>
 
       {/* SabayTa Logo */}
-      <Image
-        source={require('@/assets/images/SabayTa_logo...png')}
-        style={styles.image}
-        contentFit="contain"
-      />
+      <Image source={require('@/assets/images/SabayTa_logo...png')} style={styles.image} contentFit="contain" />
 
       {/* Title */}
       <ThemedText type="title" style={styles.title}>
@@ -31,20 +25,14 @@ export default function HomeScreen() {
 
       {/* Subtitle */}
       <ThemedText style={styles.subtitle}>
-        With just a few taps, connect with trusted student drivers, share the ride, and get there safely and easily — it’s that simple
+        With just a few taps, connect with trusted student drivers, share the ride, and get there safely and easily — it’s that
+        simple
       </ThemedText>
 
       {/* Go Button */}
-      <TouchableOpacity
-        style={styles.arrowButton}
-        onPress={() => router.push('/enable_location')}
-      >
-        <View style={styles.outerCircle}>
-          <View style={styles.innerCircle}>
-            <ThemedText style={styles.goText}>Go</ThemedText>
-          </View>
-        </View>
-      </TouchableOpacity>
+      <ArrowButton onPress={() => router.push('/enable_location')}>
+        <ThemedText style={styles.goText}>Go</ThemedText>
+      </ArrowButton>
     </ThemedView>
   );
 }
@@ -54,7 +42,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 10,       // reduced top padding
+    paddingTop: 10, // reduced top padding
     paddingHorizontal: 20,
     backgroundColor: '#fff',
   },
@@ -70,7 +58,7 @@ const styles = StyleSheet.create({
     color: '#555',
   },
   image: {
-    width: 500,      // bigger logo
+    width: 500, // bigger logo
     height: 300,
     marginBottom: 15,
     marginTop: 0,
@@ -89,28 +77,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 30,
   },
-  arrowButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  outerCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 50,
-    backgroundColor: '#622C9B',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: '#F0AEDA',
-  },
-  innerCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 35,
-    backgroundColor: '#622C9B',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   goText: {
     color: '#fff',
     fontSize: 24,
@@ -118,3 +84,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+

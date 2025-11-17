@@ -1,29 +1,22 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { AntDesign } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
+import ArrowButton from '@/components/ArrowButton';
 
-export default function HomeScreen() {
+export default function OnboardingTwo() {
   const router = useRouter();
 
   return (
     <ThemedView style={styles.container}>
       {/* Skip button (top-right) */}
-      <TouchableOpacity
-        style={styles.skipButton}
-        onPress={() => router.push('/enable_location')}
-      >
+      <TouchableOpacity style={styles.skipButton} onPress={() => router.push('/enable_location')}>
         <ThemedText style={styles.skipText}>Skip</ThemedText>
       </TouchableOpacity>
 
       {/* Image on top */}
-      <Image
-        source={require('@/assets/images/5.png')}
-        style={styles.image}
-        contentFit="contain"
-      />
+      <Image source={require('@/assets/images/5.png')} style={styles.image} contentFit="contain" />
 
       {/* Title */}
       <ThemedText type="title" style={styles.title}>
@@ -36,16 +29,7 @@ export default function HomeScreen() {
       </ThemedText>
 
       {/* Arrow Button */}
-      <TouchableOpacity
-        style={styles.arrowButton}
-        onPress={() => router.push('/onboarding2')}
-      >
-        <View style={styles.outerCircle}>
-          <View style={styles.innerCircle}>
-            <AntDesign name="arrow-right" size={24} color="#fff" />
-          </View>
-        </View>
-      </TouchableOpacity>
+      <ArrowButton onPress={() => router.push('/onboarding/onboarding3')} />
     </ThemedView>
   );
 }
@@ -88,26 +72,5 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 30, // space before arrow
   },
-  arrowButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-outerCircle: {
-  width: 90,         // increased from 70
-  height: 90,        // increased from 70
-  borderRadius: 50,   // half of width/height
-  backgroundColor: '#622C9B',
-  alignItems: 'center',
-  justifyContent: 'center',
-  borderWidth: 3,
-  borderColor: '#F0AEDA',
-},
-innerCircle: {
-  width: 60,          // increased from 50
-  height: 60,         // increased from 50
-  borderRadius: 35,   // half of width/height
-  backgroundColor: '#622C9B',
-  alignItems: 'center',
-  justifyContent: 'center',
-},
 });
+
