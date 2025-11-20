@@ -1,28 +1,65 @@
-import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import MapView, { Circle, Marker } from 'react-native-maps';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const [region, setRegion] = useState({
-    latitude: 8.4822,
-    longitude: 124.6472,
-    latitudeDelta: 0.01,
-    longitudeDelta: 0.01,
-  });
+  const [region, setRegion] = useState<any>(null);
+
+  useEffect(() => {
+    let subscription: Location.LocationSubscription | null = null;
+
+    const startLocationTracking = async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Denied', 'Enable location permission in settings.');
+        return;
+      }
+
+      // Get initial location
+      const loc = await Location.getCurrentPositionAsync({});
+      setRegion({
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      });
+
+      // Watch location changes
+      subscription = await Location.watchPositionAsync(
+        { accuracy: Location.Accuracy.High, distanceInterval: 1 },
+        (location) => {
+          setRegion({
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          });
+        }
+      );
+    };
+
+    startLocationTracking();
+
+    return () => {
+      if (subscription) subscription.remove(); // clean up
+    };
+  }, []);
+
+  if (!region) {
+    return (
+      <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text>Fetching location...</Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      {/* Map Background */}
-      <MapView
-        style={StyleSheet.absoluteFill}
-        region={region}
-        showsUserLocation={true}
-        showsMyLocationButton={true}
-      >
-        {/* User location marker (purple) */}
+    <SafeAreaView style={styles.container}>
+      <MapView style={StyleSheet.absoluteFill} region={region} showsUserLocation showsMyLocationButton>
         <Marker coordinate={region}>
           <View style={styles.locationCircleOuter}>
             <View style={styles.locationCircleMid}>
@@ -32,75 +69,43 @@ export default function HomeScreen() {
             </View>
           </View>
         </Marker>
-        <Circle
-          center={region}
-          radius={400}
-          strokeWidth={0}
-          fillColor="rgba(98,44,155,0.10)"
-        />
+
+        <Circle center={region} radius={400} strokeWidth={0} fillColor="rgba(98,44,155,0.10)" />
       </MapView>
-      {/* Hamburger menu */}
-      <TouchableOpacity style={styles.menuButton} onPress={() => {/* open drawer/modal */}}>
-        <MaterialIcons name="menu" size={30} color="#534889" />
+
+      <TouchableOpacity style={styles.menuButton}>
+        <MaterialIcons name="menu" size={30} color="#000000ff" />
       </TouchableOpacity>
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
+
+      <View style={[styles.searchContainer, { bottom: 10 }]}>
         <Ionicons name="search" size={22} color="#534889" style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Where would you go?"
-          placeholderTextColor="#D0D0D0"
-        />
+        <TextInput style={styles.searchInput} placeholder="Where would you go?" placeholderTextColor="#D0D0D0" />
         <TouchableOpacity>
           <MaterialIcons name="arrow-forward-ios" size={16} color="#534889" style={styles.arrowIcon} />
         </TouchableOpacity>
       </View>
-      <View style={{ flex: 1 }} />
-      {/* Bottom Navigation */}
-      <View style={styles.tabBar}>
-        <TouchableOpacity style={styles.tabItem}>
-          <Ionicons name="home" size={22} color="#534889" />
-          <Text style={[styles.tabLabel, { color: '#534889' }]}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem}>
-          <Ionicons name="heart-outline" size={22} color="#B8B8B8" />
-          <Text style={styles.tabLabel}>Favourite</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem}>
-          <FontAwesome name="car" size={21} color="#B8B8B8" />
-          <Text style={styles.tabLabel}>Offer a ride</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem}>
-          <Ionicons name="time-outline" size={22} color="#B8B8B8" />
-          <Text style={styles.tabLabel}>History</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem}>
-          <Ionicons name="person-outline" size={22} color="#B8B8B8" />
-          <Text style={styles.tabLabel}>Profile</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', paddingTop: Platform.OS === 'android' ? 40 : 60 },
+  container: { flex: 1, backgroundColor: '#fff' },
+
   menuButton: {
     position: 'absolute',
-    top: Platform.OS === 'android' ? 52 : 64,
     left: 20,
-    zIndex: 10,
-    backgroundColor: '#fff',
-    borderRadius: 28,
-    padding: 6,
-    shadowColor: '#000',
-    shadowOpacity: 0.09,
-    shadowRadius: 2,
-    elevation: 2,
+    transform: [{ translateY: -22 }],  // Center vertically (half of height 44)
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(198,185,229,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    top: 50,
   },
+
   searchContainer: {
     position: 'absolute',
-    bottom: 78,
     left: 12,
     right: 12,
     flexDirection: 'row',
@@ -112,8 +117,8 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#D0D0D0',
     elevation: 2,
-    marginBottom: 0,
   },
+
   searchInput: {
     flex: 1,
     fontFamily: 'Poppins',
@@ -122,36 +127,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     backgroundColor: 'transparent',
   },
+
   searchIcon: { marginRight: 7 },
   arrowIcon: { marginLeft: 7 },
-  locationCircleOuter: {
-    width: 60, height: 60, borderRadius: 30, backgroundColor: '#E5D6F9', alignItems: 'center', justifyContent: 'center'
-  },
-  locationCircleMid: {
-    width: 44, height: 44, borderRadius: 22, backgroundColor: '#CCB2F2', alignItems: 'center', justifyContent: 'center'
-  },
-  locationCircleInner: {
-    width: 30, height: 30, borderRadius: 15, backgroundColor: '#534889', alignItems: 'center', justifyContent: 'center'
-  },
-  tabBar: {
-    flexDirection: 'row',
-    borderTopWidth: 1,
-    borderColor: '#D0D0D0',
-    backgroundColor: '#fff',
-    height: 68,
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    elevation: 7,
-    shadowColor: '#CCB2F2',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-  },
-  tabItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  tabLabel: {
-    fontSize: 12,
-    fontFamily: 'Poppins',
-    color: '#B8B8B8',
-    marginTop: 4,
-  },
+
+  locationCircleOuter: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#E5D6F9', alignItems: 'center', justifyContent: 'center' },
+  locationCircleMid: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#CCB2F2', alignItems: 'center', justifyContent: 'center' },
+  locationCircleInner: { width: 30, height: 30, borderRadius: 15, backgroundColor: '#534889', alignItems: 'center', justifyContent: 'center' },
 });
