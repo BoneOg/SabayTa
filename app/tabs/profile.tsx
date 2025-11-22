@@ -2,10 +2,12 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import SideMenu from './side_menu'; // Adjust path if needed
 
 export default function ProfileScreen() {
   const router = useRouter();
 
+  const [isMenuVisible, setIsMenuVisible] = useState(false); // Side menu state
   const [name, setName] = useState('John Doe');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -14,9 +16,20 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header - Fixed at the top */}
+      {/* Side Menu */}
+      <SideMenu
+        visible={isMenuVisible}
+        onClose={() => setIsMenuVisible(false)}
+        profilePicture="https://example.com/pic.jpg"
+        gmail="user@gmail.com"
+      />
+
+      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.menuContainer}>
+        <TouchableOpacity 
+          style={styles.menuContainer} 
+          onPress={() => setIsMenuVisible(true)}
+        >
           <MaterialIcons name="menu" size={30} color="#000000ff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Profile</Text>
@@ -25,16 +38,12 @@ export default function ProfileScreen() {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Centered Content */}
         <View style={styles.centeredContent}>
-          {/* Profile Image */}
           <Image
             source={require('@/assets/images/cat5.jpg')}
             style={styles.profileImage}
           />
-
-          {/* Name */}
           <Text style={styles.name}>{name}</Text>
 
-          {/* Email Input */}
           <TextInput
             style={styles.input}
             value={email}
@@ -44,7 +53,6 @@ export default function ProfileScreen() {
             keyboardType="email-address"
           />
 
-          {/* Mobile Input with Philippine Flag */}
           <View style={styles.rowInput}>
             <View style={styles.countryCodeBox}>
               <Text style={styles.countryCode}>🇵🇭 +63</Text>
@@ -59,7 +67,6 @@ export default function ProfileScreen() {
             />
           </View>
 
-          {/* Gender Input */}
           <TextInput
             style={styles.input}
             value={gender}
@@ -68,7 +75,6 @@ export default function ProfileScreen() {
             placeholderTextColor="#D0D0D0"
           />
 
-          {/* Address Input */}
           <TextInput
             style={[styles.input, { height: 80 }]}
             value={address}
@@ -78,7 +84,6 @@ export default function ProfileScreen() {
             multiline
           />
 
-          {/* Log Out Button */}
           <TouchableOpacity
             style={styles.logoutButton}
             onPress={() => router.push('/auth/Login')}
@@ -91,23 +96,23 @@ export default function ProfileScreen() {
   );
 }
 
+// Keep the existing styles from your code
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
     backgroundColor: '#fff', 
-    paddingTop: Platform.OS === 'android' ? 20 : 20  // Reduced padding for status bar to make header appear more at the top
+    paddingTop: Platform.OS === 'android' ? 20 : 20
   },
-
-header: {
-  height: 60,
-  justifyContent: 'center', // vertically center the text
-  alignItems: 'center',     // horizontally center the text
-  position: 'relative',
-},
+  header: {
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
   menuContainer: {
     position: 'absolute',
     left: 20,
-    transform: [{ translateY: -22 }],  // Center vertically (half of height 44)
+    transform: [{ translateY: -22 }],
     width: 44,
     height: 44,
     borderRadius: 22,
@@ -116,21 +121,18 @@ header: {
     justifyContent: 'center',
     top: '50%',
   },
-headerTitle: {
-  fontSize: 24,
-  color: '#000000',
-  fontFamily: 'Poppins',
-},
-
+  headerTitle: {
+    fontSize: 24,
+    color: '#000000',
+    fontFamily: 'Poppins',
+  },
   scrollContainer: {
     flexGrow: 1,
   },
-
   centeredContent: {
     alignItems: 'center',
     paddingHorizontal: 20,
   },
-
   profileImage: {
     width: 120,
     height: 120,
@@ -138,7 +140,6 @@ headerTitle: {
     marginBottom: 10,
     backgroundColor: '#D0D0D0',
   },
-
   name: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -146,7 +147,6 @@ headerTitle: {
     fontFamily: 'Poppins',
     marginBottom: 20,
   },
-
   input: {
     width: '100%',
     borderWidth: 1,
@@ -160,15 +160,12 @@ headerTitle: {
     fontFamily: 'Poppins',
     marginBottom: 15,
   },
-
-  // Mobile input row
   rowInput: {
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
     marginBottom: 15,
   },
-
   countryCodeBox: {
     borderWidth: 1,
     borderColor: '#D0D0D0',
@@ -178,13 +175,11 @@ headerTitle: {
     marginRight: 8,
     backgroundColor: '#fff',
   },
-
   countryCode: {
     fontFamily: 'Poppins',
     color: '#414141',
     fontSize: 15,
   },
-
   phoneInput: {
     flex: 1,
     borderWidth: 1,
@@ -197,7 +192,6 @@ headerTitle: {
     backgroundColor: '#F8F8F8',
     fontFamily: 'Poppins',
   },
-
   logoutButton: {
     marginTop: 30,
     backgroundColor: 'transparent',
@@ -209,7 +203,6 @@ headerTitle: {
     alignItems: 'center',
     marginBottom: 30,
   },
-
   logoutText: {
     color: '#622C9B',
     fontSize: 16,

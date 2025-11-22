@@ -1,25 +1,40 @@
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  Animated,
+  Dimensions,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import MapView, { Circle, Marker } from 'react-native-maps';
+import SideMenu from './side_menu';
+
+const { height } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
   const [region, setRegion] = useState<any>(null);
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const slideAnim = useRef(new Animated.Value(height)).current;
 
+  // Real-time location tracking
   useEffect(() => {
     let subscription: Location.LocationSubscription | null = null;
 
     const startLocationTracking = async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Enable location permission in settings.');
+        alert('Enable location permission in settings.');
         return;
       }
 
-      // Get initial location
       const loc = await Location.getCurrentPositionAsync({});
       setRegion({
         latitude: loc.coords.latitude,
@@ -28,7 +43,6 @@ export default function HomeScreen() {
         longitudeDelta: 0.01,
       });
 
-      // Watch location changes
       subscription = await Location.watchPositionAsync(
         { accuracy: Location.Accuracy.High, distanceInterval: 1 },
         (location) => {
@@ -43,11 +57,25 @@ export default function HomeScreen() {
     };
 
     startLocationTracking();
-
-    return () => {
-      if (subscription) subscription.remove(); // clean up
-    };
+    return () => subscription?.remove();
   }, []);
+
+  const openModal = () => {
+    setModalVisible(true);
+    Animated.timing(slideAnim, {
+      toValue: height * 0.5,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const closeModal = () => {
+    Animated.timing(slideAnim, {
+      toValue: height,
+      duration: 300,
+      useNativeDriver: false,
+    }).start(() => setModalVisible(false));
+  };
 
   if (!region) {
     return (
@@ -59,6 +87,15 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* SIDE MENU */}
+      <SideMenu
+        visible={isMenuVisible}
+        onClose={() => setIsMenuVisible(false)}
+        profilePicture="https://example.com/cat1.jpg"
+        gmail="user@gmail.com"
+      />
+
+      {/* MAP */}
       <MapView style={StyleSheet.absoluteFill} region={region} showsUserLocation showsMyLocationButton>
         <Marker coordinate={region}>
           <View style={styles.locationCircleOuter}>
@@ -69,21 +106,42 @@ export default function HomeScreen() {
             </View>
           </View>
         </Marker>
-
         <Circle center={region} radius={400} strokeWidth={0} fillColor="rgba(98,44,155,0.10)" />
       </MapView>
 
-      <TouchableOpacity style={styles.menuButton}>
+      {/* MENU BUTTON */}
+      <TouchableOpacity style={styles.menuButton} onPress={() => setIsMenuVisible(true)}>
         <MaterialIcons name="menu" size={30} color="#000000ff" />
       </TouchableOpacity>
 
-      <View style={[styles.searchContainer, { bottom: 10 }]}>
-        <Ionicons name="search" size={22} color="#534889" style={styles.searchIcon} />
-        <TextInput style={styles.searchInput} placeholder="Where would you go?" placeholderTextColor="#D0D0D0" />
-        <TouchableOpacity>
-          <MaterialIcons name="arrow-forward-ios" size={16} color="#534889" style={styles.arrowIcon} />
-        </TouchableOpacity>
-      </View>
+      {/* SEARCH BAR */}
+      <TouchableOpacity style={styles.destinationContainer} onPress={openModal}>
+        <View style={styles.destinationInputWrapper}>
+          <Ionicons name="search" size={20} color="#534889" style={styles.searchIconInside} />
+          <Text style={{ color: '#a2a2a2ff', fontSize: 16, fontFamily: 'Poppins' }}>
+            Where would you like to go?
+          </Text>
+        </View>
+      </TouchableOpacity>
+
+      {/* BOTTOM SHEET MODAL */}
+      {modalVisible && (
+        <View style={StyleSheet.absoluteFill}>
+          <TouchableOpacity style={styles.dimBackground} activeOpacity={1} onPress={closeModal} />
+          <Animated.View style={[styles.modalContainer, { top: slideAnim }]}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Select Address</Text>
+              <TouchableOpacity onPress={closeModal}>
+                <FontAwesome name="close" size={22} color="#414141" />
+              </TouchableOpacity>
+            </View>
+
+            <TextInput placeholder="From" placeholderTextColor="#D0D0D0" style={styles.input} />
+            <TextInput placeholder="To" placeholderTextColor="#D0D0D0" style={styles.input} />
+            <TextInput placeholder="Time" placeholderTextColor="#D0D0D0" style={styles.input} />
+          </Animated.View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -94,7 +152,7 @@ const styles = StyleSheet.create({
   menuButton: {
     position: 'absolute',
     left: 20,
-    transform: [{ translateY: -22 }],  // Center vertically (half of height 44)
+    transform: [{ translateY: -22 }],
     width: 44,
     height: 44,
     borderRadius: 22,
@@ -104,34 +162,32 @@ const styles = StyleSheet.create({
     top: 50,
   },
 
-  searchContainer: {
+  locationCircleOuter: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#E5D6F9', alignItems: 'center', justifyContent: 'center' },
+  locationCircleMid: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#CCB2F2', alignItems: 'center', justifyContent: 'center' },
+  locationCircleInner: { width: 30, height: 30, borderRadius: 15, backgroundColor: '#534889', alignItems: 'center', justifyContent: 'center' },
+
+  destinationContainer: {
     position: 'absolute',
+    bottom: 80,
     left: 12,
     right: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 9,
-    paddingHorizontal: 14,
     borderRadius: 14,
     backgroundColor: '#F8F6FC',
     borderWidth: 1.5,
     borderColor: '#D0D0D0',
     elevation: 2,
   },
-
-  searchInput: {
-    flex: 1,
-    fontFamily: 'Poppins',
-    color: '#414141',
-    fontSize: 17,
-    paddingHorizontal: 6,
-    backgroundColor: 'transparent',
+  destinationInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
   },
+  searchIconInside: { marginRight: 8 },
 
-  searchIcon: { marginRight: 7 },
-  arrowIcon: { marginLeft: 7 },
-
-  locationCircleOuter: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#E5D6F9', alignItems: 'center', justifyContent: 'center' },
-  locationCircleMid: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#CCB2F2', alignItems: 'center', justifyContent: 'center' },
-  locationCircleInner: { width: 30, height: 30, borderRadius: 15, backgroundColor: '#534889', alignItems: 'center', justifyContent: 'center' },
+  dimBackground: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.2)' },
+  modalContainer: { position: 'absolute', left: 0, width: '100%', height: height * 0.5, backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 15 },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  modalTitle: { fontSize: 18, fontFamily: 'Poppins', fontWeight: 'bold' },
+  input: { width: '100%', borderWidth: 1, borderColor: '#D0D0D0', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 12, fontSize: 16, color: '#414141', backgroundColor: '#F8F8F8', fontFamily: 'Poppins', marginBottom: 10 },
 });

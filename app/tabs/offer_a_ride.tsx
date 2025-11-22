@@ -2,22 +2,24 @@ import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    Animated,
-    Dimensions,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Animated,
+  Dimensions,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import MapView, { Circle, Marker } from 'react-native-maps';
+import SideMenu from './side_menu'; // import the SideMenu
 
 const { height } = Dimensions.get('window');
 
 export default function OfferARideMap() {
   const [region, setRegion] = useState<any>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [isMenuVisible, setIsMenuVisible] = useState(false); // SideMenu state
   const slideAnim = useRef(new Animated.Value(height)).current;
 
   // Real-time location tracking
@@ -53,15 +55,14 @@ export default function OfferARideMap() {
     };
 
     startLocationTracking();
-
     return () => subscription?.remove();
   }, []);
 
-  // Automatically open modal when component mounts
+  // Automatically open bottom sheet modal
   useEffect(() => {
     setModalVisible(true);
     Animated.timing(slideAnim, {
-      toValue: height * 0.5, // slide to 50% of screen
+      toValue: height * 0.5,
       duration: 300,
       useNativeDriver: false,
     }).start();
@@ -85,6 +86,14 @@ export default function OfferARideMap() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Side Menu */}
+      <SideMenu
+        visible={isMenuVisible}
+        onClose={() => setIsMenuVisible(false)}
+        profilePicture="https://example.com/pic.jpg"
+        gmail="user@gmail.com"
+      />
+
       {/* Map Background */}
       <MapView
         style={StyleSheet.absoluteFill}
@@ -106,7 +115,10 @@ export default function OfferARideMap() {
       </MapView>
 
       {/* Menu Button */}
-      <TouchableOpacity style={styles.menuButton}>
+      <TouchableOpacity
+        style={styles.menuButton}
+        onPress={() => setIsMenuVisible(true)}
+      >
         <MaterialIcons name="menu" size={30} color="#000" />
       </TouchableOpacity>
 
@@ -126,13 +138,11 @@ export default function OfferARideMap() {
       {/* Bottom Sheet Modal */}
       {modalVisible && (
         <View style={StyleSheet.absoluteFill}>
-          {/* Dim background */}
           <TouchableOpacity
             style={styles.dimBackground}
             activeOpacity={1}
             onPress={closeModal}
           />
-
           <Animated.View style={[styles.modalContainer, { top: slideAnim }]}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Select Address</Text>
@@ -153,19 +163,18 @@ export default function OfferARideMap() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
-
   menuButton: {
     position: 'absolute',
     left: 20,
-    top: 50,
+    transform: [{ translateY: -22 }],
     width: 44,
     height: 44,
     borderRadius: 22,
     backgroundColor: 'rgba(198,185,229,0.5)',
     alignItems: 'center',
     justifyContent: 'center',
+    top: 50,
   },
-
   searchContainer: {
     position: 'absolute',
     left: 12,
@@ -180,72 +189,15 @@ const styles = StyleSheet.create({
     borderColor: '#D0D0D0',
     elevation: 2,
   },
-
-  searchInput: {
-    flex: 1,
-    fontFamily: 'Poppins',
-    color: '#414141',
-    fontSize: 17,
-    paddingHorizontal: 6,
-    backgroundColor: 'transparent',
-  },
-
+  searchInput: { flex: 1, fontFamily: 'Poppins', color: '#414141', fontSize: 17, paddingHorizontal: 6, backgroundColor: 'transparent' },
   searchIcon: { marginRight: 7 },
   arrowIcon: { marginLeft: 7 },
-
-  locationCircleOuter: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#E5D6F9',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  locationCircleMid: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#CCB2F2',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  locationCircleInner: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: '#534889',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  dimBackground: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.2)',
-  },
-
-  modalContainer: {
-    position: 'absolute',
-    left: 0,
-    width: '100%',
-    height: height * 0.5,
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 15,
-  },
+  locationCircleOuter: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#E5D6F9', alignItems: 'center', justifyContent: 'center' },
+  locationCircleMid: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#CCB2F2', alignItems: 'center', justifyContent: 'center' },
+  locationCircleInner: { width: 30, height: 30, borderRadius: 15, backgroundColor: '#534889', alignItems: 'center', justifyContent: 'center' },
+  dimBackground: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.2)' },
+  modalContainer: { position: 'absolute', left: 0, width: '100%', height: height * 0.5, backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 15 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   modalTitle: { fontSize: 18, fontFamily: 'Poppins', fontWeight: 'bold' },
-  input: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#D0D0D0',
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    fontSize: 16,
-    color: '#414141',
-    backgroundColor: '#F8F8F8',
-    fontFamily: 'Poppins',
-    marginBottom: 10,
-  },
+  input: { width: '100%', borderWidth: 1, borderColor: '#D0D0D0', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 12, fontSize: 16, color: '#414141', backgroundColor: '#F8F8F8', fontFamily: 'Poppins', marginBottom: 10 },
 });

@@ -1,10 +1,15 @@
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
-import { Slot, useRouter } from "expo-router";
+import { Slot, useRouter, useSegments } from "expo-router";
 import React from "react";
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function Layout() {
   const router = useRouter();
+  const segments = useSegments(); // Get current route segments
+  const currentRoute = segments[segments.length - 1]; // last segment is the current tab
+
+  // Helper to determine if tab is active
+  const isActive = (routeName: string) => currentRoute === routeName;
 
   return (
     <View style={styles.container}>
@@ -16,32 +21,62 @@ export default function Layout() {
         <View style={styles.tabBar}>
           {/* Home */}
           <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/tabs/home")}>
-            <Ionicons name="home" size={22} color="#534889" />
-            <Text style={[styles.tabLabel, { color: "#534889" }]}>Home</Text>
+            <Ionicons
+              name="home"
+              size={22}
+              color={isActive("home") ? "#534889" : "#B8B8B8"}
+            />
+            <Text style={[styles.tabLabel, { color: isActive("home") ? "#534889" : "#B8B8B8" }]}>
+              Home
+            </Text>
           </TouchableOpacity>
 
           {/* Favorites */}
           <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/tabs/favorites")}>
-            <Ionicons name="heart-outline" size={22} color="#B8B8B8" />
-            <Text style={styles.tabLabel}>Favourite</Text>
+            <Ionicons
+              name="heart-outline"
+              size={22}
+              color={isActive("favorites") ? "#534889" : "#B8B8B8"}
+            />
+            <Text style={[styles.tabLabel, { color: isActive("favorites") ? "#534889" : "#B8B8B8" }]}>
+              Favourite
+            </Text>
           </TouchableOpacity>
 
           {/* Offer a Ride */}
           <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/tabs/offer_a_ride")}>
-            <FontAwesome name="car" size={21} color="#B8B8B8" />
-            <Text style={styles.tabLabel}>Offer a ride</Text>
+            <FontAwesome
+              name="car"
+              size={21}
+              color={isActive("offer_a_ride") ? "#534889" : "#B8B8B8"}
+            />
+            <Text style={[styles.tabLabel, { color: isActive("offer_a_ride") ? "#534889" : "#B8B8B8" }]}>
+              Offer a ride
+            </Text>
           </TouchableOpacity>
 
           {/* History */}
           <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/tabs/history")}>
-            <Ionicons name="time-outline" size={22} color="#B8B8B8" />
-            <Text style={styles.tabLabel}>History</Text>
+            <Ionicons
+              name="time-outline"
+              size={22}
+              color={isActive("history") ? "#534889" : "#B8B8B8"}
+            />
+            <Text style={[styles.tabLabel, { color: isActive("history") ? "#534889" : "#B8B8B8" }]}>
+              History
+            </Text>
           </TouchableOpacity>
 
           {/* Profile */}
           <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/tabs/profile")}>
-            <Ionicons name="person-outline" size={22} color="#B8B8B8" />
-            <Text style={styles.tabLabel}>Profile</Text>
+            <Ionicons
+              name="person-outline"
+              size={22}
+              color={isActive("profile") ? "#534889" : "#B8B8B8"}
+            />
+            <Text style={[styles.tabLabel, { color: isActive("profile") ? "#534889" : "#B8B8B8" }]}>
+              Profile
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -63,12 +98,12 @@ const styles = StyleSheet.create({
     overflow: "visible",
     backgroundColor: "transparent",
     ...Platform.select({
-      android: { elevation: 20 }, // maximum elevation on Android
+      android: { elevation: 20 },
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: -8 }, // more vertical shadow
-        shadowOpacity: 0.35, // stronger shadow
-        shadowRadius: 12, // bigger blur
+        shadowOffset: { width: 0, height: -8 },
+        shadowOpacity: 0.35,
+        shadowRadius: 12,
       },
     }),
   },
@@ -79,7 +114,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "space-around",
-    borderTopLeftRadius: 20, // only top corners
+    borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
 
