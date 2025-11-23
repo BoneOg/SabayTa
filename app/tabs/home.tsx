@@ -23,6 +23,7 @@ export default function HomeScreen() {
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(height)).current;
+  const mapRef = useRef<MapView>(null);
 
   // Real-time location tracking
   useEffect(() => {
@@ -77,6 +78,17 @@ export default function HomeScreen() {
     }).start(() => setModalVisible(false));
   };
 
+  const centerOnLocation = () => {
+    if (mapRef.current && region) {
+      mapRef.current.animateToRegion({
+        latitude: region.latitude,
+        longitude: region.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }, 300);
+    }
+  };
+
   if (!region) {
     return (
       <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
@@ -96,7 +108,13 @@ export default function HomeScreen() {
       />
 
       {/* MAP */}
-      <MapView style={StyleSheet.absoluteFill} region={region} showsUserLocation showsMyLocationButton>
+      <MapView 
+        ref={mapRef} 
+        style={StyleSheet.absoluteFill} 
+        region={region} 
+        showsUserLocation 
+        showsMyLocationButton={false}
+      >
         <Marker coordinate={region}>
           <View style={styles.locationCircleOuter}>
             <View style={styles.locationCircleMid}>
@@ -112,6 +130,16 @@ export default function HomeScreen() {
       {/* MENU BUTTON */}
       <TouchableOpacity style={styles.menuButton} onPress={() => setIsMenuVisible(true)}>
         <MaterialIcons name="menu" size={30} color="#000000ff" />
+      </TouchableOpacity>
+
+      {/* NOTIFICATION BUTTON */}
+      <TouchableOpacity style={styles.notificationButton} onPress={() => router.push('/tabs/notification')}>
+        <Ionicons name="notifications-outline" size={24} color="#000000ff" />
+      </TouchableOpacity>
+
+      {/* LOCATION BUTTON */}
+      <TouchableOpacity style={styles.locationButton} onPress={centerOnLocation}>
+        <Ionicons name="locate" size={24} color="#534889" />
       </TouchableOpacity>
 
       {/* SEARCH BAR */}
@@ -161,11 +189,37 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     top: 50,
   },
+  notificationButton: {
+    position: 'absolute',
+    right: 20,
+    transform: [{ translateY: -22 }],
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(198,185,229,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    top: 50,
+  },
 
   locationCircleOuter: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#E5D6F9', alignItems: 'center', justifyContent: 'center' },
   locationCircleMid: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#CCB2F2', alignItems: 'center', justifyContent: 'center' },
   locationCircleInner: { width: 30, height: 30, borderRadius: 15, backgroundColor: '#534889', alignItems: 'center', justifyContent: 'center' },
 
+  locationButton: {
+    position: 'absolute',
+    bottom: 150,
+    right: 12,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#F8F6FC',
+    borderWidth: 1.5,
+    borderColor: '#D0D0D0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+  },
   destinationContainer: {
     position: 'absolute',
     bottom: 80,

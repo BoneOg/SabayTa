@@ -11,12 +11,16 @@ export default function Layout() {
   // Helper to determine if tab is active
   const isActive = (routeName: string) => currentRoute === routeName;
 
+  // Hide tab bar for notification screen
+  const shouldShowTabBar = currentRoute !== 'notification';
+
   return (
     <View style={styles.container}>
       {/* Main content */}
       <Slot />
 
       {/* Bottom Tabs */}
+      {shouldShowTabBar && (
       <View style={styles.tabBarWrapper}>
         <View style={styles.tabBar}>
           {/* Home */}
@@ -80,6 +84,7 @@ export default function Layout() {
           </TouchableOpacity>
         </View>
       </View>
+      )}
     </View>
   );
 }

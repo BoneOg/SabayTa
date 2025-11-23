@@ -1,6 +1,7 @@
 import BackButton from '@/components/BackButton';
 import Button from '@/components/Button';
 import { Entypo, FontAwesome } from '@expo/vector-icons';
+import type { DocumentPickerResult } from 'expo-document-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -23,7 +24,7 @@ export default function SignUpPage() {
   const [selectedRole, setSelectedRole] = useState<'student' | 'rider' | null>(null);
 
   // State for proof attachment (shown only when rider is selected)
-  const [proofFile, setProofFile] = useState<DocumentPicker.DocumentResult | null>(null);
+  const [proofFile, setProofFile] = useState<DocumentPickerResult | null>(null);
 
   const pickProofDocument = async () => {
     try {
@@ -31,7 +32,7 @@ export default function SignUpPage() {
         type: ['image/*', 'application/pdf'], // Allow images and PDFs
         copyToCacheDirectory: true,
       });
-      if (result.type === 'success') {
+      if (!result.canceled && result.assets && result.assets[0]) {
         setProofFile(result);
       }
     } catch (error) {
@@ -128,7 +129,9 @@ export default function SignUpPage() {
           <TouchableOpacity style={styles.attachButton} onPress={pickProofDocument}>
             <FontAwesome name="paperclip" size={20} color="#534889" />
             <Text style={styles.attachText}>
-              {proofFile ? `Attached: ${proofFile.name}` : 'Attach Document'}
+              {proofFile && proofFile.assets && proofFile.assets[0]
+                ? `Attached: ${proofFile.assets[0].name}`
+                : 'Attach Document'}
             </Text>
           </TouchableOpacity>
         </View>

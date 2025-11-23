@@ -1,4 +1,4 @@
-import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import React, { useEffect, useRef } from 'react';
 import { Animated, Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -41,33 +41,50 @@ const SideMenu: React.FC<SideMenuProps> = ({ visible, onClose, profilePicture, g
 
       {/* Sliding menu */}
       <Animated.View style={[styles.menu, { left: slideAnim }]}>
+        {/* Back button */}
+        <TouchableOpacity style={styles.backButton} onPress={onClose}>
+          <Ionicons name="arrow-back" size={20} color="#414141" />
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
+
+        {/* Profile section */}
         <View style={styles.profileSection}>
           <Image source={{ uri: profilePicture }} style={styles.profilePicture} />
           <Text style={styles.gmail}>{gmail}</Text>
         </View>
 
         <TouchableOpacity style={styles.menuItem}>
-          <FontAwesome name="exclamation-triangle" size={20} color="#414141" />
+          <View style={styles.iconContainer}>
+            <FontAwesome name="exclamation-triangle" size={20} color="#414141" />
+          </View>
           <Text style={styles.menuText}>Complain</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
-          <MaterialIcons name="info" size={20} color="#414141" />
+          <View style={styles.iconContainer}>
+            <MaterialIcons name="info-outline" size={20} color="#414141" />
+          </View>
           <Text style={styles.menuText}>About Us</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
-          <FontAwesome name="cog" size={20} color="#414141" />
+          <View style={styles.iconContainer}>
+            <MaterialIcons name="settings" size={20} color="#414141" />
+          </View>
           <Text style={styles.menuText}>Settings</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
-          <MaterialIcons name="help" size={20} color="#414141" />
+          <View style={styles.iconContainer}>
+            <MaterialIcons name="help-outline" size={20} color="#414141" />
+          </View>
           <Text style={styles.menuText}>Help and Support</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
-          <MaterialIcons name="logout" size={20} color="#414141" />
+          <View style={styles.iconContainer}>
+            <MaterialIcons name="logout" size={20} color="#414141" />
+          </View>
           <Text style={styles.menuText}>Logout</Text>
         </TouchableOpacity>
       </Animated.View>
@@ -95,12 +112,53 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     bottom: 0,
+    borderRadius: 40,
   },
-  profileSection: { alignItems: 'center', marginBottom: 30 },
-  profilePicture: { width: 60, height: 60, borderRadius: 30, marginBottom: 10 },
-  gmail: { fontSize: 14, color: '#414141', textAlign: 'center', fontFamily: 'Poppins' },
-  menuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 15, borderBottomWidth: 1, borderBottomColor: '#D0D0D0' },
-  menuText: { fontSize: 16, color: '#414141', marginLeft: 15, fontFamily: 'Poppins' },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    marginTop: 40,
+  },
+  backText: {
+    fontSize: 16,
+    color: '#414141',
+    marginLeft: 10,
+    fontFamily: 'Poppins',
+  },
+  profileSection: {
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  profilePicture: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginBottom: 10,
+  },
+  gmail: {
+    fontSize: 14,
+    color: '#414141',
+    textAlign: 'center',
+    fontFamily: 'Poppins',
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#D0D0D0',
+  },
+  iconContainer: {
+    width: 24,
+    alignItems: 'center',
+  },
+  menuText: {
+    fontSize: 16,
+    color: '#414141',
+    marginLeft: 15,
+    fontFamily: 'Poppins',
+  },
 });
 
 export default SideMenu;
