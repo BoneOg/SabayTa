@@ -30,7 +30,10 @@ export default function Layout() {
               size={22}
               color={isActive("home") ? "#534889" : "#B8B8B8"}
             />
-            <Text style={[styles.tabLabel, { color: isActive("home") ? "#534889" : "#B8B8B8" }]}>
+            <Text 
+              style={[styles.tabLabel, { color: isActive("home") ? "#534889" : "#B8B8B8" }]}
+              numberOfLines={2}
+            >
               Home
             </Text>
           </TouchableOpacity>
@@ -42,7 +45,10 @@ export default function Layout() {
               size={22}
               color={isActive("favorites") ? "#534889" : "#B8B8B8"}
             />
-            <Text style={[styles.tabLabel, { color: isActive("favorites") ? "#534889" : "#B8B8B8" }]}>
+            <Text 
+              style={[styles.tabLabel, { color: isActive("favorites") ? "#534889" : "#B8B8B8" }]}
+              numberOfLines={2}
+            >
               Favourite
             </Text>
           </TouchableOpacity>
@@ -54,7 +60,10 @@ export default function Layout() {
               size={21}
               color={isActive("offer_a_ride") ? "#534889" : "#B8B8B8"}
             />
-            <Text style={[styles.tabLabel, { color: isActive("offer_a_ride") ? "#534889" : "#B8B8B8" }]}>
+            <Text 
+              style={[styles.tabLabel, { color: isActive("offer_a_ride") ? "#534889" : "#B8B8B8" }]}
+              numberOfLines={2}
+            >
               Offer a ride
             </Text>
           </TouchableOpacity>
@@ -66,7 +75,10 @@ export default function Layout() {
               size={22}
               color={isActive("history") ? "#534889" : "#B8B8B8"}
             />
-            <Text style={[styles.tabLabel, { color: isActive("history") ? "#534889" : "#B8B8B8" }]}>
+            <Text 
+              style={[styles.tabLabel, { color: isActive("history") ? "#534889" : "#B8B8B8" }]}
+              numberOfLines={2}
+            >
               History
             </Text>
           </TouchableOpacity>
@@ -78,7 +90,10 @@ export default function Layout() {
               size={22}
               color={isActive("profile") ? "#534889" : "#B8B8B8"}
             />
-            <Text style={[styles.tabLabel, { color: isActive("profile") ? "#534889" : "#B8B8B8" }]}>
+            <Text 
+              style={[styles.tabLabel, { color: isActive("profile") ? "#534889" : "#B8B8B8" }]}
+              numberOfLines={2}
+            >
               Profile
             </Text>
           </TouchableOpacity>
@@ -121,18 +136,22 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    paddingHorizontal: 4,
   },
 
   tabItem: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 2,
   },
 
   tabLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Poppins",
     color: "#B8B8B8",
     marginTop: 4,
+    textAlign: "center",
   },
 });

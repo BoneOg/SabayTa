@@ -112,13 +112,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     bottom: 0,
-    borderRadius: 40,
+    borderTopRightRadius: 20,
+    borderBottomRightRadius: 20,
   },
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
-    marginTop: 40,
+    marginTop: 10,
   },
   backText: {
     fontSize: 16,
@@ -154,7 +155,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   menuText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#414141',
     marginLeft: 15,
     fontFamily: 'Poppins',
