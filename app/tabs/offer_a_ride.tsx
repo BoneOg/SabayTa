@@ -90,7 +90,7 @@ export default function OfferARideMap() {
       <SideMenu
         visible={isMenuVisible}
         onClose={() => setIsMenuVisible(false)}
-        profilePicture="https://example.com/pic.jpg"
+        profilePicture='../../assets/images/cat5.jpg'
         gmail="user@gmail.com"
       />
 
@@ -151,9 +151,21 @@ export default function OfferARideMap() {
               </TouchableOpacity>
             </View>
 
-            <TextInput placeholder="From" placeholderTextColor="#D0D0D0" style={styles.input} />
-            <TextInput placeholder="To" placeholderTextColor="#D0D0D0" style={styles.input} />
-            <TextInput placeholder="Time" placeholderTextColor="#D0D0D0" style={styles.input} />
+            {/* Inputs with icons */}
+            <View style={styles.inputWrapper}>
+              <MaterialIcons name="my-location" size={20} color="#494949ff" style={styles.inputIcon} />
+              <TextInput placeholder="From" placeholderTextColor="#494949ff" style={styles.input} />
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <Ionicons name="location-outline" size={20} color="#494949ff" style={styles.inputIcon} />
+              <TextInput placeholder="To" placeholderTextColor="#494949ff" style={styles.input} />
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <Ionicons name="time-outline" size={20} color="#494949ff" style={styles.inputIcon} />
+              <TextInput placeholder="Time" placeholderTextColor="#494949ff" style={styles.input} />
+            </View>
           </Animated.View>
         </View>
       )}
@@ -169,7 +181,7 @@ const styles = StyleSheet.create({
     transform: [{ translateY: -22 }],
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 5,
     backgroundColor: 'rgba(198,185,229,0.5)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -197,7 +209,21 @@ const styles = StyleSheet.create({
   locationCircleInner: { width: 30, height: 30, borderRadius: 15, backgroundColor: '#534889', alignItems: 'center', justifyContent: 'center' },
   dimBackground: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.2)' },
   modalContainer: { position: 'absolute', left: 0, width: '100%', height: height * 0.5, backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 15 },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  modalTitle: { fontSize: 18, fontFamily: 'Poppins', fontWeight: 'bold' },
-  input: { width: '100%', borderWidth: 1, borderColor: '#D0D0D0', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 12, fontSize: 16, color: '#414141', backgroundColor: '#F8F8F8', fontFamily: 'Poppins', marginBottom: 10 },
+modalHeader: { 
+  flexDirection: 'row', 
+  justifyContent: 'space-between', 
+  alignItems: 'center', 
+  marginBottom: 10,
+  marginTop: 15,
+},
+modalTitle: { 
+  fontSize: 18, 
+  fontFamily: 'Poppins', 
+  textAlign: 'center',
+  flex: 1, // ensures it takes up available space
+},
+
+  inputWrapper: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, backgroundColor: '#F8F8F8', borderRadius: 10, borderWidth: 1, borderColor: '#D0D0D0' },
+  inputIcon: { paddingHorizontal: 10 },
+  input: { flex: 1, paddingVertical: 8, paddingHorizontal: 0, fontSize: 16, color: '#414141', fontFamily: 'Poppins' },
 });

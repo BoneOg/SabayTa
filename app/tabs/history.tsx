@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     transform: [{ translateY: -22 }],
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 5,
     backgroundColor: 'rgba(198,185,229,0.5)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -198,10 +198,9 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    fontSize: 24,
+    fontSize: 19,
     color: '#000',
     fontFamily: 'Poppins',
-    fontWeight: 'bold',
   },
 
   topTabsContainer: {
@@ -229,7 +228,7 @@ const styles = StyleSheet.create({
 
   tabButton: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 15,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
@@ -237,16 +236,15 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
 
-  tabText: {
-    fontSize: 14,
-    fontFamily: 'Poppins',
-    color: '#414141',
-  },
+tabText: {
+  fontSize: 13,
+  fontFamily: 'Poppins',
+  color: '#414141',
+},
 
-  activeTabText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
+activeTabText: {
+  color: '#fff',
+},
 
   scrollContainer: {
     flexGrow: 1,
@@ -266,41 +264,39 @@ const styles = StyleSheet.create({
     padding: 15,
   },
 
-  rideContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
+rideContent: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'flex-start',
+  gap: 10, // add gap between info and meta
+},
 
-  rideInfo: {
-    flex: 1,
-    gap: 10,
-  },
+rideInfo: {
+  flex: 1,
+  gap: 8,
+  flexShrink: 1, // allow text to shrink instead of being cut
+},
 
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
+infoRow: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 6,
+  flexWrap: 'wrap', // wrap long text
+},
 
-  rideInfoText: {
-    fontSize: 14,
-    color: '#414141',
-    fontFamily: 'Poppins',
-  },
+rideInfoText: {
+  fontSize: 14,
+  color: '#414141',
+  fontFamily: 'Poppins',
+  flexShrink: 1, // prevent cutting
+},
 
-  infoText: {
-    fontSize: 16,
-    color: '#414141',
-    textAlign: 'center',
-    fontFamily: 'Poppins',
-  },
-
-  rideMeta: {
-    alignItems: 'flex-end',
-    gap: 6,
-  },
-
+rideMeta: {
+  alignItems: 'flex-end',
+  gap: 4,
+  marginLeft: 8,
+  flexShrink: 0, // keep meta aligned
+},
   roleText: {
     fontSize: 14,
     color: '#414141',

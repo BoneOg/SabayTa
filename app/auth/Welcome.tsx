@@ -3,7 +3,9 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { Dimensions, StyleSheet, View } from 'react-native';
+
+const { width } = Dimensions.get('window');
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -29,7 +31,6 @@ export default function WelcomeScreen() {
 
       {/* Buttons Container */}
       <View style={styles.buttonsContainer}>
-
         {/* Create Account Button */}
         <Button label="Create Account" onPress={() => router.push('/auth/SignUp')} />
 
@@ -39,7 +40,6 @@ export default function WelcomeScreen() {
           variant="outline"
           onPress={() => router.push('/auth/Login')}
         />
-
       </View>
     </ThemedView>
   );
@@ -54,8 +54,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   logo: {
-    width: 500,
-    height: 300,
+    width: width * 0.9, // increased from 0.6 to 0.8
+    height: width * 0.58, // height adjusted proportionally
     marginBottom: 20,
   },
   title: {
@@ -64,17 +64,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 10,
     color: '#000',
+    fontFamily: 'Poppins',
   },
   subtitle: {
     fontSize: 16,
     textAlign: 'center',
     color: 'gray',
     marginBottom: 40,
+    fontFamily: 'Poppins',
   },
   buttonsContainer: {
     width: '100%',
     alignItems: 'center',
     gap: 15,
   },
-
 });

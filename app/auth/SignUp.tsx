@@ -20,16 +20,16 @@ import {
 export default function SignUpPage() {
   const router = useRouter();
 
-  // NEW: Student / Rider selection
-  const [selectedRole, setSelectedRole] = useState<'student' | 'rider' | null>(null);
+  // Role selection: Rider or Driver
+  const [selectedRole, setSelectedRole] = useState<'rider' | 'driver' | null>(null);
 
-  // State for proof attachment (shown only when rider is selected)
+  // Proof attachment for drivers
   const [proofFile, setProofFile] = useState<DocumentPickerResult | null>(null);
 
   const pickProofDocument = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: ['image/*', 'application/pdf'], // Allow images and PDFs
+        type: ['image/*', 'application/pdf'],
         copyToCacheDirectory: true,
       });
       if (!result.canceled && result.assets && result.assets[0]) {
@@ -42,11 +42,8 @@ export default function SignUpPage() {
 
   return (
     <ScrollView style={styles.container}>
-
-      {/* Back Button */}
       <BackButton onPress={() => router.replace('/auth/Welcome')} />
 
-      {/* Title */}
       <Text style={styles.title}>Sign up with your email or phone number</Text>
 
       {/* Inputs */}
@@ -55,7 +52,6 @@ export default function SignUpPage() {
         placeholder="Name"
         placeholderTextColor="#D0D0D0"
       />
-
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -68,7 +64,6 @@ export default function SignUpPage() {
         <View style={styles.countryCodeBox}>
           <Text style={styles.countryCode}>🇵🇭 +63</Text>
         </View>
-
         <TextInput
           style={[styles.input, styles.mobileInput]}
           placeholder="Your mobile number"
@@ -84,26 +79,9 @@ export default function SignUpPage() {
         placeholderTextColor="#D0D0D0"
       />
 
-      {/* NEW: Student or Rider Option Box */}
+      {/* Role selection */}
       <Text style={styles.label}>Sign up as:</Text>
       <View style={styles.roleContainer}>
-        <Pressable
-          style={[
-            styles.roleOption,
-            selectedRole === 'student' && styles.roleSelected,
-          ]}
-          onPress={() => setSelectedRole('student')}
-        >
-          <Text
-            style={[
-              styles.roleText,
-              selectedRole === 'student' && styles.roleTextSelected,
-            ]}
-          >
-            Student
-          </Text>
-        </Pressable>
-
         <Pressable
           style={[
             styles.roleOption,
@@ -120,12 +98,29 @@ export default function SignUpPage() {
             Rider
           </Text>
         </Pressable>
+
+        <Pressable
+          style={[
+            styles.roleOption,
+            selectedRole === 'driver' && styles.roleSelected,
+          ]}
+          onPress={() => setSelectedRole('driver')}
+        >
+          <Text
+            style={[
+              styles.roleText,
+              selectedRole === 'driver' && styles.roleTextSelected,
+            ]}
+          >
+            Driver
+          </Text>
+        </Pressable>
       </View>
 
-      {/* Conditional Proof Attachment for Rider */}
-      {selectedRole === 'rider' && (
+      {/* Proof attachment for Driver */}
+      {selectedRole === 'driver' && (
         <View style={styles.proofContainer}>
-          <Text style={styles.proofLabel}>Attach proof that you are still a student:</Text>
+          <Text style={styles.proofLabel}>Attach proof that you are a student:</Text>
           <TouchableOpacity style={styles.attachButton} onPress={pickProofDocument}>
             <FontAwesome name="paperclip" size={20} color="#534889" />
             <Text style={styles.attachText}>
@@ -154,33 +149,37 @@ export default function SignUpPage() {
         style={{ marginVertical: 10 }}
       />
 
-      <Text style={styles.orText}>or</Text>
+{/* Divider with OR */}
+<View style={styles.orContainer}>
+  <View style={styles.line} />
+  <Text style={styles.orText}>or</Text>
+  <View style={styles.line} />
+</View>
 
       {/* Social Buttons */}
       <TouchableOpacity style={styles.socialButton}>
         <FontAwesome name="google" size={20} color="#414141" />
         <Text style={styles.socialText}>Sign up with Gmail</Text>
       </TouchableOpacity>
-
       <TouchableOpacity style={styles.socialButton}>
         <FontAwesome name="facebook" size={20} color="#414141" />
         <Text style={styles.socialText}>Sign up with Facebook</Text>
       </TouchableOpacity>
-
       <TouchableOpacity style={styles.socialButton}>
         <FontAwesome name="apple" size={20} color="#414141" />
         <Text style={styles.socialText}>Sign up with Apple</Text>
       </TouchableOpacity>
 
-      {/* Footer: Sign In */}
-      <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 18 }}>
-        <Text style={styles.footerText}>Already have an account? </Text>
+  {/* Footer: Sign In */}
+  <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 18 }}>
+    <Text style={styles.footerText}>Already have an account? </Text>
+    <Pressable onPress={() => router.push('/auth/Login')}>
+      <Text style={styles.signInLink}>Sign in</Text>
+    </Pressable>
+  </View> 
 
-        <Pressable onPress={() => router.push('/auth/Login')}>
-          <Text style={styles.signInLink}>Sign in</Text>
-        </Pressable>
-      </View>
-
+{/* Spacer below sign-in */}
+<View style={{ height: 30 }} />
     </ScrollView>
   );
 }
@@ -194,7 +193,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: 'Poppins',
-    fontSize: 20,
+    fontSize: 24,
     color: '#414141',
     marginVertical: 16,
     fontWeight: '600',
@@ -307,12 +306,22 @@ const styles = StyleSheet.create({
     color: '#534889',
     textDecorationLine: 'underline',
   },
-  orText: {
-    textAlign: 'center',
-    color: '#B8B8B8',
-    marginVertical: 8,
-    fontFamily: 'Poppins',
-  },
+orContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginVertical: 12,
+},
+line: {
+  flex: 1,
+  height: 1,
+  backgroundColor: '#D0D0D0',
+},
+orText: {
+  fontFamily: 'Poppins',
+  fontSize: 14,
+  color: '#B8B8B8',
+  marginHorizontal: 8,
+},
   socialButton: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -1,104 +1,102 @@
-import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { Slot, useRouter, useSegments } from "expo-router";
 import React from "react";
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function Layout() {
   const router = useRouter();
-  const segments = useSegments(); // Get current route segments
-  const currentRoute = segments[segments.length - 1]; // last segment is the current tab
+  const segments = useSegments();
+  const currentRoute = segments[segments.length - 1];
 
-  // Helper to determine if tab is active
   const isActive = (routeName: string) => currentRoute === routeName;
-
-  // Hide tab bar for notification screen
   const shouldShowTabBar = currentRoute !== 'notification';
 
   return (
     <View style={styles.container}>
-      {/* Main content */}
+      {/* Main Content */}
       <Slot />
 
       {/* Bottom Tabs */}
       {shouldShowTabBar && (
-      <View style={styles.tabBarWrapper}>
-        <View style={styles.tabBar}>
-          {/* Home */}
-          <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/tabs/home")}>
-            <Ionicons
-              name="home"
-              size={22}
-              color={isActive("home") ? "#534889" : "#B8B8B8"}
-            />
-            <Text 
-              style={[styles.tabLabel, { color: isActive("home") ? "#534889" : "#B8B8B8" }]}
-              numberOfLines={2}
-            >
-              Home
-            </Text>
-          </TouchableOpacity>
+        <View style={styles.tabBarWrapper}>
+          <View style={styles.tabBar}>
+            {/* Home */}
+            <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/tabs/home")}>
+              <Ionicons name="home" size={22} color={isActive("home") ? "#534889" : "#B8B8B8"} />
+              <Text
+                style={[styles.tabLabel, { color: isActive("home") ? "#534889" : "#B8B8B8" }]}
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
+                Home
+              </Text>
+            </TouchableOpacity>
 
-          {/* Favorites */}
-          <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/tabs/favorites")}>
-            <Ionicons
-              name="heart-outline"
-              size={22}
-              color={isActive("favorites") ? "#534889" : "#B8B8B8"}
-            />
-            <Text 
-              style={[styles.tabLabel, { color: isActive("favorites") ? "#534889" : "#B8B8B8" }]}
-              numberOfLines={2}
-            >
-              Favourite
-            </Text>
-          </TouchableOpacity>
+            {/* Favorites */}
+            <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/tabs/favorites")}>
+              <MaterialIcons
+                name="favorite"
+                size={22}
+                color={isActive("favorites") ? "#534889" : "#B8B8B8"}
+              />
+              <Text
+                style={[styles.tabLabel, { color: isActive("favorites") ? "#534889" : "#B8B8B8" }]}
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
+                Favourite
+              </Text>
+            </TouchableOpacity>
 
-          {/* Offer a Ride */}
-          <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/tabs/offer_a_ride")}>
-            <FontAwesome
-              name="car"
-              size={21}
-              color={isActive("offer_a_ride") ? "#534889" : "#B8B8B8"}
-            />
-            <Text 
-              style={[styles.tabLabel, { color: isActive("offer_a_ride") ? "#534889" : "#B8B8B8" }]}
-              numberOfLines={2}
-            >
-              Offer a ride
-            </Text>
-          </TouchableOpacity>
+            {/* Offer a Ride */}
+            <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/tabs/offer_a_ride")}>
+              <FontAwesome
+                name="car"
+                size={21}
+                color={isActive("offer_a_ride") ? "#534889" : "#B8B8B8"}
+              />
+              <Text
+                style={[styles.tabLabel, { color: isActive("offer_a_ride") ? "#534889" : "#B8B8B8" }]}
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
+                Offer a ride
+              </Text>
+            </TouchableOpacity>
 
-          {/* History */}
-          <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/tabs/history")}>
-            <Ionicons
-              name="time-outline"
-              size={22}
-              color={isActive("history") ? "#534889" : "#B8B8B8"}
-            />
-            <Text 
-              style={[styles.tabLabel, { color: isActive("history") ? "#534889" : "#B8B8B8" }]}
-              numberOfLines={2}
-            >
-              History
-            </Text>
-          </TouchableOpacity>
+            {/* History */}
+            <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/tabs/history")}>
+              <Ionicons
+                name="time"
+                size={22}
+                color={isActive("history") ? "#534889" : "#B8B8B8"}
+              />
+              <Text
+                style={[styles.tabLabel, { color: isActive("history") ? "#534889" : "#B8B8B8" }]}
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
+                History
+              </Text>
+            </TouchableOpacity>
 
-          {/* Profile */}
-          <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/tabs/profile")}>
-            <Ionicons
-              name="person-outline"
-              size={22}
-              color={isActive("profile") ? "#534889" : "#B8B8B8"}
-            />
-            <Text 
-              style={[styles.tabLabel, { color: isActive("profile") ? "#534889" : "#B8B8B8" }]}
-              numberOfLines={2}
-            >
-              Profile
-            </Text>
-          </TouchableOpacity>
+            {/* Profile */}
+            <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/tabs/profile")}>
+              <Ionicons
+                name="person"
+                size={22}
+                color={isActive("profile") ? "#534889" : "#B8B8B8"}
+              />
+              <Text
+                style={[styles.tabLabel, { color: isActive("profile") ? "#534889" : "#B8B8B8" }]}
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
+                Profile
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
       )}
     </View>
   );
@@ -130,7 +128,7 @@ const styles = StyleSheet.create({
 
   tabBar: {
     flexDirection: "row",
-    height: 68,
+    height: 70,
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "space-around",
@@ -139,19 +137,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
 
-  tabItem: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 2,
-  },
-
-  tabLabel: {
-    fontSize: 11,
-    fontFamily: "Poppins",
-    color: "#B8B8B8",
-    marginTop: 4,
-    textAlign: "center",
-  },
+tabItem: {
+  flex: 1,
+  minWidth: 60,
+  alignItems: 'center',
+  justifyContent: 'center',
+  paddingVertical: 6, // increase a bit for spacing
+},
+tabLabel: {
+  fontSize: 10,
+  fontFamily: 'Poppins',
+  marginTop: 4, // spacing from icon
+  textAlign: 'center',
+  flexShrink: 1,
+  includeFontPadding: false, // ensures Android doesn't add extra padding
+  lineHeight: 14, // ensures text fits inside container
+},
 });

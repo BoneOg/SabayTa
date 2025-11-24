@@ -6,6 +6,7 @@ import {
   Animated,
   Dimensions,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -15,7 +16,7 @@ import {
 import MapView, { Circle, Marker } from 'react-native-maps';
 import SideMenu from './side_menu';
 
-const { height } = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -80,12 +81,15 @@ export default function HomeScreen() {
 
   const centerOnLocation = () => {
     if (mapRef.current && region) {
-      mapRef.current.animateToRegion({
-        latitude: region.latitude,
-        longitude: region.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      }, 300);
+      mapRef.current.animateToRegion(
+        {
+          latitude: region.latitude,
+          longitude: region.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        300
+      );
     }
   };
 
@@ -103,16 +107,16 @@ export default function HomeScreen() {
       <SideMenu
         visible={isMenuVisible}
         onClose={() => setIsMenuVisible(false)}
-        profilePicture="https://example.com/cat1.jpg"
+        profilePicture="../../assets/images/cat5.jpg"
         gmail="user@gmail.com"
       />
 
       {/* MAP */}
-      <MapView 
-        ref={mapRef} 
-        style={StyleSheet.absoluteFill} 
-        region={region} 
-        showsUserLocation 
+      <MapView
+        ref={mapRef}
+        style={StyleSheet.absoluteFill}
+        region={region}
+        showsUserLocation
         showsMyLocationButton={false}
       >
         <Marker coordinate={region}>
@@ -124,7 +128,12 @@ export default function HomeScreen() {
             </View>
           </View>
         </Marker>
-        <Circle center={region} radius={400} strokeWidth={0} fillColor="rgba(98,44,155,0.10)" />
+        <Circle
+          center={region}
+          radius={400}
+          strokeWidth={0}
+          fillColor="rgba(98,44,155,0.10)"
+        />
       </MapView>
 
       {/* MENU BUTTON */}
@@ -133,7 +142,10 @@ export default function HomeScreen() {
       </TouchableOpacity>
 
       {/* NOTIFICATION BUTTON */}
-      <TouchableOpacity style={styles.notificationButton} onPress={() => router.push('/tabs/notification')}>
+      <TouchableOpacity
+        style={styles.notificationButton}
+        onPress={() => router.push('/tabs/notification')}
+      >
         <Ionicons name="notifications-outline" size={24} color="#000000ff" />
       </TouchableOpacity>
 
@@ -145,8 +157,12 @@ export default function HomeScreen() {
       {/* SEARCH BAR */}
       <TouchableOpacity style={styles.destinationContainer} onPress={openModal}>
         <View style={styles.destinationInputWrapper}>
-          <Ionicons name="search" size={20} color="#534889" style={styles.searchIconInside} />
-          <Text style={{ color: '#a2a2a2ff', fontSize: 16, fontFamily: 'Poppins' }}>
+          <Ionicons name="search" size={20} color="#534889" />
+          <Text
+            style={styles.destinationPlaceholder}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
             Where would you like to go?
           </Text>
         </View>
@@ -164,9 +180,41 @@ export default function HomeScreen() {
               </TouchableOpacity>
             </View>
 
-            <TextInput placeholder="From" placeholderTextColor="#D0D0D0" style={styles.input} />
-            <TextInput placeholder="To" placeholderTextColor="#D0D0D0" style={styles.input} />
-            <TextInput placeholder="Time" placeholderTextColor="#D0D0D0" style={styles.input} />
+            <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+              {/* From Input */}
+              <View style={styles.inputWithIcon}>
+                <MaterialIcons
+                  name="my-location"
+                  size={20}
+                  color="#494949ff"
+                  style={{ marginRight: 8 }}
+                />
+                <TextInput
+                  placeholder="From"
+                  placeholderTextColor="#494949ff"
+                  style={styles.input}
+                  textAlignVertical="center"
+                  includeFontPadding={false}
+                />
+              </View>
+
+              {/* To Input */}
+              <View style={styles.inputWithIcon}>
+                <Ionicons
+                  name="location-outline"
+                  size={20}
+                  color="#494949ff"
+                  style={{ marginRight: 8 }}
+                />
+                <TextInput
+                  placeholder="To"
+                  placeholderTextColor="#494949ff"
+                  style={styles.input}
+                  textAlignVertical="center"
+                  includeFontPadding={false}
+                />
+              </View>
+            </ScrollView>
           </Animated.View>
         </View>
       )}
@@ -176,35 +224,55 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-
   menuButton: {
     position: 'absolute',
     left: 20,
     transform: [{ translateY: -22 }],
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(198,185,229,0.5)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    top: 50,
-  },
-  notificationButton: {
-    position: 'absolute',
-    right: 20,
-    transform: [{ translateY: -22 }],
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    borderRadius: 5,
     backgroundColor: 'rgba(198,185,229,0.5)',
     alignItems: 'center',
     justifyContent: 'center',
     top: 50,
   },
 
-  locationCircleOuter: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#E5D6F9', alignItems: 'center', justifyContent: 'center' },
-  locationCircleMid: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#CCB2F2', alignItems: 'center', justifyContent: 'center' },
-  locationCircleInner: { width: 30, height: 30, borderRadius: 15, backgroundColor: '#534889', alignItems: 'center', justifyContent: 'center' },
+  notificationButton: {
+    position: 'absolute',
+    right: 20,
+    top: 30,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(198,185,229,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  locationCircleOuter: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#E5D6F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  locationCircleMid: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#CCB2F2',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  locationCircleInner: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#534889',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
   locationButton: {
     position: 'absolute',
@@ -220,28 +288,76 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     elevation: 2,
   },
-  destinationContainer: {
-    position: 'absolute',
-    bottom: 80,
-    left: 12,
-    right: 12,
-    borderRadius: 14,
-    backgroundColor: '#F8F6FC',
-    borderWidth: 1.5,
-    borderColor: '#D0D0D0',
-    elevation: 2,
+
+destinationContainer: {
+  position: 'absolute',
+  bottom: 80,
+  left: 12,
+  right: 12,
+  borderRadius: 14,
+  backgroundColor: '#F8F6FC',
+  borderWidth: 1.5,
+  borderColor: '#D0D0D0',
+  height: 55, // increased from 55
+  justifyContent: 'center',
+  elevation: 2,
+  paddingHorizontal: 16,
+},
+destinationInputWrapper: {
+  flexDirection: 'row',
+  alignItems: 'center',
+},
+destinationPlaceholder: {
+  color: '#a2a2a2ff',
+  fontSize: 16, // slightly bigger for readability
+  fontFamily: 'Poppins',
+  marginLeft: 8,
+  flex: 1, // allow text to expand
+},
+
+  dimBackground: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.2)',
   },
-  destinationInputWrapper: {
+  modalContainer: {
+    position: 'absolute',
+    left: 0,
+    width: width,
+    height: height * 0.5,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 15,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+    marginTop: 15,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: 'Poppins',
+    textAlign: 'center',
+    flex: 1,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: '#414141',
+    fontFamily: 'Poppins',
+    paddingVertical: 8,
+  },
+  inputWithIcon: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: '#D0D0D0',
+    borderRadius: 10,
     paddingHorizontal: 12,
+    height: 45,
+    backgroundColor: '#F8F8F8',
+    marginBottom: 10,
   },
-  searchIconInside: { marginRight: 8 },
-
-  dimBackground: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.2)' },
-  modalContainer: { position: 'absolute', left: 0, width: '100%', height: height * 0.5, backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 15 },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  modalTitle: { fontSize: 18, fontFamily: 'Poppins', fontWeight: 'bold' },
-  input: { width: '100%', borderWidth: 1, borderColor: '#D0D0D0', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 12, fontSize: 16, color: '#414141', backgroundColor: '#F8F8F8', fontFamily: 'Poppins', marginBottom: 10 },
 });

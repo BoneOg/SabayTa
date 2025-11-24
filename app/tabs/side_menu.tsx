@@ -7,32 +7,30 @@ const { width } = Dimensions.get('window');
 interface SideMenuProps {
   visible: boolean;
   onClose: () => void;
-  profilePicture: string;
+  profilePicture?: any; // can be string (remote URL) or require(local)
   gmail: string;
 }
 
+const defaultProfile = require('../../assets/images/cat5.jpg'); // fallback local image
+
 const SideMenu: React.FC<SideMenuProps> = ({ visible, onClose, profilePicture, gmail }) => {
-  const slideAnim = useRef(new Animated.Value(-width * 0.6)).current; // start off-screen
+  const slideAnim = useRef(new Animated.Value(-width * 0.6)).current;
 
   useEffect(() => {
-    if (visible) {
-      // Slide in
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
-    } else {
-      // Slide out
-      Animated.timing(slideAnim, {
-        toValue: -width * 0.6,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
-    }
+    Animated.timing(slideAnim, {
+      toValue: visible ? 0 : -width * 0.6,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
   }, [visible]);
 
   if (!visible) return null;
+
+  const resolvedImage = profilePicture
+    ? typeof profilePicture === 'string'
+      ? { uri: profilePicture }
+      : profilePicture
+    : defaultProfile;
 
   return (
     <View style={styles.overlay}>
@@ -49,44 +47,25 @@ const SideMenu: React.FC<SideMenuProps> = ({ visible, onClose, profilePicture, g
 
         {/* Profile section */}
         <View style={styles.profileSection}>
-          <Image source={{ uri: profilePicture }} style={styles.profilePicture} />
+          <Image source={resolvedImage} style={styles.profilePicture} />
           <Text style={styles.gmail}>{gmail}</Text>
         </View>
 
-        <TouchableOpacity style={styles.menuItem}>
-          <View style={styles.iconContainer}>
-            <FontAwesome name="exclamation-triangle" size={20} color="#414141" />
-          </View>
-          <Text style={styles.menuText}>Complain</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.menuItem}>
-          <View style={styles.iconContainer}>
-            <MaterialIcons name="info-outline" size={20} color="#414141" />
-          </View>
-          <Text style={styles.menuText}>About Us</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.menuItem}>
-          <View style={styles.iconContainer}>
-            <MaterialIcons name="settings" size={20} color="#414141" />
-          </View>
-          <Text style={styles.menuText}>Settings</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.menuItem}>
-          <View style={styles.iconContainer}>
-            <MaterialIcons name="help-outline" size={20} color="#414141" />
-          </View>
-          <Text style={styles.menuText}>Help and Support</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.menuItem}>
-          <View style={styles.iconContainer}>
-            <MaterialIcons name="logout" size={20} color="#414141" />
-          </View>
-          <Text style={styles.menuText}>Logout</Text>
-        </TouchableOpacity>
+        {/* Menu Items */}
+        {[
+          { icon: 'exclamation-triangle', text: 'Complain', library: FontAwesome },
+          { icon: 'info-outline', text: 'About Us', library: MaterialIcons },
+          { icon: 'settings', text: 'Settings', library: MaterialIcons },
+          { icon: 'help-outline', text: 'Help and Support', library: MaterialIcons },
+          { icon: 'logout', text: 'Logout', library: MaterialIcons },
+        ].map((item, idx) => (
+          <TouchableOpacity key={idx} style={styles.menuItem}>
+            <View style={styles.iconContainer}>
+              <item.library name={item.icon as any} size={20} color="#414141" />
+            </View>
+            <Text style={styles.menuText}>{item.text}</Text>
+          </TouchableOpacity>
+        ))}
       </Animated.View>
     </View>
   );
@@ -95,7 +74,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ visible, onClose, profilePicture, g
 const styles = StyleSheet.create({
   overlay: {
     position: 'absolute',
-    top: 0, left: 0, bottom: 0, right: 0,
+    top: 0, left: 0, right: 0, bottom: 0,
     flexDirection: 'row',
     zIndex: 1000,
   },

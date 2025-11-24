@@ -20,7 +20,7 @@ export default function ProfileScreen() {
       <SideMenu
         visible={isMenuVisible}
         onClose={() => setIsMenuVisible(false)}
-        profilePicture="https://example.com/pic.jpg"
+        profilePicture='../../assets/images/cat5.jpg'
         gmail="user@gmail.com"
       />
 
@@ -86,7 +86,7 @@ export default function ProfileScreen() {
 
           <TouchableOpacity
             style={styles.logoutButton}
-            onPress={() => router.push('/auth/Login')}
+            onPress={() => router.push('/auth/Welcome')}
           >
             <Text style={styles.logoutText}>Log Out</Text>
           </TouchableOpacity>
@@ -115,14 +115,14 @@ const styles = StyleSheet.create({
     transform: [{ translateY: -22 }],
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 5,
     backgroundColor: 'rgba(198,185,229,0.5)',
     alignItems: 'center',
     justifyContent: 'center',
     top: '50%',
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 20,
     color: '#000000',
     fontFamily: 'Poppins',
   },
