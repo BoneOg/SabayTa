@@ -14,7 +14,7 @@ import {
   View,
 } from 'react-native';
 import MapView, { Circle, Marker } from 'react-native-maps';
-import SideMenu from './side_menu';
+import SideMenu from './sidebar/menu';
 
 const { height, width } = Dimensions.get('window');
 
@@ -102,23 +102,22 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={{ flex: 1 }}>
       {/* SIDE MENU */}
       <SideMenu
         visible={isMenuVisible}
         onClose={() => setIsMenuVisible(false)}
-        profilePicture="../../assets/images/cat5.jpg"
-        gmail="user@gmail.com"
       />
 
-      {/* MAP */}
-      <MapView
-        ref={mapRef}
-        style={StyleSheet.absoluteFill}
-        region={region}
-        showsUserLocation
-        showsMyLocationButton={false}
-      >
+      <SafeAreaView style={styles.container}>
+        {/* MAP */}
+        <MapView
+          ref={mapRef}
+          style={StyleSheet.absoluteFill}
+          region={region}
+          showsUserLocation
+          showsMyLocationButton={false}
+        >
         <Marker coordinate={region}>
           <View style={styles.locationCircleOuter}>
             <View style={styles.locationCircleMid}>
@@ -168,57 +167,56 @@ export default function HomeScreen() {
         </View>
       </TouchableOpacity>
 
-      {/* BOTTOM SHEET MODAL */}
-      {modalVisible && (
-        <View style={StyleSheet.absoluteFill}>
-          <TouchableOpacity style={styles.dimBackground} activeOpacity={1} onPress={closeModal} />
-          <Animated.View style={[styles.modalContainer, { top: slideAnim }]}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Address</Text>
-              <TouchableOpacity onPress={closeModal}>
-                <FontAwesome name="close" size={22} color="#414141" />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-              {/* From Input */}
-              <View style={styles.inputWithIcon}>
-                <MaterialIcons
-                  name="my-location"
-                  size={20}
-                  color="#494949ff"
-                  style={{ marginRight: 8 }}
-                />
-                <TextInput
-                  placeholder="From"
-                  placeholderTextColor="#494949ff"
-                  style={styles.input}
-                  textAlignVertical="center"
-                  includeFontPadding={false}
-                />
+        {/* BOTTOM SHEET MODAL */}
+        {modalVisible && (
+          <View style={StyleSheet.absoluteFill}>
+            <TouchableOpacity style={styles.dimBackground} activeOpacity={1} onPress={closeModal} />
+            <Animated.View style={[styles.modalContainer, { top: slideAnim }]}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Select Address</Text>
+                <TouchableOpacity onPress={closeModal}>
+                  <FontAwesome name="close" size={22} color="#414141" />
+                </TouchableOpacity>
               </View>
 
-              {/* To Input */}
-              <View style={styles.inputWithIcon}>
-                <Ionicons
-                  name="location-outline"
-                  size={20}
-                  color="#494949ff"
-                  style={{ marginRight: 8 }}
-                />
-                <TextInput
-                  placeholder="To"
-                  placeholderTextColor="#494949ff"
-                  style={styles.input}
-                  textAlignVertical="center"
-                  includeFontPadding={false}
-                />
-              </View>
-            </ScrollView>
-          </Animated.View>
-        </View>
-      )}
-    </SafeAreaView>
+              <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+                {/* From Input */}
+                <View style={styles.inputWithIcon}>
+                  <MaterialIcons
+                    name="my-location"
+                    size={20}
+                    color="#494949ff"
+                    style={{ marginRight: 8 }}
+                  />
+                  <TextInput
+                    placeholder="From"
+                    placeholderTextColor="#494949ff"
+                    style={styles.input}
+                    textAlignVertical="center"
+                  />
+                </View>
+
+                {/* To Input */}
+                <View style={styles.inputWithIcon}>
+                  <Ionicons
+                    name="location-outline"
+                    size={20}
+                    color="#494949ff"
+                    style={{ marginRight: 8 }}
+                  />
+                  <TextInput
+                    placeholder="To"
+                    placeholderTextColor="#494949ff"
+                    style={styles.input}
+                    textAlignVertical="center"
+                  />
+                </View>
+              </ScrollView>
+            </Animated.View>
+          </View>
+        )}
+      </SafeAreaView>
+    </View>
   );
 }
 

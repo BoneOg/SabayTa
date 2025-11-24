@@ -67,7 +67,11 @@ export default function NotificationScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => router.push("/tabs/home")}
+          style={styles.backButton}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
           <Ionicons name="chevron-back" size={24} color="#000" />
           <Text style={styles.backText}>Back</Text>
         </TouchableOpacity>
@@ -128,6 +132,8 @@ const styles = StyleSheet.create({
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 6,
   },
   backText: {
     fontSize: 16,
@@ -136,17 +142,15 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins',
   },
   headerTitle: {
+    flex: 1,
     fontSize: 18,
     fontWeight: 'bold',
     color: '#000',
     fontFamily: 'Poppins',
-    position: 'absolute',
-    left: 0,
-    right: 0,
     textAlign: 'center',
   },
   headerSpacer: {
-    width: 60,
+    width: 32,
   },
   scrollView: {
     flex: 1,

@@ -3,7 +3,7 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import SideMenu from './side_menu';
+import SideMenu from '../tabs/sidebar/menu';
 
 export default function FavoritesScreen() {
   const router = useRouter();
@@ -30,7 +30,7 @@ export default function FavoritesScreen() {
       <SideMenu
         visible={isMenuVisible}
         onClose={() => setIsMenuVisible(false)}
-        profilePicture='../../assets/images/cat5.jpg'
+        profilePicture={require('@/assets/images/cat5.jpg')}
         gmail="user@gmail.com"
       />
 

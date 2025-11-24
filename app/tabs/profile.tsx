@@ -2,7 +2,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import SideMenu from './side_menu'; // Adjust path if needed
+import SideMenu from './sidebar/menu'; // Adjust path if needed
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -20,8 +20,7 @@ export default function ProfileScreen() {
       <SideMenu
         visible={isMenuVisible}
         onClose={() => setIsMenuVisible(false)}
-        profilePicture='../../assets/images/cat5.jpg'
-        gmail="user@gmail.com"
+        profilePicture={require('@/assets/images/cat5.jpg')}
       />
 
       {/* Header */}

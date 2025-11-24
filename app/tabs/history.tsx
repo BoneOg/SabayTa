@@ -2,7 +2,7 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import SideMenu from './side_menu';
+import SideMenu from './sidebar/menu';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -75,8 +75,7 @@ export default function HistoryScreen() {
       <SideMenu
         visible={isMenuVisible}
         onClose={() => setIsMenuVisible(false)}
-        profilePicture="https://example.com/pic.jpg"
-        gmail="user@gmail.com"
+        profilePicture={require('@/assets/images/cat5.jpg')}
       />
 
       {/* Header */}

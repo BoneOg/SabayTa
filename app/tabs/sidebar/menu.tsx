@@ -1,20 +1,31 @@
 import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Href, useRouter } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
-import { Animated, Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Animated,
+  Dimensions,
+  Image,
+  ImageSourcePropType,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 const { width } = Dimensions.get('window');
 
 interface SideMenuProps {
   visible: boolean;
   onClose: () => void;
-  profilePicture?: any; // can be string (remote URL) or require(local)
-  gmail: string;
+  profilePicture?: ImageSourcePropType;
+  gmail?: string;
 }
 
-const defaultProfile = require('../../assets/images/cat5.jpg'); // fallback local image
+const defaultProfile = require('@/assets/images/cat5.jpg');
 
-const SideMenu: React.FC<SideMenuProps> = ({ visible, onClose, profilePicture, gmail }) => {
+const SideMenu: React.FC<SideMenuProps> = ({ visible, onClose, profilePicture = defaultProfile }) => {
   const slideAnim = useRef(new Animated.Value(-width * 0.6)).current;
+  const router = useRouter();
 
   useEffect(() => {
     Animated.timing(slideAnim, {
@@ -26,11 +37,53 @@ const SideMenu: React.FC<SideMenuProps> = ({ visible, onClose, profilePicture, g
 
   if (!visible) return null;
 
-  const resolvedImage = profilePicture
-    ? typeof profilePicture === 'string'
-      ? { uri: profilePicture }
-      : profilePicture
-    : defaultProfile;
+  const resolvedImage = profilePicture || defaultProfile;
+
+  const menuItems: {
+    icon: string;
+    text: string;
+    library: typeof FontAwesome | typeof MaterialIcons | typeof Ionicons;
+    route?: Href;
+    replace?: boolean;
+  }[] = [
+    {
+      icon: 'exclamation-triangle',
+      text: 'Complain',
+      library: FontAwesome,
+      route: '/tabs/sidebar/complain',
+    },
+    { icon: 'info-outline', text: 'About Us', library: MaterialIcons, route: '/tabs/sidebar/aboutus' },
+    {
+      icon: 'settings',
+      text: 'Settings',
+      library: MaterialIcons,
+      route: '/tabs/sidebar/settings',
+    },
+    {
+      icon: 'help-outline',
+      text: 'Help and Support',
+      library: MaterialIcons,
+      route: '/tabs/sidebar/helpandsupport',
+    },
+    {
+      icon: 'logout',
+      text: 'Logout',
+      library: MaterialIcons,
+      route: '/auth/Welcome',
+      replace: true,
+    },
+  ];
+
+  const handlePress = (route?: Href, replace?: boolean) => {
+    onClose();
+    if (route) {
+      if (replace) {
+        router.replace(route);
+      } else {
+        router.push(route);
+      }
+    }
+  };
 
   return (
     <View style={styles.overlay}>
@@ -47,19 +100,16 @@ const SideMenu: React.FC<SideMenuProps> = ({ visible, onClose, profilePicture, g
 
         {/* Profile section */}
         <View style={styles.profileSection}>
-          <Image source={resolvedImage} style={styles.profilePicture} />
-          <Text style={styles.gmail}>{gmail}</Text>
+          <Image source={resolvedImage} style={styles.profilePicture} resizeMode="cover" />
         </View>
 
         {/* Menu Items */}
-        {[
-          { icon: 'exclamation-triangle', text: 'Complain', library: FontAwesome },
-          { icon: 'info-outline', text: 'About Us', library: MaterialIcons },
-          { icon: 'settings', text: 'Settings', library: MaterialIcons },
-          { icon: 'help-outline', text: 'Help and Support', library: MaterialIcons },
-          { icon: 'logout', text: 'Logout', library: MaterialIcons },
-        ].map((item, idx) => (
-          <TouchableOpacity key={idx} style={styles.menuItem}>
+        {menuItems.map((item, idx) => (
+          <TouchableOpacity
+            key={idx}
+            style={styles.menuItem}
+            onPress={() => handlePress(item.route, item.replace)}
+          >
             <View style={styles.iconContainer}>
               <item.library name={item.icon as any} size={20} color="#414141" />
             </View>
@@ -111,16 +161,10 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   profilePicture: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginBottom: 10,
-  },
-  gmail: {
-    fontSize: 14,
-    color: '#414141',
-    textAlign: 'center',
-    fontFamily: 'Poppins',
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: '#D0D0D0',
   },
   menuItem: {
     flexDirection: 'row',

@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 import MapView, { Circle, Marker } from 'react-native-maps';
-import SideMenu from './side_menu'; // import the SideMenu
+import SideMenu from './sidebar/menu'; // import the SideMenu
 
 const { height } = Dimensions.get('window');
 
@@ -90,8 +90,7 @@ export default function OfferARideMap() {
       <SideMenu
         visible={isMenuVisible}
         onClose={() => setIsMenuVisible(false)}
-        profilePicture='../../assets/images/cat5.jpg'
-        gmail="user@gmail.com"
+        profilePicture={require('@/assets/images/cat5.jpg')}
       />
 
       {/* Map Background */}

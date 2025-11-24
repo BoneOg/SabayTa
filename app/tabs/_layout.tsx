@@ -9,7 +9,7 @@ export default function Layout() {
   const currentRoute = segments[segments.length - 1];
 
   const isActive = (routeName: string) => currentRoute === routeName;
-  const shouldShowTabBar = currentRoute !== 'notification';
+  const shouldShowTabBar = currentRoute !== 'notification' && currentRoute !== 'aboutus' && currentRoute !== 'helpandsupport' && currentRoute !== 'settings' && currentRoute !== 'complain';
 
   return (
     <View style={styles.container}>
@@ -23,11 +23,7 @@ export default function Layout() {
             {/* Home */}
             <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/tabs/home")}>
               <Ionicons name="home" size={22} color={isActive("home") ? "#534889" : "#B8B8B8"} />
-              <Text
-                style={[styles.tabLabel, { color: isActive("home") ? "#534889" : "#B8B8B8" }]}
-                numberOfLines={2}
-                ellipsizeMode="tail"
-              >
+              <Text style={[styles.tabLabel, { color: isActive("home") ? "#534889" : "#B8B8B8" }]}>
                 Home
               </Text>
             </TouchableOpacity>
@@ -39,11 +35,7 @@ export default function Layout() {
                 size={22}
                 color={isActive("favorites") ? "#534889" : "#B8B8B8"}
               />
-              <Text
-                style={[styles.tabLabel, { color: isActive("favorites") ? "#534889" : "#B8B8B8" }]}
-                numberOfLines={2}
-                ellipsizeMode="tail"
-              >
+              <Text style={[styles.tabLabel, { color: isActive("favorites") ? "#534889" : "#B8B8B8" }]}>
                 Favourite
               </Text>
             </TouchableOpacity>
@@ -55,11 +47,7 @@ export default function Layout() {
                 size={21}
                 color={isActive("offer_a_ride") ? "#534889" : "#B8B8B8"}
               />
-              <Text
-                style={[styles.tabLabel, { color: isActive("offer_a_ride") ? "#534889" : "#B8B8B8" }]}
-                numberOfLines={2}
-                ellipsizeMode="tail"
-              >
+              <Text style={[styles.tabLabel, { color: isActive("offer_a_ride") ? "#534889" : "#B8B8B8" }]}>
                 Offer a ride
               </Text>
             </TouchableOpacity>
@@ -71,11 +59,7 @@ export default function Layout() {
                 size={22}
                 color={isActive("history") ? "#534889" : "#B8B8B8"}
               />
-              <Text
-                style={[styles.tabLabel, { color: isActive("history") ? "#534889" : "#B8B8B8" }]}
-                numberOfLines={2}
-                ellipsizeMode="tail"
-              >
+              <Text style={[styles.tabLabel, { color: isActive("history") ? "#534889" : "#B8B8B8" }]}>
                 History
               </Text>
             </TouchableOpacity>
@@ -87,11 +71,7 @@ export default function Layout() {
                 size={22}
                 color={isActive("profile") ? "#534889" : "#B8B8B8"}
               />
-              <Text
-                style={[styles.tabLabel, { color: isActive("profile") ? "#534889" : "#B8B8B8" }]}
-                numberOfLines={2}
-                ellipsizeMode="tail"
-              >
+              <Text style={[styles.tabLabel, { color: isActive("profile") ? "#534889" : "#B8B8B8" }]}>
                 Profile
               </Text>
             </TouchableOpacity>
@@ -142,15 +122,17 @@ tabItem: {
   minWidth: 60,
   alignItems: 'center',
   justifyContent: 'center',
-  paddingVertical: 6, // increase a bit for spacing
+  paddingVertical: 6,
+  paddingHorizontal: 6,
 },
 tabLabel: {
   fontSize: 10,
   fontFamily: 'Poppins',
-  marginTop: 4, // spacing from icon
+  marginTop: 4,
   textAlign: 'center',
-  flexShrink: 1,
-  includeFontPadding: false, // ensures Android doesn't add extra padding
-  lineHeight: 14, // ensures text fits inside container
+  includeFontPadding: false,
+  lineHeight: 14,
+  flexWrap: 'wrap',
+  maxWidth: 72,
 },
 });
