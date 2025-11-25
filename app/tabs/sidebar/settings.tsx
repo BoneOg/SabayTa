@@ -9,12 +9,20 @@ const SettingsScreen = () => {
   const router = useRouter();
 
   const handlePress = (label: string) => {
-    if (label === 'Delete Account') {
+    if (label === 'Change Password') {
+      router.push('/tabs/sidebar/changepassword');
+    } 
+    else if (label === 'Privacy Policy') {
+      router.push('/tabs/sidebar/privacypolicy');
+    }
+    else if (label === 'Delete Account') {
       Alert.alert('Delete Account', 'Account deletion is not available in preview mode.');
-    } else {
+    }
+    else {
       Alert.alert(label, `${label} screen coming soon.`);
     }
   };
+
 
   return (
     <SafeAreaView style={styles.container}>
