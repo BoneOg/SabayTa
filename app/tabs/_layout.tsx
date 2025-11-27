@@ -9,7 +9,7 @@ export default function Layout() {
   const currentRoute = segments[segments.length - 1];
 
   const isActive = (routeName: string) => currentRoute === routeName;
-  const shouldShowTabBar = currentRoute !== 'notification' && currentRoute !== 'aboutus' && currentRoute !== 'helpandsupport' && currentRoute !== 'settings' && currentRoute !== 'changepassword' && currentRoute !== 'privacypolicy' && currentRoute !== 'complain';
+  const shouldShowTabBar = currentRoute !== 'notification' && currentRoute !== 'aboutus' && currentRoute !== 'helpandsupport' && currentRoute !== 'settings' && currentRoute !== 'changepassword' && currentRoute !== 'privacypolicy' && currentRoute !== 'complain' && currentRoute !== 'contactus' && currentRoute !== 'deleteaccount';
 
   return (
     <View style={styles.container}>

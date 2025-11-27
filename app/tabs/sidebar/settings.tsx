@@ -15,8 +15,11 @@ const SettingsScreen = () => {
     else if (label === 'Privacy Policy') {
       router.push('/tabs/sidebar/privacypolicy');
     }
+    else if (label === 'Contact Us') {
+      router.push('/tabs/sidebar/contactus');
+    }
     else if (label === 'Delete Account') {
-      Alert.alert('Delete Account', 'Account deletion is not available in preview mode.');
+      router.push('/tabs/sidebar/deleteaccount');
     }
     else {
       Alert.alert(label, `${label} screen coming soon.`);

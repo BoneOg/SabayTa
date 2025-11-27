@@ -86,9 +86,9 @@ const styles = StyleSheet.create({
     color: '#1C1B1F',
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: 'Poppins-SemiBold',
-    color: '#4C1889',
+    color: '#1C1B1F',
     marginBottom: 6,
   },
   bodyText: {
