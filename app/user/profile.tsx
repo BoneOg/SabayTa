@@ -57,9 +57,9 @@ export default function ProfileScreen() {
     },
   ];
 
-  const handlePress = (route?: Href, replace?: boolean) => {
+  const handlePress = (route?: string, replace?: boolean) => {
     if (route) {
-      replace ? router.replace(route) : router.push(route);
+      replace ? router.replace(route as Href) : router.push(route as Href);
     }
   };
 
@@ -106,7 +106,10 @@ export default function ProfileScreen() {
                 styles.toggleButton,
                 selectedRole === 'driver' ? styles.activeToggle : {},
               ]}
-              onPress={() => setSelectedRole('driver')}
+              onPress={() => {
+                setSelectedRole('driver');
+                router.push("/driver/profile");
+              }}
             >
               <Text
                 style={[
@@ -123,8 +126,7 @@ export default function ProfileScreen() {
         {/* Menu Items */}
         <View style={styles.menuContainer}>
           {menuItems.map((item, idx) => {
-            // ⭐ FIX: Assign the component (item.library) to a variable that starts with a capital letter
-            const IconComponent = item.library; 
+            const IconComponent = item.library;
 
             return (
               <TouchableOpacity
@@ -138,9 +140,8 @@ export default function ProfileScreen() {
                     item.color ? { backgroundColor: item.color + '10' } : {},
                   ]}
                 >
-                  {/* ⭐ FIX APPLIED HERE: Using the capitalized variable as a component tag */}
                   <IconComponent
-                    name={item.icon}
+                    name={item.icon as any}
                     size={22}
                     color={item.color || '#414141'}
                   />
@@ -212,7 +213,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  /* ⭐ ROLE TOGGLE BUTTONS ⭐ */
+  /* ROLE TOGGLE BUTTONS */
   toggleContainer: {
     flexDirection: 'row',
     marginTop: 5,
