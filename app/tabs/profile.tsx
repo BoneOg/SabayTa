@@ -1,3 +1,4 @@
+import Button from '@/components/Button';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -25,8 +26,8 @@ export default function ProfileScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.menuContainer} 
+        <TouchableOpacity
+          style={styles.menuContainer}
           onPress={() => setIsMenuVisible(true)}
         >
           <MaterialIcons name="menu" size={30} color="#000000ff" />
@@ -83,12 +84,11 @@ export default function ProfileScreen() {
             multiline
           />
 
-          <TouchableOpacity
-            style={styles.logoutButton}
-            onPress={() => router.push('/auth/Welcome')}
-          >
-            <Text style={styles.logoutText}>Log Out</Text>
-          </TouchableOpacity>
+          <Button
+            label="Apply as Driver"
+            onPress={() => router.push('/apply_as_driver')}
+            style={{ marginTop: 30, marginBottom: 30, backgroundColor: '#622C9B' }}
+          />
         </View>
       </ScrollView>
     </View>
@@ -97,9 +97,9 @@ export default function ProfileScreen() {
 
 // Keep the existing styles from your code
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: '#fff', 
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
     paddingTop: Platform.OS === 'android' ? 20 : 20
   },
   header: {
@@ -189,23 +189,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#414141',
     backgroundColor: '#F8F8F8',
-    fontFamily: 'Poppins',
-  },
-  logoutButton: {
-    marginTop: 30,
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: '#622C9B',
-    paddingVertical: 14,
-    borderRadius: 10,
-    width: '100%',
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  logoutText: {
-    color: '#622C9B',
-    fontSize: 16,
-    fontWeight: 'bold',
     fontFamily: 'Poppins',
   },
 });
