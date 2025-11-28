@@ -8,13 +8,19 @@ interface RideCardProps {
     time: string;
     from: string;
     to: string;
+    status: 'cancelled' | 'completed';
 }
 
-const HistoryCard: React.FC<RideCardProps> = ({ name, date, time, from, to }) => {
+const HistoryCard: React.FC<RideCardProps> = ({ name, date, time, from, to, status }) => {
     return (
         <View style={styles.card}>
-            {/* Name */}
-            <Text style={styles.name}>{name}</Text>
+            {/* Name and Status */}
+            <View style={styles.nameRow}>
+                <Text style={styles.name}>{name}</Text>
+                <View style={[styles.statusBadge, status === 'cancelled' ? styles.cancelledBadge : styles.completedBadge]}>
+                    <Text style={styles.statusText}>{status === 'cancelled' ? 'Cancelled' : 'Completed'}</Text>
+                </View>
+            </View>
 
             {/* Date and Time */}
             <View style={styles.row}>
@@ -22,19 +28,19 @@ const HistoryCard: React.FC<RideCardProps> = ({ name, date, time, from, to }) =>
                 <Text style={styles.dateTime}>{date} at {time}</Text>
             </View>
 
-            {/* Locations */}
+            {/* Locations - Stacked Vertically */}
             <View style={styles.locationContainer}>
                 <View style={styles.locationRow}>
-                    <Ionicons name="location-outline" size={20} color="green" style={styles.locationIcon} />
-                    <View>
+                    <Ionicons name="location-outline" size={18} color="green" style={styles.locationIcon} />
+                    <View style={styles.locationTextContainer}>
                         <Text style={styles.locationLabel}>From</Text>
                         <Text style={styles.locationText}>{from}</Text>
                     </View>
                 </View>
 
                 <View style={styles.locationRow}>
-                    <Ionicons name="location-sharp" size={20} color="red" style={styles.locationIcon} />
-                    <View>
+                    <Ionicons name="location-sharp" size={18} color="red" style={styles.locationIcon} />
+                    <View style={styles.locationTextContainer}>
                         <Text style={styles.locationLabel}>To</Text>
                         <Text style={styles.locationText}>{to}</Text>
                     </View>
@@ -58,6 +64,7 @@ export default function DriverHistory() {
                     time="8:00 AM"
                     from="Carmen Orora..."
                     to="USTP"
+                    status="completed"
                 />
                 <HistoryCard
                     name="Althea L. Navales"
@@ -65,6 +72,7 @@ export default function DriverHistory() {
                     time="10:00 AM"
                     from="Bulua Gaisano"
                     to="USTP"
+                    status="cancelled"
                 />
                 <HistoryCard
                     name="Rogin U. Lagrosas"
@@ -72,6 +80,7 @@ export default function DriverHistory() {
                     time="11:00 AM"
                     from="SNR Bulua"
                     to="USTP"
+                    status="completed"
                 />
                 <HistoryCard
                     name="Juan Dela Cruz"
@@ -79,6 +88,7 @@ export default function DriverHistory() {
                     time="7:30 AM"
                     from="Cogon Market"
                     to="Limketkai Center"
+                    status="cancelled"
                 />
             </ScrollView>
         </View>
@@ -108,8 +118,8 @@ const styles = StyleSheet.create({
     card: {
         backgroundColor: "#fff",
         borderRadius: 16,
-        padding: 20,
-        marginBottom: 20,
+        padding: 14,
+        marginBottom: 16,
         borderWidth: 2,
         borderColor: "#6A4C93", // Purple border
         shadowColor: "#000",
@@ -118,22 +128,46 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 3,
     },
+    nameRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: 4,
+    },
     name: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: "bold",
         color: "#333",
-        marginBottom: 8,
+        flex: 1,
+        marginRight: 8,
+    },
+    statusBadge: {
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 6,
+    },
+    cancelledBadge: {
+        backgroundColor: "#FF4747",
+    },
+    completedBadge: {
+        backgroundColor: "#41B341",
+    },
+    statusText: {
+        fontSize: 11,
+        fontWeight: "600",
+        color: "#fff",
+        textTransform: "capitalize",
     },
     row: {
         flexDirection: "row",
         alignItems: "center",
-        marginBottom: 20,
+        marginBottom: 5,
     },
     icon: {
         marginRight: 6,
     },
     dateTime: {
-        fontSize: 14,
+        fontSize: 13,
         color: "#666",
     },
     locationContainer: {
@@ -147,14 +181,18 @@ const styles = StyleSheet.create({
     },
     locationIcon: {
         marginRight: 8,
-        marginTop: 2,
+        marginTop: 1,
+    },
+    locationTextContainer: {
+        flex: 1,
     },
     locationLabel: {
-        fontSize: 12,
+        fontSize: 11,
         color: "#888",
+        marginBottom: 1,
     },
     locationText: {
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: "500",
         color: "#333",
     },
