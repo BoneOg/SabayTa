@@ -6,10 +6,21 @@ import { Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native
 export default function Layout() {
   const router = useRouter();
   const segments = useSegments();
-  const currentRoute = segments[segments.length - 1];
+  const currentRoute = (segments[segments.length - 1] ?? "") as string;
 
   const isActive = (routeName: string) => currentRoute === routeName;
-  const shouldShowTabBar = currentRoute !== 'notification' && currentRoute !== 'aboutus' && currentRoute !== 'helpandsupport' && currentRoute !== 'settings' && currentRoute !== 'changepassword' && currentRoute !== 'privacypolicy' && currentRoute !== 'complain' && currentRoute !== 'contactus' && currentRoute !== 'deleteaccount';
+  const hiddenRoutes = new Set([
+    "notification",
+    "aboutus",
+    "helpandsupport",
+    "settings",
+    "changepassword",
+    "privacypolicy",
+    "complain",
+    "contactus",
+    "deleteaccount",
+  ]);
+  const shouldShowTabBar = !hiddenRoutes.has(currentRoute);
 
   return (
     <View style={styles.container}>
