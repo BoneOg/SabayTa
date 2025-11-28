@@ -1,9 +1,10 @@
 import BackButton from '@/components/BackButton';
 import Button from '@/components/Button';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
+    Image,
     Platform,
     ScrollView,
     StyleSheet,
@@ -15,8 +16,29 @@ import {
 
 export default function ApplyAsDriver() {
     const router = useRouter();
-    const [plateNumber, setPlateNumber] = useState('ABC 1234');
+    const [plateNumber, setPlateNumber] = useState('');
     const [motorcycleModel, setMotorcycleModel] = useState('');
+    const [documents, setDocuments] = useState({
+        license: false,
+        orCr: false,
+        cor: false,
+        schoolId: false,
+    });
+
+    const handleUpload = (docType: keyof typeof documents) => {
+        // Simulate upload
+        setDocuments(prev => ({ ...prev, [docType]: true }));
+    };
+
+    const isFormComplete = plateNumber && motorcycleModel &&
+        documents.license && documents.orCr &&
+        documents.cor && documents.schoolId;
+
+    const handleSubmit = () => {
+        // Here you would typically upload documents and submit data to your backend
+        // For now, we'll simulate a successful submission
+        router.back();
+    };
 
     return (
         <View style={styles.container}>
@@ -36,7 +58,10 @@ export default function ApplyAsDriver() {
                     <Text style={styles.cardTitle}>Applicant Information</Text>
                     <View style={styles.applicantRow}>
                         <View style={styles.avatarContainer}>
-                            <Ionicons name="person-outline" size={30} color="#622C9B" />
+                            <Image
+                                source={require('@/assets/images/cat5.jpg')}
+                                style={styles.profileImage}
+                            />
                         </View>
                         <View style={styles.applicantDetails}>
                             <Text style={styles.applicantName}>John Doe</Text>
@@ -56,23 +81,69 @@ export default function ApplyAsDriver() {
                             <MaterialIcons name="credit-card" size={16} color="#666" />
                             <Text style={styles.documentLabel}>Driver's License</Text>
                         </View>
-                        <TouchableOpacity style={styles.uploadBox}>
-                            <MaterialIcons name="file-upload" size={24} color="#888" />
-                            <Text style={styles.uploadText}>Click to upload or drag and drop</Text>
-                            <Text style={styles.uploadSubText}>PDF or Image (Max 5MB)</Text>
+                        <TouchableOpacity
+                            style={[styles.uploadBox, documents.license && styles.uploadBoxActive]}
+                            onPress={() => handleUpload('license')}
+                        >
+                            <MaterialIcons
+                                name={documents.license ? "check-circle" : "file-upload"}
+                                size={24}
+                                color={documents.license ? "#4CAF50" : "#888"}
+                            />
+                            <Text style={styles.uploadText}>
+                                {documents.license ? "Uploaded" : "Tap to upload"}
+                            </Text>
+                            {!documents.license && (
+                                <Text style={styles.uploadSubText}>PDF or Image (Max 5MB)</Text>
+                            )}
                         </TouchableOpacity>
                     </View>
 
-                    {/* School Certificate of Registration */}
+                    {/* Vehicle OR/CR */}
                     <View style={styles.documentSection}>
                         <View style={styles.documentLabelRow}>
                             <MaterialIcons name="description" size={16} color="#666" />
-                            <Text style={styles.documentLabel}>School Certificate of Registration</Text>
+                            <Text style={styles.documentLabel}>Vehicle OR/CR</Text>
                         </View>
-                        <TouchableOpacity style={styles.uploadBox}>
-                            <MaterialIcons name="file-upload" size={24} color="#888" />
-                            <Text style={styles.uploadText}>Click to upload or drag and drop</Text>
-                            <Text style={styles.uploadSubText}>PDF or Image (Max 5MB)</Text>
+                        <TouchableOpacity
+                            style={[styles.uploadBox, documents.orCr && styles.uploadBoxActive]}
+                            onPress={() => handleUpload('orCr')}
+                        >
+                            <MaterialIcons
+                                name={documents.orCr ? "check-circle" : "file-upload"}
+                                size={24}
+                                color={documents.orCr ? "#4CAF50" : "#888"}
+                            />
+                            <Text style={styles.uploadText}>
+                                {documents.orCr ? "Uploaded" : "Tap to upload"}
+                            </Text>
+                            {!documents.orCr && (
+                                <Text style={styles.uploadSubText}>PDF or Image (Max 5MB)</Text>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* School Certificate of Registration (COR) */}
+                    <View style={styles.documentSection}>
+                        <View style={styles.documentLabelRow}>
+                            <MaterialIcons name="description" size={16} color="#666" />
+                            <Text style={styles.documentLabel}>School Certificate of Registration (COR)</Text>
+                        </View>
+                        <TouchableOpacity
+                            style={[styles.uploadBox, documents.cor && styles.uploadBoxActive]}
+                            onPress={() => handleUpload('cor')}
+                        >
+                            <MaterialIcons
+                                name={documents.cor ? "check-circle" : "file-upload"}
+                                size={24}
+                                color={documents.cor ? "#4CAF50" : "#888"}
+                            />
+                            <Text style={styles.uploadText}>
+                                {documents.cor ? "Uploaded" : "Tap to upload"}
+                            </Text>
+                            {!documents.cor && (
+                                <Text style={styles.uploadSubText}>PDF or Image (Max 5MB)</Text>
+                            )}
                         </TouchableOpacity>
                     </View>
 
@@ -82,20 +153,28 @@ export default function ApplyAsDriver() {
                             <MaterialIcons name="badge" size={16} color="#666" />
                             <Text style={styles.documentLabel}>School ID</Text>
                         </View>
-                        <TouchableOpacity style={styles.uploadBox}>
-                            <MaterialIcons name="file-upload" size={24} color="#888" />
-                            <Text style={styles.uploadText}>Click to upload or drag and drop</Text>
-                            <Text style={styles.uploadSubText}>PDF or Image (Max 5MB)</Text>
+                        <TouchableOpacity
+                            style={[styles.uploadBox, documents.schoolId && styles.uploadBoxActive]}
+                            onPress={() => handleUpload('schoolId')}
+                        >
+                            <MaterialIcons
+                                name={documents.schoolId ? "check-circle" : "file-upload"}
+                                size={24}
+                                color={documents.schoolId ? "#4CAF50" : "#888"}
+                            />
+                            <Text style={styles.uploadText}>
+                                {documents.schoolId ? "Uploaded" : "Tap to upload"}
+                            </Text>
+                            {!documents.schoolId && (
+                                <Text style={styles.uploadSubText}>PDF or Image (Max 5MB)</Text>
+                            )}
                         </TouchableOpacity>
                     </View>
                 </View>
 
                 {/* Vehicle Information */}
                 <View style={styles.card}>
-                    <View style={styles.cardTitleRow}>
-                        <Ionicons name="car-outline" size={20} color="#414141" style={{ marginRight: 8 }} />
-                        <Text style={styles.cardTitle}>Vehicle Information</Text>
-                    </View>
+                    <Text style={styles.cardTitle}>Vehicle Information</Text>
 
                     <Text style={styles.inputLabel}>Plate Number</Text>
                     <TextInput
@@ -119,19 +198,20 @@ export default function ApplyAsDriver() {
                 {/* Application Process Info */}
                 <View style={styles.infoBox}>
                     <View style={styles.infoTitleRow}>
-                        <MaterialIcons name="assignment" size={18} color="#E67E22" />
+                        <MaterialIcons name="assignment" size={18} color="#622C9B" />
                         <Text style={styles.infoTitle}>Application Process</Text>
                     </View>
                     <Text style={styles.infoText}>
-                        After submission, your application will be marked as "Pending admin approval". Our team will review your documents within 1-3 business days. You'll receive a notification once your application is approved.
+                        Your application will be reviewed within 1-3 business days. You'll be notified once approved.
                     </Text>
                 </View>
 
                 {/* Submit Button */}
                 <Button
                     label="Submit Application"
-                    onPress={() => { }}
+                    onPress={handleSubmit}
                     style={styles.submitButton}
+                    disabled={!isFormComplete}
                 />
 
                 <View style={{ height: 40 }} />
@@ -143,7 +223,7 @@ export default function ApplyAsDriver() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F5F5F5', // Light gray background for the whole screen
+        backgroundColor: '#fff', // White background
         paddingTop: Platform.OS === 'android' ? 40 : 20,
     },
     header: {
@@ -163,15 +243,12 @@ const styles = StyleSheet.create({
         paddingBottom: 20,
     },
     card: {
-        backgroundColor: '#fff',
+        backgroundColor: '#F9F9F9',
         borderRadius: 12,
         padding: 20,
         marginBottom: 20,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
+        borderWidth: 1,
+        borderColor: '#EFEFEF',
     },
     cardTitle: {
         fontSize: 16,
@@ -190,13 +267,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     avatarContainer: {
+        marginRight: 15,
+    },
+    profileImage: {
         width: 50,
         height: 50,
         borderRadius: 25,
-        backgroundColor: '#F3E5F5', // Light purple
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 15,
+        backgroundColor: '#D0D0D0',
     },
     applicantDetails: {
         flex: 1,
@@ -240,7 +317,12 @@ const styles = StyleSheet.create({
         height: 100,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#FAFAFA',
+        backgroundColor: '#fff',
+    },
+    uploadBoxActive: {
+        borderColor: '#4CAF50',
+        backgroundColor: '#F1F8E9',
+        borderStyle: 'solid',
     },
     uploadText: {
         fontSize: 14,
@@ -263,21 +345,22 @@ const styles = StyleSheet.create({
     input: {
         borderWidth: 1,
         borderColor: '#D0D0D0',
-        borderRadius: 8,
+        borderRadius: 10,
         paddingVertical: 10,
         paddingHorizontal: 12,
         fontSize: 16,
         color: '#414141',
         fontFamily: 'Poppins',
         marginBottom: 15,
+        backgroundColor: '#F8F8F8',
     },
     infoBox: {
-        backgroundColor: '#E3F2FD', // Light blue
+        backgroundColor: '#F3E5F5', // Light purple
         borderRadius: 12,
         padding: 15,
         marginBottom: 25,
         borderWidth: 1,
-        borderColor: '#BBDEFB',
+        borderColor: '#E1BEE7',
     },
     infoTitleRow: {
         flexDirection: 'row',
@@ -287,13 +370,13 @@ const styles = StyleSheet.create({
     infoTitle: {
         fontSize: 14,
         fontWeight: 'bold',
-        color: '#0D47A1',
+        color: '#4A148C', // Darker purple
         marginLeft: 8,
         fontFamily: 'Poppins',
     },
     infoText: {
         fontSize: 13,
-        color: '#1565C0',
+        color: '#6A1B9A', // Medium purple
         lineHeight: 20,
         fontFamily: 'Poppins',
     },

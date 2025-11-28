@@ -86,7 +86,7 @@ export default function ProfileScreen() {
 
           <Button
             label="Apply as Driver"
-            onPress={() => router.push('/apply_as_driver')}
+            onPress={() => router.push('/driver/apply_as_driver')}
             style={{ marginTop: 30, marginBottom: 30, backgroundColor: '#622C9B' }}
           />
         </View>
