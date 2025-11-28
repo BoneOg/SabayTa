@@ -51,7 +51,16 @@ export default function ProfileScreen() {
         library: MaterialIcons,
         route: '/auth/Welcome',
         replace: true,
-        color: '#FF3B30', // Red color for logout
+        color: '#FF3B30',
+      },
+
+      // ✅ NEW: Apply as Driver (after logout)
+      {
+        icon: 'car-repair',
+        text: 'Apply as Driver',
+        library: MaterialIcons,
+        route: '/driver/apply_as_driver',
+        color: '#622C9B',
       },
     ];
 
@@ -109,31 +118,30 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: Platform.OS === 'android' ? 10 : 20
+    paddingTop: Platform.OS === 'android' ? 20 : 20
   },
   header: {
-    height: 40,
+    height: 60,
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
-    paddingBottom: 10,
   },
   headerTitle: {
-    fontSize: 20,
-    color: '#000000',
+    fontSize: 19,
+    color: '#000',
     fontFamily: 'Poppins',
-    fontWeight: 'bold',
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingBottom: 30,
+    paddingBottom: 100,
   },
-  profileSection: {
-    alignItems: 'center',
-    paddingVertical: 30,
-    paddingHorizontal: 20,
-  },
+profileSection: {
+  alignItems: 'center',
+  paddingVertical: 15, // ⬅️ Reduced from 30 to 15
+  paddingHorizontal: 20,
+},
   profileImage: {
     width: 100,
     height: 100,
@@ -144,7 +152,7 @@ const styles = StyleSheet.create({
   nameContainer: {
     width: '100%',
     alignItems: 'center',
-    paddingHorizontal: 20, // Added padding to prevent text cutoff
+    paddingHorizontal: 20,
   },
   name: {
     fontSize: 22,

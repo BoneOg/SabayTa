@@ -75,12 +75,7 @@ export default function EditProfileScreen() {
                     <Button
                         label="Save Changes"
                         onPress={() => router.back()}
-                        style={{ marginTop: 30, marginBottom: 15, backgroundColor: '#622C9B' }}
-                    />
-                    <Button
-                        label="Apply as Driver"
-                        onPress={() => router.push('/driver/apply_as_driver')}
-                        style={{ marginBottom: 30, backgroundColor: '#622C9B' }}
+                        style={{ marginTop: 30, marginBottom: 30, backgroundColor: '#622C9B' }}
                     />
                 </View>
             </ScrollView>
