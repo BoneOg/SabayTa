@@ -8,7 +8,7 @@ export default function LoginSuccess() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.replace('/tabs/home');
+      router.replace('/user/home');
     }, 1000);
 
     return () => clearTimeout(timer);

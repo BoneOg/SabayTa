@@ -3,7 +3,7 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import SideMenu from '../tabs/sidebar/menu';
+import SideMenu from './sidebar/menu';
 
 export default function FavoritesScreen() {
   const router = useRouter();

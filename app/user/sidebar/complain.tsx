@@ -38,7 +38,7 @@ const ComplaintsScreen = () => {
     setMessage('');
     setSelectedType(complaintTypes[0]);
     setSuccessVisible(false);
-    router.push('/tabs/home');
+    router.push('/user/home');
   };
 
   return (

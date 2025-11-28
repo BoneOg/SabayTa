@@ -32,45 +32,45 @@ export default function Layout() {
         <View style={styles.tabBarWrapper}>
           <View style={styles.tabBar}>
             {/* Home */}
-            <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/tabs/home")}>
+            <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/user/home")}>
               <Ionicons name="home" size={22} color={isActive("home") ? "#534889" : "#B8B8B8"} />
-              <Text style={[styles.tabLabel, { color: isActive("home") ? "#534889" : "#B8B8B8" }]}>
+              <Text numberOfLines={1} style={[styles.tabLabel, { color: isActive("home") ? "#534889" : "#B8B8B8" }]}>
                 Home
               </Text>
             </TouchableOpacity>
 
             {/* Favorites */}
-            <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/tabs/favorites")}>
+            <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/user/favorites")}>
               <MaterialIcons
                 name="favorite"
                 size={22}
                 color={isActive("favorites") ? "#534889" : "#B8B8B8"}
               />
-              <Text style={[styles.tabLabel, { color: isActive("favorites") ? "#534889" : "#B8B8B8" }]}>
+              <Text numberOfLines={1} style={[styles.tabLabel, { color: isActive("favorites") ? "#534889" : "#B8B8B8" }]}>
                 Favourite
               </Text>
             </TouchableOpacity>
 
             {/* History */}
-            <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/tabs/history")}>
+            <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/user/history")}>
               <Ionicons
                 name="time"
                 size={22}
                 color={isActive("history") ? "#534889" : "#B8B8B8"}
               />
-              <Text style={[styles.tabLabel, { color: isActive("history") ? "#534889" : "#B8B8B8" }]}>
+              <Text numberOfLines={1} style={[styles.tabLabel, { color: isActive("history") ? "#534889" : "#B8B8B8" }]}>
                 History
               </Text>
             </TouchableOpacity>
 
             {/* Profile */}
-            <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/tabs/profile")}>
+            <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/user/profile")}>
               <Ionicons
                 name="person"
                 size={22}
                 color={isActive("profile") ? "#534889" : "#B8B8B8"}
               />
-              <Text style={[styles.tabLabel, { color: isActive("profile") ? "#534889" : "#B8B8B8" }]}>
+              <Text numberOfLines={1} style={[styles.tabLabel, { color: isActive("profile") ? "#534889" : "#B8B8B8" }]}>
                 Profile
               </Text>
             </TouchableOpacity>
@@ -122,16 +122,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 6,
-    paddingHorizontal: 6,
+    paddingHorizontal: 2,
   },
   tabLabel: {
     fontSize: 10,
     fontFamily: "Poppins",
     marginTop: 4,
     textAlign: "center",
-    includeFontPadding: false,
-    lineHeight: 14,
-    flexWrap: "wrap",
-    maxWidth: 72,
+    width: '100%',
+    // includeFontPadding: false, // Removed to prevent clipping issues on some devices
+    // flexWrap: "wrap", // Removed to prevent wrapping
   },
 });

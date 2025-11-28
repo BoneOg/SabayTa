@@ -24,12 +24,12 @@ interface SideMenuProps {
 const defaultProfile = require('@/assets/images/cat5.jpg');
 
 const SideMenu: React.FC<SideMenuProps> = ({ visible, onClose, profilePicture = defaultProfile }) => {
-  const slideAnim = useRef(new Animated.Value(-width * 0.6)).current;
+  const slideAnim = useRef(new Animated.Value(-width * 0.75)).current;
   const router = useRouter();
 
   useEffect(() => {
     Animated.timing(slideAnim, {
-      toValue: visible ? 0 : -width * 0.6,
+      toValue: visible ? 0 : -width * 0.75,
       duration: 300,
       useNativeDriver: false,
     }).start();
@@ -46,33 +46,33 @@ const SideMenu: React.FC<SideMenuProps> = ({ visible, onClose, profilePicture = 
     route?: Href;
     replace?: boolean;
   }[] = [
-    {
-      icon: 'exclamation-triangle',
-      text: 'Complain',
-      library: FontAwesome,
-      route: '/tabs/sidebar/complain',
-    },
-    { icon: 'info-outline', text: 'About Us', library: MaterialIcons, route: '/tabs/sidebar/aboutus' },
-    {
-      icon: 'settings',
-      text: 'Settings',
-      library: MaterialIcons,
-      route: '/tabs/sidebar/settings',
-    },
-    {
-      icon: 'help-outline',
-      text: 'Help and Support',
-      library: MaterialIcons,
-      route: '/tabs/sidebar/helpandsupport',
-    },
-    {
-      icon: 'logout',
-      text: 'Logout',
-      library: MaterialIcons,
-      route: '/auth/Welcome',
-      replace: true,
-    },
-  ];
+      {
+        icon: 'exclamation-triangle',
+        text: 'Complain',
+        library: FontAwesome,
+        route: '/user/sidebar/complain',
+      },
+      { icon: 'info-outline', text: 'About Us', library: MaterialIcons, route: '/user/sidebar/aboutus' },
+      {
+        icon: 'settings',
+        text: 'Settings',
+        library: MaterialIcons,
+        route: '/user/sidebar/settings',
+      },
+      {
+        icon: 'help-outline',
+        text: 'Help and Support',
+        library: MaterialIcons,
+        route: '/user/sidebar/helpandsupport',
+      },
+      {
+        icon: 'logout',
+        text: 'Logout',
+        library: MaterialIcons,
+        route: '/auth/Welcome',
+        replace: true,
+      },
+    ];
 
   const handlePress = (route?: Href, replace?: boolean) => {
     onClose();
@@ -94,7 +94,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ visible, onClose, profilePicture = 
       <Animated.View style={[styles.menu, { left: slideAnim }]}>
         {/* Back button */}
         <TouchableOpacity style={styles.backButton} onPress={onClose}>
-          <Ionicons name="arrow-back" size={20} color="#414141" />
+          <MaterialIcons name="arrow-back-ios" size={20} color="#414141" />
           <Text style={styles.backText}>Back</Text>
         </TouchableOpacity>
 
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   menu: {
-    width: width * 0.6,
+    width: width * 0.75,
     backgroundColor: '#fff',
     padding: 20,
     borderRightWidth: 1,
@@ -182,6 +182,10 @@ const styles = StyleSheet.create({
     color: '#414141',
     marginLeft: 15,
     fontFamily: 'Poppins',
+    paddingRight: 10,
+    paddingBottom: 5,
+    paddingTop: 5,
+    flex: 1,
   },
 });
 

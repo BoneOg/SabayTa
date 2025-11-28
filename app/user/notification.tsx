@@ -68,7 +68,7 @@ export default function NotificationScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => router.push("/tabs/home")}
+          onPress={() => router.push("/user/home")}
           style={styles.backButton}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >

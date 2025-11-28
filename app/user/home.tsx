@@ -111,7 +111,7 @@ export default function HomeScreen() {
       return;
     }
     try {
-const url = `https://nominatim.openstreetmap.org/search?format=json&q=${text}&limit=10&viewbox=${MINDANAO_BBOX.minLon},${MINDANAO_BBOX.maxLat},${MINDANAO_BBOX.maxLon},${MINDANAO_BBOX.minLat}&bounded=1`;
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${text}&limit=10&viewbox=${MINDANAO_BBOX.minLon},${MINDANAO_BBOX.maxLat},${MINDANAO_BBOX.maxLon},${MINDANAO_BBOX.minLat}&bounded=1`;
 
       const response = await fetch(url);
       const data: NominatimResult[] = await response.json();
@@ -203,30 +203,30 @@ const url = `https://nominatim.openstreetmap.org/search?format=json&q=${text}&li
     }
   };
 
-const handleConfirmLocation = () => {
-  if (fromLocation && toLocation) {
-    console.log("Confirmed Trip Details:", fromLocation, toLocation);
-    
-    // Set the route coordinates
-    setRouteCoords([
-      { latitude: fromLocation.lat, longitude: fromLocation.lon },
-      { latitude: toLocation.lat, longitude: toLocation.lon }
-    ]);
-    if (mapRef.current) {
-      mapRef.current.fitToCoordinates([
+  const handleConfirmLocation = () => {
+    if (fromLocation && toLocation) {
+      console.log("Confirmed Trip Details:", fromLocation, toLocation);
+
+      // Set the route coordinates
+      setRouteCoords([
         { latitude: fromLocation.lat, longitude: fromLocation.lon },
         { latitude: toLocation.lat, longitude: toLocation.lon }
-      ], {
-        edgePadding: { top: 80, right: 40, bottom: 80, left: 40 },
-        animated: true,
-      });
-    }
+      ]);
+      if (mapRef.current) {
+        mapRef.current.fitToCoordinates([
+          { latitude: fromLocation.lat, longitude: fromLocation.lon },
+          { latitude: toLocation.lat, longitude: toLocation.lon }
+        ], {
+          edgePadding: { top: 80, right: 40, bottom: 80, left: 40 },
+          animated: true,
+        });
+      }
 
-    closeModal();
-  } else {
-    alert("Please select both From and To locations.");
-  }
-};
+      closeModal();
+    } else {
+      alert("Please select both From and To locations.");
+    }
+  };
 
   // ====================================================================
   // MODAL ANIMATIONS
@@ -286,60 +286,60 @@ const handleConfirmLocation = () => {
       <SideMenu visible={isMenuVisible} onClose={() => setIsMenuVisible(false)} />
 
       <SafeAreaView style={styles.container}>
-      {/* MAP */}
-<MapView
-  ref={mapRef}
-  style={StyleSheet.absoluteFill}
-  initialRegion={region} // <-- only sets initial position
-  showsUserLocation
-  showsMyLocationButton={false}
->
-  {/* User location marker */}
-  <Marker coordinate={region}>
-    <View style={styles.locationCircleOuter}>
-      <View style={styles.locationCircleMid}>
-        <View style={styles.locationCircleInner}>
-          <Ionicons name="location" size={32} color="#fff" />
-        </View>
-      </View>
-    </View>
-  </Marker>
+        {/* MAP */}
+        <MapView
+          ref={mapRef}
+          style={StyleSheet.absoluteFill}
+          initialRegion={region} // <-- only sets initial position
+          showsUserLocation
+          showsMyLocationButton={false}
+        >
+          {/* User location marker */}
+          <Marker coordinate={region}>
+            <View style={styles.locationCircleOuter}>
+              <View style={styles.locationCircleMid}>
+                <View style={styles.locationCircleInner}>
+                  <Ionicons name="location" size={32} color="#fff" />
+                </View>
+              </View>
+            </View>
+          </Marker>
 
-  {/* Location radius */}
-  <Circle center={region} radius={400} strokeWidth={0} fillColor="rgba(98,44,155,0.10)" />
+          {/* Location radius */}
+          <Circle center={region} radius={400} strokeWidth={0} fillColor="rgba(98,44,155,0.10)" />
 
-  {/* FROM/TO route Polyline */}
-  {fromLocation && toLocation && (
-  <Polyline
-    coordinates={[
-      { latitude: fromLocation.lat, longitude: fromLocation.lon },
-      { latitude: toLocation.lat, longitude: toLocation.lon },
-    ]}
-    strokeColor="#d612e0ff" // line color
-    strokeWidth={5}       // line thickness
-    lineCap="round"
-    lineJoin="round"
-  />
-)}
+          {/* FROM/TO route Polyline */}
+          {fromLocation && toLocation && (
+            <Polyline
+              coordinates={[
+                { latitude: fromLocation.lat, longitude: fromLocation.lon },
+                { latitude: toLocation.lat, longitude: toLocation.lon },
+              ]}
+              strokeColor="#d612e0ff" // line color
+              strokeWidth={5}       // line thickness
+              lineCap="round"
+              lineJoin="round"
+            />
+          )}
 
-  {/* Optional: Markers for FROM and TO */}
-  {fromLocation && (
-    <Marker coordinate={{ latitude: fromLocation.lat, longitude: fromLocation.lon }} title="From">
-      <Ionicons name="location-sharp" size={28} color="#34A853" />
-    </Marker>
-  )}
-  {toLocation && (
-    <Marker coordinate={{ latitude: toLocation.lat, longitude: toLocation.lon }} title="To">
-      <Ionicons name="location-sharp" size={28} color="#EA4335" />
-    </Marker>
-  )}
-</MapView>
+          {/* Optional: Markers for FROM and TO */}
+          {fromLocation && (
+            <Marker coordinate={{ latitude: fromLocation.lat, longitude: fromLocation.lon }} title="From">
+              <Ionicons name="location-sharp" size={28} color="#34A853" />
+            </Marker>
+          )}
+          {toLocation && (
+            <Marker coordinate={{ latitude: toLocation.lat, longitude: toLocation.lon }} title="To">
+              <Ionicons name="location-sharp" size={28} color="#EA4335" />
+            </Marker>
+          )}
+        </MapView>
 
         {/* BUTTONS */}
         <TouchableOpacity style={styles.menuButton} onPress={() => setIsMenuVisible(true)}>
           <MaterialIcons name="menu" size={30} color="#000000ff" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.notificationButton} onPress={() => router.push('/tabs/notification')}>
+        <TouchableOpacity style={styles.notificationButton} onPress={() => router.push('/user/notification')}>
           <Ionicons name="notifications-outline" size={24} color="#000000ff" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.locationButton} onPress={centerOnLocation}>
@@ -372,14 +372,14 @@ const handleConfirmLocation = () => {
                 {/* FROM INPUT */}
                 <View style={{ position: 'relative', marginBottom: 10 }}>
                   <View style={styles.inputWithIcon}>
-                    <MaterialIcons name="my-location" size={20} color="#494949ff" style={{ marginRight: 8 }}/>
+                    <MaterialIcons name="my-location" size={20} color="#494949ff" style={{ marginRight: 8 }} />
                     <TextInput
                       placeholder="From"
                       placeholderTextColor="#494949ff"
                       style={styles.input}
                       value={fromText}
                       onChangeText={handleFromTextChange}
-                      onFocus={slideToTop} 
+                      onFocus={slideToTop}
                     />
                     <TouchableOpacity onPress={setFromToCurrentLocation} style={styles.myLocationButton}>
                       <MaterialIcons name="my-location" size={20} color="#534889" />
@@ -390,7 +390,7 @@ const handleConfirmLocation = () => {
                     <View style={[styles.suggestionsContainer, { position: 'absolute', top: 45, left: 0, right: 0, zIndex: 1000 }]}>
                       {fromSuggestions.map(item => (
                         <TouchableOpacity key={item.place_id} style={styles.suggestionItem} onPress={() => selectFromLocation(item)}>
-                          <Ionicons name="pin-outline" size={18} color="#a2a2a2ff" style={{ marginRight: 8 }}/>
+                          <Ionicons name="pin-outline" size={18} color="#a2a2a2ff" style={{ marginRight: 8 }} />
                           <Text style={styles.suggestionText} numberOfLines={1}>{item.display_name}</Text>
                         </TouchableOpacity>
                       ))}
@@ -401,15 +401,15 @@ const handleConfirmLocation = () => {
                 {/* TO INPUT */}
                 <View style={{ position: 'relative', marginTop: 10 }}>
                   <View style={styles.inputWithIcon}>
-                    <Ionicons name="location-outline" size={20} color="#494949ff" style={{ marginRight: 8 }}/>
+                    <Ionicons name="location-outline" size={20} color="#494949ff" style={{ marginRight: 8 }} />
                     <TextInput
-                      ref={toFieldRef} 
+                      ref={toFieldRef}
                       placeholder="To"
                       placeholderTextColor="#494949ff"
                       style={styles.input}
                       value={toText}
                       onChangeText={handleToTextChange}
-                      onFocus={slideToTop} 
+                      onFocus={slideToTop}
                     />
                   </View>
 
@@ -417,7 +417,7 @@ const handleConfirmLocation = () => {
                     <View style={[styles.suggestionsContainer, { position: 'absolute', top: 45, left: 0, right: 0, zIndex: 1000 }]}>
                       {toSuggestions.map(item => (
                         <TouchableOpacity key={item.place_id} style={styles.suggestionItem} onPress={() => selectToLocation(item)}>
-                          <Ionicons name="pin-outline" size={18} color="#a2a2a2ff" style={{ marginRight: 8 }}/>
+                          <Ionicons name="pin-outline" size={18} color="#a2a2a2ff" style={{ marginRight: 8 }} />
                           <Text style={styles.suggestionText} numberOfLines={1}>{item.display_name}</Text>
                         </TouchableOpacity>
                       ))}
@@ -460,6 +460,6 @@ const styles = StyleSheet.create({
   suggestionsContainer: { backgroundColor: '#fff', borderRadius: 10, overflow: 'hidden', shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 2, elevation: 5 },
   suggestionItem: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#ebebeb', backgroundColor: '#fff' },
   suggestionText: { fontSize: 14, color: '#414141', flex: 1 },
-  confirmButton: { backgroundColor: '#534889', padding: 14, borderRadius: 14, marginHorizontal: 0, marginBottom: 10, alignItems: 'center', justifyContent: 'center', bottom: 70},
+  confirmButton: { backgroundColor: '#534889', padding: 14, borderRadius: 14, marginHorizontal: 0, marginBottom: 10, alignItems: 'center', justifyContent: 'center', bottom: 70 },
   confirmButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 18 },
 });
