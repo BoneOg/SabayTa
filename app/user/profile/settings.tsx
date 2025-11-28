@@ -11,16 +11,16 @@ const SettingsScreen = () => {
 
   const handlePress = (label: string) => {
     if (label === 'Change Password') {
-      router.push('/user/sidebar/changepassword');
+      router.push('/user/profile/changepassword');
     }
     else if (label === 'Privacy Policy') {
-      router.push('/user/sidebar/privacypolicy');
+      router.push('/user/profile/privacypolicy');
     }
     else if (label === 'Contact Us') {
-      router.push('/user/sidebar/contactus');
+      router.push('/user/profile/contactus');
     }
     else if (label === 'Delete Account') {
-      router.push('/user/sidebar/deleteaccount');
+      router.push('/user/profile/deleteaccount');
     }
     else {
       Alert.alert(label, `${label} screen coming soon.`);

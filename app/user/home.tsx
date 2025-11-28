@@ -4,7 +4,6 @@ import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, } from 'react-native';
 import MapView, { Circle, Marker, Polyline } from 'react-native-maps';
-import SideMenu from './sidebar/menu';
 
 const { height, width } = Dimensions.get('window');
 
@@ -37,7 +36,6 @@ const MINDANAO_BBOX = {
 export default function HomeScreen() {
   const router = useRouter();
   const [region, setRegion] = useState<any>(null);
-  const [isMenuVisible, setIsMenuVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(height)).current;
   const mapRef = useRef<MapView>(null);
@@ -283,7 +281,6 @@ export default function HomeScreen() {
   // ====================================================================
   return (
     <View style={{ flex: 1 }}>
-      <SideMenu visible={isMenuVisible} onClose={() => setIsMenuVisible(false)} />
 
       <SafeAreaView style={styles.container}>
         {/* MAP */}
@@ -336,9 +333,6 @@ export default function HomeScreen() {
         </MapView>
 
         {/* BUTTONS */}
-        <TouchableOpacity style={styles.menuButton} onPress={() => setIsMenuVisible(true)}>
-          <MaterialIcons name="menu" size={30} color="#000000ff" />
-        </TouchableOpacity>
         <TouchableOpacity style={styles.notificationButton} onPress={() => router.push('/user/notification')}>
           <Ionicons name="notifications-outline" size={24} color="#000000ff" />
         </TouchableOpacity>
@@ -441,7 +435,6 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-  menuButton: { position: 'absolute', left: 20, transform: [{ translateY: -22 }], width: 44, height: 44, borderRadius: 5, backgroundColor: 'rgba(198,185,229,0.5)', alignItems: 'center', justifyContent: 'center', top: 50 },
   notificationButton: { position: 'absolute', right: 20, top: 30, width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(198,185,229,0.5)', alignItems: 'center', justifyContent: 'center' },
   locationCircleOuter: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#E5D6F9', alignItems: 'center', justifyContent: 'center' },
   locationCircleMid: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#CCB2F2', alignItems: 'center', justifyContent: 'center' },

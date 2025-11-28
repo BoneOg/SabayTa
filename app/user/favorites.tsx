@@ -1,13 +1,11 @@
 import { Poppins_400Regular, Poppins_700Bold, useFonts } from '@expo-google-fonts/poppins';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React from 'react';
 import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import SideMenu from './sidebar/menu';
 
 export default function FavoritesScreen() {
   const router = useRouter();
-  const [isMenuVisible, setIsMenuVisible] = useState(false);
 
   // Load Poppins font
   let [fontsLoaded] = useFonts({
@@ -26,22 +24,8 @@ export default function FavoritesScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Side Menu */}
-      <SideMenu
-        visible={isMenuVisible}
-        onClose={() => setIsMenuVisible(false)}
-        profilePicture={require('@/assets/images/cat5.jpg')}
-        gmail="user@gmail.com"
-      />
-
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.menuContainer}
-          onPress={() => setIsMenuVisible(true)}
-        >
-          <MaterialIcons name="menu" size={30} color="#000000ff" />
-        </TouchableOpacity>
         <Text style={styles.headerTitle}>Favourite</Text>
       </View>
 
@@ -92,18 +76,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-  },
-  menuContainer: {
-    position: 'absolute',
-    left: 20,
-    transform: [{ translateY: -22 }],
-    width: 44,
-    height: 44,
-    borderRadius: 5,
-    backgroundColor: 'rgba(198,185,229,0.5)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    top: '50%',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
   },
   headerTitle: {
     fontSize: 20,

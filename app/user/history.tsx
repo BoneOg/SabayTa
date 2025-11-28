@@ -1,8 +1,7 @@
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import SideMenu from './sidebar/menu';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -36,27 +35,26 @@ const rideData: { [key: string]: RideEntry[] } = {
 
 export default function HistoryScreen() {
   const router = useRouter();
-  const [isMenuVisible, setIsMenuVisible] = useState(false);
 
   // Active top tab state
   const [activeTab, setActiveTab] = useState<'upcoming' | 'completed' | 'cancelled'>('upcoming');
-  
+
   // Animation for sliding indicator
   const slideAnim = useRef(new Animated.Value(0)).current;
   const [tabContainerWidth, setTabContainerWidth] = useState(0);
   const tabs = ['upcoming', 'completed', 'cancelled'];
-  
+
   const handleTabPress = (tab: 'upcoming' | 'completed' | 'cancelled') => {
     const tabIndex = tabs.indexOf(tab);
     const tabWidth = tabContainerWidth / tabs.length;
     const newPosition = tabIndex * tabWidth;
-    
+
     Animated.timing(slideAnim, {
       toValue: newPosition,
       duration: 300,
       useNativeDriver: false,
     }).start();
-    
+
     setActiveTab(tab);
   };
 
@@ -71,27 +69,14 @@ export default function HistoryScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Side Menu */}
-      <SideMenu
-        visible={isMenuVisible}
-        onClose={() => setIsMenuVisible(false)}
-        profilePicture={require('@/assets/images/cat5.jpg')}
-      />
-
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.menuContainer}
-          onPress={() => setIsMenuVisible(true)}
-        >
-          <MaterialIcons name="menu" size={30} color="#000000ff" />
-        </TouchableOpacity>
         <Text style={styles.headerTitle}>History</Text>
       </View>
 
       {/* Top Tabs */}
       <View style={styles.topTabsContainer}>
-        <View 
+        <View
           style={styles.topTabs}
           onLayout={(event) => {
             const { width } = event.nativeEvent.layout;
@@ -110,7 +95,7 @@ export default function HistoryScreen() {
               ]}
             />
           )}
-          
+
           {tabs.map((tab) => (
             <TouchableOpacity
               key={tab}
@@ -181,19 +166,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-  },
-
-  menuContainer: {
-    position: 'absolute',
-    left: 20,
-    transform: [{ translateY: -22 }],
-    width: 44,
-    height: 44,
-    borderRadius: 5,
-    backgroundColor: 'rgba(198,185,229,0.5)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    top: '50%',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
   },
 
   headerTitle: {
@@ -235,15 +209,15 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
 
-tabText: {
-  fontSize: 13,
-  fontFamily: 'Poppins',
-  color: '#414141',
-},
+  tabText: {
+    fontSize: 13,
+    fontFamily: 'Poppins',
+    color: '#414141',
+  },
 
-activeTabText: {
-  color: '#fff',
-},
+  activeTabText: {
+    color: '#fff',
+  },
 
   scrollContainer: {
     flexGrow: 1,
@@ -263,39 +237,39 @@ activeTabText: {
     padding: 15,
   },
 
-rideContent: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'flex-start',
-  gap: 10, // add gap between info and meta
-},
+  rideContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 10, // add gap between info and meta
+  },
 
-rideInfo: {
-  flex: 1,
-  gap: 8,
-  flexShrink: 1, // allow text to shrink instead of being cut
-},
+  rideInfo: {
+    flex: 1,
+    gap: 8,
+    flexShrink: 1, // allow text to shrink instead of being cut
+  },
 
-infoRow: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  gap: 6,
-  flexWrap: 'wrap', // wrap long text
-},
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flexWrap: 'wrap', // wrap long text
+  },
 
-rideInfoText: {
-  fontSize: 14,
-  color: '#414141',
-  fontFamily: 'Poppins',
-  flexShrink: 1, // prevent cutting
-},
+  rideInfoText: {
+    fontSize: 14,
+    color: '#414141',
+    fontFamily: 'Poppins',
+    flexShrink: 1, // prevent cutting
+  },
 
-rideMeta: {
-  alignItems: 'flex-end',
-  gap: 4,
-  marginLeft: 8,
-  flexShrink: 0, // keep meta aligned
-},
+  rideMeta: {
+    alignItems: 'flex-end',
+    gap: 4,
+    marginLeft: 8,
+    flexShrink: 0, // keep meta aligned
+  },
   roleText: {
     fontSize: 14,
     color: '#414141',
@@ -314,5 +288,12 @@ rideMeta: {
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 40,
+  },
+
+  infoText: {
+    fontSize: 14,
+    color: '#666',
+    fontFamily: 'Poppins',
+    textAlign: 'center',
   },
 });
