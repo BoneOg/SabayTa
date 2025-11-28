@@ -25,7 +25,7 @@ export default function ProfileScreen() {
     {
       icon: 'info-outline',
       text: 'About Us',
-      library: Ionicons,
+      library: MaterialIcons,
       route: '/user/profile/aboutus',
     },
     {
