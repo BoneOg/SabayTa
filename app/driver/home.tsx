@@ -10,6 +10,7 @@ import {
     StyleSheet,
     Text,
     TouchableOpacity,
+    TouchableWithoutFeedback,
     View,
 } from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
@@ -23,6 +24,7 @@ interface User {
   destination: string;
   date: string;
   time: string;
+  pickupCoords?: { latitude: number; longitude: number };
 }
 
 export default function DriverHome() {
@@ -41,34 +43,34 @@ export default function DriverHome() {
   const slideAnim = useRef(new Animated.Value(height)).current;
 
   const [users] = useState<User[]>([
-  {
-    id: 1,
-    name: "Alice",
-    pickup: "CDO City Hall",
-    destination: "USTP",
-    date: "Nov 28, 2025",
-    time: "8:00 AM",
-    pickupCoords: { latitude: 8.4545, longitude: 124.6312 },
-  },
-  {
-    id: 2,
-    name: "Bob",
-    pickup: "SM CDO",
-    destination: "Agora",
-    date: "Nov 28, 2025",
-    time: "10:00 AM",
-    pickupCoords: { latitude: 8.4853, longitude: 124.6489 },
-  },
-  {
-    id: 3,
-    name: "Charlie",
-    pickup: "Bulua",
-    destination: "Gusa",
-    date: "Nov 28, 2025",
-    time: "11:00 AM",
-    pickupCoords: { latitude: 8.4780, longitude: 124.6350 },
-  },
-]);
+    {
+      id: 1,
+      name: "Alice",
+      pickup: "CDO City Hall",
+      destination: "USTP",
+      date: "Nov 28, 2025",
+      time: "8:00 AM",
+      pickupCoords: { latitude: 8.4545, longitude: 124.6312 },
+    },
+    {
+      id: 2,
+      name: "Bob",
+      pickup: "SM CDO",
+      destination: "Agora",
+      date: "Nov 28, 2025",
+      time: "10:00 AM",
+      pickupCoords: { latitude: 8.4853, longitude: 124.6489 },
+    },
+    {
+      id: 3,
+      name: "Charlie",
+      pickup: "Bulua",
+      destination: "Gusa",
+      date: "Nov 28, 2025",
+      time: "11:00 AM",
+      pickupCoords: { latitude: 8.4780, longitude: 124.6350 },
+    },
+  ]);
 
   const [fontsLoaded] = useFonts({ Poppins_400Regular });
 
@@ -119,50 +121,54 @@ export default function DriverHome() {
     }).start(() => setShowUsers(false));
   };
 
-const handleUserSelect = (user: User) => {
-  setSelectedUser(user);
-  handleCloseUsers();
+  const handleUserSelect = (user: User) => {
+    setSelectedUser(user);
+    handleCloseUsers();
 
-  if (user.pickupCoords) {
-    setRouteCoordinates([driverLocation, user.pickupCoords]);
-  } else {
-    Alert.alert("Error", "Pickup coordinates not available.");
-  }
-};
+    if (user.pickupCoords) {
+      setRouteCoordinates([driverLocation, user.pickupCoords]);
+    } else {
+      Alert.alert("Error", "Pickup coordinates not available.");
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Map */}
-     <MapView
-  style={StyleSheet.absoluteFillObject}
-  region={{
-    latitude: driverLocation.latitude,
-    longitude: driverLocation.longitude,
-    latitudeDelta: 0.05,
-    longitudeDelta: 0.05,
-  }}
->
-  {/* Driver marker */}
-  <Marker coordinate={driverLocation} title="Your Location">
-    <View style={styles.driverMarker}>
-      <Ionicons name="location-sharp" size={24} color="#fff" />
-    </View>
-  </Marker>
+      <MapView
+        style={StyleSheet.absoluteFillObject}
+        region={{
+          latitude: driverLocation.latitude,
+          longitude: driverLocation.longitude,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        }}
+      >
+        {/* Driver marker */}
+        <Marker coordinate={driverLocation} title="Your Location">
+          <View style={styles.driverMarker}>
+            <Ionicons name="location-sharp" size={24} color="#fff" />
+          </View>
+        </Marker>
 
-  {/* Draw route if selected */}
-  {routeCoordinates && (
-    <>
-      <Polyline
-        coordinates={routeCoordinates}
-        strokeColor="pink"
-        strokeWidth={4}
-      />
-      {/* Marker at the end of the path */}
-      <Marker coordinate={routeCoordinates[routeCoordinates.length - 1]} title="Pickup Location">
-        <FontAwesome6 name="location-dot" size={28} color="white" />
-      </Marker>
-    </>
-  )}
-</MapView>
+        {/* Draw route if selected */}
+        {routeCoordinates && (
+          <>
+            <Polyline
+              coordinates={routeCoordinates}
+              strokeColor="pink"
+              strokeWidth={4}
+            />
+            {/* Marker at the end of the path */}
+            <Marker
+              coordinate={routeCoordinates[routeCoordinates.length - 1]}
+              title="Pickup Location"
+            >
+              <FontAwesome6 name="location-dot" size={28} color="white" />
+            </Marker>
+          </>
+        )}
+      </MapView>
 
       {/* Header */}
       <View style={styles.header}>
@@ -174,20 +180,24 @@ const handleUserSelect = (user: User) => {
         </TouchableOpacity>
       </View>
 
-      {/* 25% Modal */}
+      {/* 25% Modal with tap outside to close */}
       {showModal && (
-        <View style={styles.modal25}>
-          <Ionicons
-            name="person-circle"
-            size={60}
-            color="#622C9B"
-            style={{ marginBottom: 10 }}
-          />
-          <Text style={styles.modalText}>Fetch a User</Text>
-          <TouchableOpacity style={styles.modalButton} onPress={handleStart}>
-            <Text style={styles.modalButtonText}>Start</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableWithoutFeedback onPress={() => setShowModal(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableOpacity activeOpacity={1} style={styles.modal25}>
+              <Ionicons
+                name="person-circle"
+                size={60}
+                color="#622C9B"
+                style={{ marginBottom: 10 }}
+              />
+              <Text style={styles.modalText}>Fetch a User</Text>
+              <TouchableOpacity style={styles.modalButton} onPress={handleStart}>
+                <Text style={styles.modalButtonText}>Start</Text>
+              </TouchableOpacity>
+            </TouchableOpacity>
+          </View>
+        </TouchableWithoutFeedback>
       )}
 
       {/* Slide-up Users */}
@@ -280,9 +290,17 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#fff",
   },
-  modal25: {
+  modalOverlay: {
     position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
     bottom: 0,
+    backgroundColor: "transparent",
+    justifyContent: "flex-end",
+    zIndex: 15,
+  },
+  modal25: {
     width: "100%",
     height: height * 0.25,
     backgroundColor: "#fff",
@@ -295,7 +313,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
-    zIndex: 15,
   },
   modalText: {
     fontSize: 18,

@@ -3,7 +3,7 @@ import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, } from 'react-native';
-import MapView, { Marker, Polyline } from 'react-native-maps';
+import MapView, { Circle, Marker, Polyline } from 'react-native-maps';
 
 const { height, width } = Dimensions.get('window');
 
@@ -27,10 +27,10 @@ const CDO_COORDS = {
   longitudeDelta: 0.01,
 };
 const MINDANAO_BBOX = {
-  minLon: 121.5,
-  minLat: 5.0,
-  maxLon: 127.5,
-  maxLat: 9.5
+  minLon: 121.5, // West
+  minLat: 5.0,   // South
+  maxLon: 127.5, // East
+  maxLat: 9.5    // North
 };
 
 export default function HomeScreen() {
@@ -281,12 +281,13 @@ export default function HomeScreen() {
   // ====================================================================
   return (
     <View style={{ flex: 1 }}>
+
       <SafeAreaView style={styles.container}>
         {/* MAP */}
         <MapView
           ref={mapRef}
           style={StyleSheet.absoluteFill}
-          initialRegion={region}
+          initialRegion={region} // <-- only sets initial position
           showsUserLocation
           showsMyLocationButton={false}
         >
@@ -301,6 +302,9 @@ export default function HomeScreen() {
             </View>
           </Marker>
 
+          {/* Location radius */}
+          <Circle center={region} radius={400} strokeWidth={0} fillColor="rgba(98,44,155,0.10)" />
+
           {/* FROM/TO route Polyline */}
           {fromLocation && toLocation && (
             <Polyline
@@ -308,8 +312,8 @@ export default function HomeScreen() {
                 { latitude: fromLocation.lat, longitude: fromLocation.lon },
                 { latitude: toLocation.lat, longitude: toLocation.lon },
               ]}
-              strokeColor="#d612e0ff"
-              strokeWidth={5}
+              strokeColor="#d612e0ff" // line color
+              strokeWidth={5}       // line thickness
               lineCap="round"
               lineJoin="round"
             />
@@ -444,11 +448,11 @@ const styles = StyleSheet.create({
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, marginTop: 15 },
   modalTitle: { fontSize: 18, textAlign: 'center', flex: 1, marginTop: 8 },
   input: { flex: 1, fontSize: 16, color: '#414141', paddingVertical: 8 },
-  inputWithIcon: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#D0D0D0', borderRadius: 8, paddingHorizontal: 8, height: 45, backgroundColor: '#F8F6FC' },
-  myLocationButton: { marginLeft: 5 },
-  suggestionsContainer: { backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: '#D0D0D0' },
-  suggestionItem: { flexDirection: 'row', alignItems: 'center', padding: 10 },
-  suggestionText: { flex: 1, fontSize: 14 },
-  confirmButton: { backgroundColor: '#d612e0ff', borderRadius: 8, marginHorizontal: 15, paddingVertical: 12, marginBottom: 10, alignItems: 'center', justifyContent: 'center' },
-  confirmButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  inputWithIcon: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#D0D0D0', borderRadius: 10, paddingHorizontal: 12, height: 45, backgroundColor: '#F8F8F8' },
+  myLocationButton: { marginLeft: 8, padding: 5 },
+  suggestionsContainer: { backgroundColor: '#fff', borderRadius: 10, overflow: 'hidden', shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 2, elevation: 5 },
+  suggestionItem: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#ebebeb', backgroundColor: '#fff' },
+  suggestionText: { fontSize: 14, color: '#414141', flex: 1 },
+  confirmButton: { backgroundColor: '#534889', padding: 14, borderRadius: 14, marginHorizontal: 0, marginBottom: 10, alignItems: 'center', justifyContent: 'center', bottom: 70 },
+  confirmButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 18 },
 });
