@@ -3,7 +3,7 @@ import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, } from 'react-native';
-import MapView, { Circle, Marker, Polyline } from 'react-native-maps';
+import MapView, { Marker, Polyline } from 'react-native-maps';
 
 const { height, width } = Dimensions.get('window');
 
@@ -60,10 +60,9 @@ export default function HomeScreen() {
 
     const startLocationTracking = async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      setRegion(CDO_COORDS);
-
       if (status !== 'granted') {
         console.warn('Location permission denied. Defaulting to Cagayan de Oro.');
+        setRegion(CDO_COORDS);
         return;
       }
 
@@ -288,22 +287,14 @@ export default function HomeScreen() {
           ref={mapRef}
           style={StyleSheet.absoluteFill}
           initialRegion={region} // <-- only sets initial position
-          showsUserLocation
           showsMyLocationButton={false}
         >
           {/* User location marker */}
           <Marker coordinate={region}>
-            <View style={styles.locationCircleOuter}>
-              <View style={styles.locationCircleMid}>
-                <View style={styles.locationCircleInner}>
-                  <Ionicons name="location" size={32} color="#fff" />
-                </View>
-              </View>
+            <View style={styles.userMarker}>
+              <Ionicons name="location-sharp" size={24} color="#fff" />
             </View>
           </Marker>
-
-          {/* Location radius */}
-          <Circle center={region} radius={400} strokeWidth={0} fillColor="rgba(98,44,155,0.10)" />
 
           {/* FROM/TO route Polyline */}
           {fromLocation && toLocation && (
@@ -436,9 +427,13 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   notificationButton: { position: 'absolute', right: 20, top: 30, width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(198,185,229,0.5)', alignItems: 'center', justifyContent: 'center' },
-  locationCircleOuter: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#E5D6F9', alignItems: 'center', justifyContent: 'center' },
-  locationCircleMid: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#CCB2F2', alignItems: 'center', justifyContent: 'center' },
-  locationCircleInner: { width: 30, height: 30, borderRadius: 15, backgroundColor: '#534889', alignItems: 'center', justifyContent: 'center' },
+  userMarker: {
+    backgroundColor: "#622C9B",
+    padding: 10,
+    borderRadius: 25,
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
   locationButton: { position: 'absolute', bottom: 150, right: 12, width: 44, height: 44, borderRadius: 22, backgroundColor: '#F8F6FC', borderWidth: 1.5, borderColor: '#D0D0D0', alignItems: 'center', justifyContent: 'center', elevation: 2 },
   destinationContainer: { position: 'absolute', bottom: 80, left: 12, right: 12, borderRadius: 14, backgroundColor: '#F8F6FC', borderWidth: 1.5, borderColor: '#D0D0D0', height: 55, justifyContent: 'center', elevation: 2, paddingHorizontal: 16 },
   destinationInputWrapper: { flexDirection: 'row', alignItems: 'center' },
