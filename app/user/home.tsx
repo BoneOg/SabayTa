@@ -200,25 +200,41 @@ export default function HomeScreen() {
     }
   };
 
+  const fetchRoute = async (start: SelectedLocation, end: SelectedLocation) => {
+    try {
+      const response = await fetch(
+        `http://router.project-osrm.org/route/v1/driving/${start.lon},${start.lat};${end.lon},${end.lat}?overview=full&geometries=geojson`
+      );
+      const data = await response.json();
+
+      if (data.routes && data.routes.length > 0) {
+        const coordinates = data.routes[0].geometry.coordinates.map((coord: number[]) => ({
+          latitude: coord[1],
+          longitude: coord[0],
+        }));
+        setRouteCoords(coordinates);
+
+        if (mapRef.current) {
+          mapRef.current.fitToCoordinates(coordinates, {
+            edgePadding: { top: 80, right: 40, bottom: 80, left: 40 },
+            animated: true,
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching route:", error);
+      // Fallback to straight line if API fails
+      setRouteCoords([
+        { latitude: start.lat, longitude: start.lon },
+        { latitude: end.lat, longitude: end.lon }
+      ]);
+    }
+  };
+
   const handleConfirmLocation = () => {
     if (fromLocation && toLocation) {
       console.log("Confirmed Trip Details:", fromLocation, toLocation);
-
-      // Set the route coordinates
-      setRouteCoords([
-        { latitude: fromLocation.lat, longitude: fromLocation.lon },
-        { latitude: toLocation.lat, longitude: toLocation.lon }
-      ]);
-      if (mapRef.current) {
-        mapRef.current.fitToCoordinates([
-          { latitude: fromLocation.lat, longitude: fromLocation.lon },
-          { latitude: toLocation.lat, longitude: toLocation.lon }
-        ], {
-          edgePadding: { top: 80, right: 40, bottom: 80, left: 40 },
-          animated: true,
-        });
-      }
-
+      fetchRoute(fromLocation, toLocation);
       closeModal();
     } else {
       alert("Please select both From and To locations.");
@@ -297,13 +313,10 @@ export default function HomeScreen() {
           </Marker>
 
           {/* FROM/TO route Polyline */}
-          {fromLocation && toLocation && (
+          {routeCoords.length > 0 && (
             <Polyline
-              coordinates={[
-                { latitude: fromLocation.lat, longitude: fromLocation.lon },
-                { latitude: toLocation.lat, longitude: toLocation.lon },
-              ]}
-              strokeColor="#d612e0ff" // line color
+              coordinates={routeCoords}
+              strokeColor="#534889" // line color
               strokeWidth={5}       // line thickness
               lineCap="round"
               lineJoin="round"
@@ -313,12 +326,16 @@ export default function HomeScreen() {
           {/* Optional: Markers for FROM and TO */}
           {fromLocation && (
             <Marker coordinate={{ latitude: fromLocation.lat, longitude: fromLocation.lon }} title="From">
-              <Ionicons name="location-sharp" size={28} color="#34A853" />
+              <View style={[styles.userMarker, { backgroundColor: "#34A853" }]}>
+                <Ionicons name="location-sharp" size={24} color="#fff" />
+              </View>
             </Marker>
           )}
           {toLocation && (
             <Marker coordinate={{ latitude: toLocation.lat, longitude: toLocation.lon }} title="To">
-              <Ionicons name="location-sharp" size={28} color="#EA4335" />
+              <View style={[styles.userMarker, { backgroundColor: "#EA4335" }]}>
+                <Ionicons name="location-sharp" size={24} color="#fff" />
+              </View>
             </Marker>
           )}
         </MapView>
