@@ -1,4 +1,4 @@
-import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Href, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -68,6 +68,9 @@ export default function ProfileScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Profile</Text>
+        <TouchableOpacity style={styles.adminButton} onPress={() => router.push('/admin')}>
+          <MaterialIcons name="security" size={24} color="#622C9B" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -179,12 +182,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
+    flexDirection: 'row',
+    position: 'relative',
   },
 
   headerTitle: {
     fontSize: 19,
     color: '#000',
     fontFamily: 'Poppins',
+  },
+
+  adminButton: {
+    position: 'absolute',
+    right: 20,
+    padding: 5,
   },
 
   scrollContainer: {
