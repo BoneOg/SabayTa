@@ -7,6 +7,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const [name, setName] = useState('John Doe');
 
+<<<<<<< Updated upstream
   const menuItems: {
     icon: string;
     text: string;
@@ -63,14 +64,61 @@ export default function ProfileScreen() {
         color: '#622C9B',
       },
     ];
+=======
+  const [selectedRole, setSelectedRole] = useState<'rider' | 'driver'>('rider');
+
+  const menuItems = [
+    {
+      icon: 'edit',
+      text: 'Edit Profile',
+      library: MaterialIcons,
+      route: '/user/profile/editprofile',
+    },
+    {
+      icon: 'exclamation-triangle',
+      text: 'Complain',
+      library: FontAwesome,
+      route: '/user/profile/complain',
+    },
+    {
+      icon: 'info-outline',
+      text: 'About Us',
+      library: Ionicons,   // 🔧 FIXED
+      route: '/user/profile/aboutus',
+    },
+    {
+      icon: 'settings',
+      text: 'Settings',
+      library: MaterialIcons,
+      route: '/user/profile/settings',
+    },
+    {
+      icon: 'help-outline',
+      text: 'Help and Support',
+      library: Ionicons,   // 🔧 FIXED
+      route: '/user/profile/helpandsupport',
+    },
+    {
+      icon: 'car-repair',
+      text: 'Apply as Driver',
+      library: MaterialIcons,
+      route: '/driver/apply_as_driver',
+      color: '#622C9B',
+    },
+    {
+      icon: 'logout',
+      text: 'Logout',
+      library: MaterialIcons,
+      route: '/auth/Welcome',
+      replace: true,
+      color: '#FF3B30',
+    },
+  ];
+>>>>>>> Stashed changes
 
   const handlePress = (route?: Href, replace?: boolean) => {
     if (route) {
-      if (replace) {
-        router.replace(route);
-      } else {
-        router.push(route);
-      }
+      replace ? router.replace(route) : router.push(route);
     }
   };
 
@@ -88,8 +136,46 @@ export default function ProfileScreen() {
             source={require('@/assets/images/cat5.jpg')}
             style={styles.profileImage}
           />
-          <View style={styles.nameContainer}>
-            <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">{name}</Text>
+
+          <Text style={styles.name} numberOfLines={1}>
+            {name}
+          </Text>
+
+          {/* Role Toggle Buttons */}
+          <View style={styles.toggleContainer}>
+            <TouchableOpacity
+              style={[
+                styles.toggleButton,
+                selectedRole === 'rider' ? styles.activeToggle : {},
+              ]}
+              onPress={() => setSelectedRole('rider')}
+            >
+              <Text
+                style={[
+                  styles.toggleText,
+                  selectedRole === 'rider' ? styles.activeToggleText : {},
+                ]}
+              >
+                Rider
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.toggleButton,
+                selectedRole === 'driver' ? styles.activeToggle : {},
+              ]}
+              onPress={() => setSelectedRole('driver')}
+            >
+              <Text
+                style={[
+                  styles.toggleText,
+                  selectedRole === 'driver' ? styles.activeToggleText : {},
+                ]}
+              >
+                Driver
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -101,10 +187,28 @@ export default function ProfileScreen() {
               style={styles.menuItem}
               onPress={() => handlePress(item.route, item.replace)}
             >
-              <View style={[styles.iconContainer, item.color ? { backgroundColor: item.color + '10' } : {}]}>
-                <item.library name={item.icon as any} size={22} color={item.color || "#414141"} />
+              <View
+                style={[
+                  styles.iconContainer,
+                  item.color ? { backgroundColor: item.color + '10' } : {},
+                ]}
+              >
+                <item.library
+                  name={item.icon}
+                  size={22}
+                  color={item.color || '#414141'}
+                />
               </View>
-              <Text style={[styles.menuText, item.color ? { color: item.color } : {}]}>{item.text}</Text>
+
+              <Text
+                style={[
+                  styles.menuText,
+                  item.color ? { color: item.color } : {},
+                ]}
+              >
+                {item.text}
+              </Text>
+
               <MaterialIcons name="chevron-right" size={24} color="#D0D0D0" />
             </TouchableOpacity>
           ))}
@@ -118,52 +222,85 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: Platform.OS === 'android' ? 20 : 20
+    paddingTop: Platform.OS === 'android' ? 20 : 20,
   },
+
   header: {
     height: 60,
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'relative',
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
   },
+
   headerTitle: {
     fontSize: 19,
     color: '#000',
     fontFamily: 'Poppins',
   },
+
   scrollContainer: {
     flexGrow: 1,
     paddingBottom: 100,
   },
-profileSection: {
-  alignItems: 'center',
-  paddingVertical: 15, // ⬅️ Reduced from 30 to 15
-  paddingHorizontal: 20,
-},
+
+  profileSection: {
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+  },
+
   profileImage: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    marginBottom: 15,
-    backgroundColor: '#D0D0D0',
+    marginBottom: 12,
   },
-  nameContainer: {
-    width: '100%',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
+
   name: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#000000',
+    color: '#000',
     fontFamily: 'Poppins',
-    textAlign: 'center',
+    marginBottom: 10,
   },
+
+  /* ⭐ ROLE TOGGLE BUTTONS ⭐ */
+  toggleContainer: {
+    flexDirection: 'row',
+    marginTop: 5,
+    backgroundColor: '#f1e8ff',
+    padding: 4,
+    borderRadius: 25,
+  },
+
+  toggleButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 60,
+    borderRadius: 20,
+  },
+
+  activeToggle: {
+    backgroundColor: '#622C9B',
+  },
+
+  toggleText: {
+    fontSize: 15,
+    color: '#622C9B',
+    fontFamily: 'Poppins',
+  },
+
+  activeToggleText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+
+  /* MENU */
   menuContainer: {
     paddingHorizontal: 20,
+    marginTop: 10,
   },
+
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -171,6 +308,7 @@ profileSection: {
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
   },
+
   iconContainer: {
     width: 40,
     height: 40,
@@ -180,6 +318,7 @@ profileSection: {
     justifyContent: 'center',
     marginRight: 15,
   },
+
   menuText: {
     flex: 1,
     fontSize: 16,
