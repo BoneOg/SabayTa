@@ -7,6 +7,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const [name, setName] = useState('John Doe');
 
+<<<<<<< Updated upstream
   const menuItems: {
     icon: string;
     text: string;
@@ -64,6 +65,57 @@ export default function ProfileScreen() {
       // ✅ NEW: Apply as Driver (after logout)
 
     ];
+=======
+  const [selectedRole, setSelectedRole] = useState<'rider' | 'driver'>('rider');
+
+  const menuItems = [
+    {
+      icon: 'edit',
+      text: 'Edit Profile',
+      library: MaterialIcons,
+      route: '/user/profile/editprofile',
+    },
+    {
+      icon: 'exclamation-triangle',
+      text: 'Complain',
+      library: FontAwesome,
+      route: '/user/profile/complain',
+    },
+    {
+      icon: 'info-outline',
+      text: 'About Us',
+      library: Ionicons,   // 🔧 FIXED
+      route: '/user/profile/aboutus',
+    },
+    {
+      icon: 'settings',
+      text: 'Settings',
+      library: MaterialIcons,
+      route: '/user/profile/settings',
+    },
+    {
+      icon: 'help-outline',
+      text: 'Help and Support',
+      library: Ionicons,   // 🔧 FIXED
+      route: '/user/profile/helpandsupport',
+    },
+    {
+      icon: 'car-repair',
+      text: 'Apply as Driver',
+      library: MaterialIcons,
+      route: '/driver/apply_as_driver',
+      color: '#622C9B',
+    },
+    {
+      icon: 'logout',
+      text: 'Logout',
+      library: MaterialIcons,
+      route: '/auth/Welcome',
+      replace: true,
+      color: '#FF3B30',
+    },
+  ];
+>>>>>>> Stashed changes
 
   const handlePress = (route?: Href, replace?: boolean) => {
     if (route) {
