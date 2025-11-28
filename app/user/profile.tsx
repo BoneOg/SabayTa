@@ -45,6 +45,13 @@ export default function ProfileScreen() {
         library: MaterialIcons,
         route: '/user/profile/helpandsupport',
       },
+            {
+        icon: 'car-repair',
+        text: 'Apply as Driver',
+        library: MaterialIcons,
+        route: '/driver/apply_as_driver',
+        color: '#622C9B',
+      },
       {
         icon: 'logout',
         text: 'Logout',
@@ -55,13 +62,7 @@ export default function ProfileScreen() {
       },
 
       // ✅ NEW: Apply as Driver (after logout)
-      {
-        icon: 'car-repair',
-        text: 'Apply as Driver',
-        library: MaterialIcons,
-        route: '/driver/apply_as_driver',
-        color: '#622C9B',
-      },
+
     ];
 
   const handlePress = (route?: Href, replace?: boolean) => {
