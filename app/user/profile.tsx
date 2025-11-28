@@ -1,4 +1,4 @@
-import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { Href, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -37,7 +37,7 @@ export default function ProfileScreen() {
     {
       icon: 'help-outline',
       text: 'Help and Support',
-      library: Ionicons,
+      library: MaterialIcons,
       route: '/user/profile/helpandsupport',
     },
     {
