@@ -2,18 +2,8 @@ import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  Dimensions,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import MapView, { Circle, Marker } from 'react-native-maps';
+import { Animated, Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, } from 'react-native';
+import MapView, { Circle, Marker, Polyline } from 'react-native-maps';
 import SideMenu from './sidebar/menu';
 
 const { height, width } = Dimensions.get('window');
@@ -62,7 +52,7 @@ export default function HomeScreen() {
   const [fromLocation, setFromLocation] = useState<SelectedLocation | null>(null);
   const [toLocation, setToLocation] = useState<SelectedLocation | null>(null);
   const [isModalFull, setIsModalFull] = useState(false);
-  
+  const [routeCoords, setRouteCoords] = useState<{ latitude: number; longitude: number }[]>([]);
 
   // ====================================================================
   // LOCATION TRACKING
@@ -217,19 +207,27 @@ const handleConfirmLocation = () => {
   if (fromLocation && toLocation) {
     console.log("Confirmed Trip Details:", fromLocation, toLocation);
     
-    // Clear selected locations
-    setFromLocation(null);
-    setToLocation(null);
-
-    // Clear input fields
-    setFromText('');
-    setToText('');
+    // Set the route coordinates
+    setRouteCoords([
+      { latitude: fromLocation.lat, longitude: fromLocation.lon },
+      { latitude: toLocation.lat, longitude: toLocation.lon }
+    ]);
+    if (mapRef.current) {
+      mapRef.current.fitToCoordinates([
+        { latitude: fromLocation.lat, longitude: fromLocation.lon },
+        { latitude: toLocation.lat, longitude: toLocation.lon }
+      ], {
+        edgePadding: { top: 80, right: 40, bottom: 80, left: 40 },
+        animated: true,
+      });
+    }
 
     closeModal();
   } else {
     alert("Please select both From and To locations.");
   }
 };
+
   // ====================================================================
   // MODAL ANIMATIONS
   // ====================================================================
@@ -288,25 +286,54 @@ const handleConfirmLocation = () => {
       <SideMenu visible={isMenuVisible} onClose={() => setIsMenuVisible(false)} />
 
       <SafeAreaView style={styles.container}>
-        {/* MAP */}
-        <MapView
-          ref={mapRef}
-          style={StyleSheet.absoluteFill}
-          region={region}
-          showsUserLocation
-          showsMyLocationButton={false}
-        >
-          <Marker coordinate={region}>
-            <View style={styles.locationCircleOuter}>
-              <View style={styles.locationCircleMid}>
-                <View style={styles.locationCircleInner}>
-                  <Ionicons name="location" size={32} color="#fff" />
-                </View>
-              </View>
-            </View>
-          </Marker>
-          <Circle center={region} radius={400} strokeWidth={0} fillColor="rgba(98,44,155,0.10)" />
-        </MapView>
+      {/* MAP */}
+<MapView
+  ref={mapRef}
+  style={StyleSheet.absoluteFill}
+  initialRegion={region} // <-- only sets initial position
+  showsUserLocation
+  showsMyLocationButton={false}
+>
+  {/* User location marker */}
+  <Marker coordinate={region}>
+    <View style={styles.locationCircleOuter}>
+      <View style={styles.locationCircleMid}>
+        <View style={styles.locationCircleInner}>
+          <Ionicons name="location" size={32} color="#fff" />
+        </View>
+      </View>
+    </View>
+  </Marker>
+
+  {/* Location radius */}
+  <Circle center={region} radius={400} strokeWidth={0} fillColor="rgba(98,44,155,0.10)" />
+
+  {/* FROM/TO route Polyline */}
+  {fromLocation && toLocation && (
+  <Polyline
+    coordinates={[
+      { latitude: fromLocation.lat, longitude: fromLocation.lon },
+      { latitude: toLocation.lat, longitude: toLocation.lon },
+    ]}
+    strokeColor="#d612e0ff" // line color
+    strokeWidth={5}       // line thickness
+    lineCap="round"
+    lineJoin="round"
+  />
+)}
+
+  {/* Optional: Markers for FROM and TO */}
+  {fromLocation && (
+    <Marker coordinate={{ latitude: fromLocation.lat, longitude: fromLocation.lon }} title="From">
+      <Ionicons name="location-sharp" size={28} color="#34A853" />
+    </Marker>
+  )}
+  {toLocation && (
+    <Marker coordinate={{ latitude: toLocation.lat, longitude: toLocation.lon }} title="To">
+      <Ionicons name="location-sharp" size={28} color="#EA4335" />
+    </Marker>
+  )}
+</MapView>
 
         {/* BUTTONS */}
         <TouchableOpacity style={styles.menuButton} onPress={() => setIsMenuVisible(true)}>
