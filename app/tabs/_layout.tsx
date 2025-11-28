@@ -1,4 +1,4 @@
-import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { Slot, useRouter, useSegments } from "expo-router";
 import React from "react";
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -48,18 +48,6 @@ export default function Layout() {
               />
               <Text style={[styles.tabLabel, { color: isActive("favorites") ? "#534889" : "#B8B8B8" }]}>
                 Favourite
-              </Text>
-            </TouchableOpacity>
-
-            {/* Offer a Ride */}
-            <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/tabs/offer_a_ride")}>
-              <FontAwesome
-                name="car"
-                size={21}
-                color={isActive("offer_a_ride") ? "#534889" : "#B8B8B8"}
-              />
-              <Text style={[styles.tabLabel, { color: isActive("offer_a_ride") ? "#534889" : "#B8B8B8" }]}>
-                Offer a ride
               </Text>
             </TouchableOpacity>
 
@@ -128,22 +116,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
 
-tabItem: {
-  flex: 1,
-  minWidth: 60,
-  alignItems: 'center',
-  justifyContent: 'center',
-  paddingVertical: 6,
-  paddingHorizontal: 6,
-},
-tabLabel: {
-  fontSize: 10,
-  fontFamily: 'Poppins',
-  marginTop: 4,
-  textAlign: 'center',
-  includeFontPadding: false,
-  lineHeight: 14,
-  flexWrap: 'wrap',
-  maxWidth: 72,
-},
+  tabItem: {
+    flex: 1,
+    minWidth: 60,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 6,
+    paddingHorizontal: 6,
+  },
+  tabLabel: {
+    fontSize: 10,
+    fontFamily: "Poppins",
+    marginTop: 4,
+    textAlign: "center",
+    includeFontPadding: false,
+    lineHeight: 14,
+    flexWrap: "wrap",
+    maxWidth: 72,
+  },
 });
