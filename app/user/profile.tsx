@@ -7,65 +7,6 @@ export default function ProfileScreen() {
   const router = useRouter();
   const [name, setName] = useState('John Doe');
 
-<<<<<<< Updated upstream
-  const menuItems: {
-    icon: string;
-    text: string;
-    library: typeof FontAwesome | typeof MaterialIcons | typeof Ionicons;
-    route?: Href;
-    replace?: boolean;
-    color?: string;
-  }[] = [
-      {
-        icon: 'edit',
-        text: 'Edit Profile',
-        library: MaterialIcons,
-        route: '/user/profile/editprofile',
-      },
-      {
-        icon: 'exclamation-triangle',
-        text: 'Complain',
-        library: FontAwesome,
-        route: '/user/profile/complain',
-      },
-      {
-        icon: 'info-outline',
-        text: 'About Us',
-        library: MaterialIcons,
-        route: '/user/profile/aboutus'
-      },
-      {
-        icon: 'settings',
-        text: 'Settings',
-        library: MaterialIcons,
-        route: '/user/profile/settings',
-      },
-      {
-        icon: 'help-outline',
-        text: 'Help and Support',
-        library: MaterialIcons,
-        route: '/user/profile/helpandsupport',
-      },
-            {
-        icon: 'car-repair',
-        text: 'Apply as Driver',
-        library: MaterialIcons,
-        route: '/driver/apply_as_driver',
-        color: '#622C9B',
-      },
-      {
-        icon: 'logout',
-        text: 'Logout',
-        library: MaterialIcons,
-        route: '/auth/Welcome',
-        replace: true,
-        color: '#FF3B30',
-      },
-
-      // ✅ NEW: Apply as Driver (after logout)
-
-    ];
-=======
   const [selectedRole, setSelectedRole] = useState<'rider' | 'driver'>('rider');
 
   const menuItems = [
@@ -84,7 +25,7 @@ export default function ProfileScreen() {
     {
       icon: 'info-outline',
       text: 'About Us',
-      library: Ionicons,   // 🔧 FIXED
+      library: Ionicons,
       route: '/user/profile/aboutus',
     },
     {
@@ -96,7 +37,7 @@ export default function ProfileScreen() {
     {
       icon: 'help-outline',
       text: 'Help and Support',
-      library: Ionicons,   // 🔧 FIXED
+      library: Ionicons,
       route: '/user/profile/helpandsupport',
     },
     {
@@ -115,7 +56,6 @@ export default function ProfileScreen() {
       color: '#FF3B30',
     },
   ];
->>>>>>> Stashed changes
 
   const handlePress = (route?: Href, replace?: boolean) => {
     if (route) {
@@ -182,37 +122,43 @@ export default function ProfileScreen() {
 
         {/* Menu Items */}
         <View style={styles.menuContainer}>
-          {menuItems.map((item, idx) => (
-            <TouchableOpacity
-              key={idx}
-              style={styles.menuItem}
-              onPress={() => handlePress(item.route, item.replace)}
-            >
-              <View
-                style={[
-                  styles.iconContainer,
-                  item.color ? { backgroundColor: item.color + '10' } : {},
-                ]}
-              >
-                <item.library
-                  name={item.icon}
-                  size={22}
-                  color={item.color || '#414141'}
-                />
-              </View>
+          {menuItems.map((item, idx) => {
+            // ⭐ FIX: Assign the component (item.library) to a variable that starts with a capital letter
+            const IconComponent = item.library; 
 
-              <Text
-                style={[
-                  styles.menuText,
-                  item.color ? { color: item.color } : {},
-                ]}
+            return (
+              <TouchableOpacity
+                key={idx}
+                style={styles.menuItem}
+                onPress={() => handlePress(item.route, item.replace)}
               >
-                {item.text}
-              </Text>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    item.color ? { backgroundColor: item.color + '10' } : {},
+                  ]}
+                >
+                  {/* ⭐ FIX APPLIED HERE: Using the capitalized variable as a component tag */}
+                  <IconComponent
+                    name={item.icon}
+                    size={22}
+                    color={item.color || '#414141'}
+                  />
+                </View>
 
-              <MaterialIcons name="chevron-right" size={24} color="#D0D0D0" />
-            </TouchableOpacity>
-          ))}
+                <Text
+                  style={[
+                    styles.menuText,
+                    item.color ? { color: item.color } : {},
+                  ]}
+                >
+                  {item.text}
+                </Text>
+
+                <MaterialIcons name="chevron-right" size={24} color="#D0D0D0" />
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </ScrollView>
     </View>
@@ -271,7 +217,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 5,
     backgroundColor: '#f1e8ff',
-    padding: 4,
+    padding: 5,
     borderRadius: 25,
   },
 
