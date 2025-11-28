@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import BackButton from '../../../components/BackButton';
 
 const { width } = Dimensions.get('window');
 
@@ -93,10 +94,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ visible, onClose, profilePicture = 
       {/* Sliding menu */}
       <Animated.View style={[styles.menu, { left: slideAnim }]}>
         {/* Back button */}
-        <TouchableOpacity style={styles.backButton} onPress={onClose}>
-          <MaterialIcons name="arrow-back-ios" size={20} color="#414141" />
-          <Text style={styles.backText}>Back</Text>
-        </TouchableOpacity>
+        <BackButton onPress={onClose} style={{ marginBottom: 20, marginTop: 10 }} />
 
         {/* Profile section */}
         <View style={styles.profileSection}>
@@ -144,18 +142,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     borderBottomRightRadius: 20,
   },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    marginTop: 10,
-  },
-  backText: {
-    fontSize: 16,
-    color: '#414141',
-    marginLeft: 10,
-    fontFamily: 'Poppins',
-  },
+
   profileSection: {
     alignItems: 'center',
     marginBottom: 30,

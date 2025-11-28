@@ -1,7 +1,7 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import BackButton from '../../../components/BackButton';
 
 export const options = {
   tabBarStyle: { display: 'none' },
@@ -24,10 +24,7 @@ const ContactUs = () => {
 
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backRow} onPress={() => router.back()}>
-            <Ionicons name='arrow-back' size={20} color='#1C1B1F' />
-            <Text style={styles.backText}>Back</Text>
-          </TouchableOpacity>
+          <BackButton style={{ marginBottom: 0 }} />
 
           <Text style={styles.title}>Contact Us</Text>
 
@@ -112,17 +109,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
-  backRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
 
-  backText: {
-    marginLeft: 6,
-    fontSize: 14,
-    fontFamily: 'Poppins',
-    color: '#1C1B1F',
-  },
 
   title: {
     fontSize: 20,

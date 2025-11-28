@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { Alert, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import BackButton from '../../../components/BackButton';
 
 const options = ['Change Password', 'Privacy Policy', 'Contact Us', 'Delete Account'];
 
@@ -31,10 +32,7 @@ const SettingsScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backRow} onPress={() => router.back()}>
-            <Ionicons name='arrow-back' size={20} color='#1C1B1F' />
-            <Text style={styles.backText}>Back</Text>
-          </TouchableOpacity>
+          <BackButton style={{ marginBottom: 0 }} />
           <Text style={styles.title}>Settings</Text>
           <View style={{ width: 40 }} />
         </View>
@@ -64,16 +62,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 30,
   },
-  backRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  backText: {
-    marginLeft: 6,
-    fontSize: 14,
-    color: '#1C1B1F',
-    fontFamily: 'Poppins',
-  },
+
   title: {
     fontSize: 20,
     fontFamily: 'Poppins-SemiBold',

@@ -1,7 +1,7 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import BackButton from '../../../components/BackButton';
 
 const PrivacyPolicy = () => {
   const router = useRouter();
@@ -9,21 +9,18 @@ const PrivacyPolicy = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        
+
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backRow} onPress={() => router.back()}>
-            <Ionicons name='arrow-back' size={20} color='#1C1B1F' />
-            <Text style={styles.backText}>Back</Text>
-          </TouchableOpacity>
+          <BackButton style={{ marginBottom: 0 }} />
 
           <Text style={styles.title}>Privacy Policy</Text>
 
           <View style={{ width: 40 }} />
         </View>
 
-        <ScrollView 
-          style={{ flex: 1 }} 
+        <ScrollView
+          style={{ flex: 1 }}
           contentContainerStyle={{ flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
         >
@@ -52,17 +49,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
 
-  backRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
 
-  backText: {
-    marginLeft: 6,
-    fontSize: 14,
-    fontFamily: 'Poppins',
-    color: '#1C1B1F',
-  },
 
   title: {
     fontSize: 20,
