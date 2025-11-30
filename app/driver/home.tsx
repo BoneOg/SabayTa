@@ -1,7 +1,8 @@
 import { Poppins_400Regular, useFonts } from "@expo-google-fonts/poppins";
-import { Ionicons } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
-import React, { useEffect, useRef, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   Animated,
@@ -41,11 +42,12 @@ export default function DriverHome() {
   >(null);
 
   const slideAnim = useRef(new Animated.Value(height)).current;
+  const modalSlideAnim = useRef(new Animated.Value(height * 0.3)).current;
 
   const [users] = useState<User[]>([
     {
       id: 1,
-      name: "Alice",
+      name: "Alice Santos",
       pickup: "CDO City Hall",
       destination: "USTP",
       date: "Nov 28, 2025",
@@ -54,7 +56,7 @@ export default function DriverHome() {
     },
     {
       id: 2,
-      name: "Bob",
+      name: "Bob Ramirez",
       pickup: "SM CDO",
       destination: "Agora",
       date: "Nov 28, 2025",
@@ -63,13 +65,41 @@ export default function DriverHome() {
     },
     {
       id: 3,
-      name: "Charlie",
+      name: "Charlie Mendoza",
       pickup: "Bulua",
       destination: "Gusa",
       date: "Nov 28, 2025",
       time: "11:00 AM",
       pickupCoords: { latitude: 8.4780, longitude: 124.6350 },
     },
+    {
+      id: 4,
+      name: "David Rivera",
+      pickup: "Lumbia",
+      destination: "Lapasan",
+      date: "Nov 28, 2025",
+      time: "11:00 AM",
+      pickupCoords: { latitude: 8.4829, longitude: 124.6640 },
+    },
+    {
+      id: 5,
+      name: "Emily Torres",
+      pickup: "Pueblo de Oro",
+      destination: "Limketkai",
+      date: "Nov 28, 2025",
+      time: "1:00 PM",
+      pickupCoords: { latitude: 8.4548, longitude: 124.6483 },
+    },
+    {
+      id: 6,
+      name: "Frank Delgado",
+      pickup: "Macasandig",
+      destination: "Divisoria",
+      date: "Nov 28, 2025",
+      time: "2:30 PM",
+      pickupCoords: { latitude: 8.4647, longitude: 124.6549 },
+    },
+
   ]);
 
   const [fontsLoaded] = useFonts({ Poppins_400Regular });
@@ -102,6 +132,21 @@ export default function DriverHome() {
       if (subscriber) subscriber.remove();
     };
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      setShowModal(true);
+      modalSlideAnim.setValue(height * 0.3);
+      Animated.timing(modalSlideAnim, {
+        toValue: 0,
+        duration: 400,
+        useNativeDriver: true,
+      }).start();
+      return () => {
+        // Optional: cleanup if needed when losing focus
+      };
+    }, [])
+  );
 
   const handleStart = () => {
     setShowModal(false);
@@ -208,22 +253,36 @@ export default function DriverHome() {
         </TouchableOpacity>
       </View>
 
-      {/* 25% Modal with tap outside to close */}
+      {/* 30% Modal with tap outside to close */}
       {showModal && (
         <TouchableWithoutFeedback onPress={() => setShowModal(false)}>
           <View style={styles.modalOverlay}>
-            <TouchableOpacity activeOpacity={1} style={styles.modal25}>
-              <Ionicons
-                name="person-circle"
-                size={60}
-                color="#622C9B"
-                style={{ marginBottom: 10 }}
-              />
-              <Text style={styles.modalText}>Fetch a User</Text>
-              <TouchableOpacity style={styles.modalButton} onPress={handleStart}>
-                <Text style={styles.modalButtonText}>Start</Text>
+            <Animated.View
+              style={[
+                styles.modal30,
+                { transform: [{ translateY: modalSlideAnim }] }
+              ]}
+            >
+              <TouchableOpacity activeOpacity={1} style={{ alignItems: 'center', width: '100%' }}>
+                <FontAwesome5
+                  name="user-alt"
+                  size={35}
+                  color="#622C9B"
+                  style={{ marginBottom: 10 }}
+                />
+
+                <Text style={styles.modalText}>Fetch a User</Text>
+
+                <Text style={styles.modalSubText}>
+                  Discover passengers waiting for a ride nearby.
+                </Text>
+
+
+                <TouchableOpacity style={styles.modalButton} onPress={handleStart}>
+                  <Text style={styles.modalButtonText}>Start</Text>
+                </TouchableOpacity>
               </TouchableOpacity>
-            </TouchableOpacity>
+            </Animated.View>
           </View>
         </TouchableWithoutFeedback>
       )}
@@ -244,46 +303,49 @@ export default function DriverHome() {
             {users.map((user) => (
               <TouchableOpacity key={user.id} onPress={() => handleUserSelect(user)}>
                 <View style={styles.userCard}>
-                  <Text style={styles.name}>{user.name}</Text>
+                  <Ionicons name="person" size={40} color="#622C9B" style={styles.userIcon} />
+                  <View style={styles.cardContent}>
+                    <Text style={styles.name}>{user.name}</Text>
 
-                  {/* Date and Time */}
-                  <View style={styles.row}>
-                    <Ionicons
-                      name="calendar-outline"
-                      size={16}
-                      color="#555"
-                      style={styles.icon}
-                    />
-                    <Text style={styles.dateTime}>
-                      {user.date} at {user.time}
-                    </Text>
-                  </View>
-
-                  {/* Locations */}
-                  <View style={styles.locationContainer}>
-                    <View style={styles.locationRow}>
+                    {/* Date and Time */}
+                    <View style={styles.row}>
                       <Ionicons
-                        name="location-outline"
-                        size={20}
-                        color="green"
-                        style={styles.locationIcon}
+                        name="calendar-outline"
+                        size={16}
+                        color="#555"
+                        style={styles.icon}
                       />
-                      <View>
-                        <Text style={styles.locationLabel}>From</Text>
-                        <Text style={styles.locationText}>{user.pickup}</Text>
-                      </View>
+                      <Text style={styles.dateTime}>
+                        {user.date} at {user.time}
+                      </Text>
                     </View>
 
-                    <View style={styles.locationRow}>
-                      <Ionicons
-                        name="location-sharp"
-                        size={20}
-                        color="red"
-                        style={styles.locationIcon}
-                      />
-                      <View>
-                        <Text style={styles.locationLabel}>To</Text>
-                        <Text style={styles.locationText}>{user.destination}</Text>
+                    {/* Locations */}
+                    <View style={styles.locationContainer}>
+                      <View style={styles.locationRow}>
+                        <Ionicons
+                          name="location-sharp"
+                          size={20}
+                          color="green"
+                          style={styles.locationIcon}
+                        />
+                        <View>
+                          <Text style={styles.locationLabel}>From</Text>
+                          <Text style={styles.locationText}>{user.pickup}</Text>
+                        </View>
+                      </View>
+
+                      <View style={styles.locationRow}>
+                        <Ionicons
+                          name="location-sharp"
+                          size={20}
+                          color="red"
+                          style={styles.locationIcon}
+                        />
+                        <View>
+                          <Text style={styles.locationLabel}>To</Text>
+                          <Text style={styles.locationText}>{user.destination}</Text>
+                        </View>
                       </View>
                     </View>
                   </View>
@@ -328,9 +390,9 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     zIndex: 15,
   },
-  modal25: {
+  modal30: {
     width: "100%",
-    height: height * 0.25,
+    height: height * 0.35,
     backgroundColor: "#fff",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -341,6 +403,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
+    paddingBottom: 70, // Add padding to avoid navbar overlap
   },
   modalText: {
     fontSize: 18,
@@ -351,8 +414,8 @@ const styles = StyleSheet.create({
   modalButton: {
     backgroundColor: "#622C9B",
     paddingVertical: 10,
-    paddingHorizontal: 30,
-    borderRadius: 8,
+    paddingHorizontal: 60,
+    borderRadius: 5,
   },
   modalButtonText: {
     color: "#fff",
@@ -364,11 +427,10 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: height,
-    backgroundColor: "#f2f2f2",
+    bottom: 0,
+    backgroundColor: "#ffffffff",
     zIndex: 20,
     elevation: 10,
-    justifyContent: "center",
   },
   usersHeader: {
     flexDirection: "row",
@@ -378,6 +440,15 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     position: "relative",
   },
+  modalSubText: {
+    fontSize: 12,
+    color: "#666",
+    fontFamily: "Poppins_400Regular",
+    marginTop: 4,
+    marginBottom: 12,
+    textAlign: "center",
+  },
+
   usersHeaderText: {
     fontSize: 20,
     fontFamily: "Poppins_400Regular,",
@@ -388,21 +459,31 @@ const styles = StyleSheet.create({
   userCard: {
     width: "100%",
     backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: 20,
+    paddingVertical: 15,
+    paddingHorizontal: 15,
     marginBottom: 20,
     borderWidth: 2,
-    borderColor: "#6A4C93",
+    borderColor: "#ffffffff",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.4,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    minHeight: 80,
+  },
+  userIcon: {
+    marginRight: 15,
+  },
+  cardContent: {
+    flex: 1,
   },
   closeButton: { position: "absolute", right: 20 },
   name: {
     fontSize: 18,
-    fontFamily: "Poppins_400Regular,",
+    fontFamily: "Poppins_400Regular",
     color: "#333",
     marginBottom: 8,
   },
@@ -412,9 +493,9 @@ const styles = StyleSheet.create({
   locationContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 10,
+    marginBottom: 5,
   },
-  locationRow: { flexDirection: "row", alignItems: "flex-start", width: "48%" },
+  locationRow: { flexDirection: "row", alignItems: "flex-start", width: "55%" },
   locationIcon: { marginRight: 8, marginTop: 2 },
   locationLabel: { fontSize: 12, fontFamily: "Poppins_400Regular", color: "#888" },
   locationText: { fontSize: 14, fontFamily: "Poppins_400Regular,", color: "#333" },

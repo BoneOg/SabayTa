@@ -75,6 +75,7 @@ const styles = StyleSheet.create({
         right: 0,
         overflow: "visible",
         backgroundColor: "transparent",
+        zIndex: 50,
         ...Platform.select({
             android: { elevation: 20 },
             ios: {
