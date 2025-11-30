@@ -1,17 +1,17 @@
 import { Poppins_400Regular, useFonts } from "@expo-google-fonts/poppins";
-import { FontAwesome6, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import React, { useEffect, useRef, useState } from "react";
 import {
-    Alert,
-    Animated,
-    Dimensions,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  Alert,
+  Animated,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 
@@ -121,12 +121,38 @@ export default function DriverHome() {
     }).start(() => setShowUsers(false));
   };
 
+  const fetchRoute = async (
+    start: { latitude: number; longitude: number },
+    end: { latitude: number; longitude: number }
+  ) => {
+    try {
+      const response = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=geojson`
+      );
+      const data = await response.json();
+      if (data.routes && data.routes.length > 0) {
+        const coordinates = data.routes[0].geometry.coordinates.map(
+          (coord: number[]) => ({
+            latitude: coord[1],
+            longitude: coord[0],
+          })
+        );
+        setRouteCoordinates(coordinates);
+      } else {
+        Alert.alert("Error", "No route found.");
+      }
+    } catch (error) {
+      console.error("Error fetching route:", error);
+      Alert.alert("Error", "Could not fetch route.");
+    }
+  };
+
   const handleUserSelect = (user: User) => {
     setSelectedUser(user);
     handleCloseUsers();
 
     if (user.pickupCoords) {
-      setRouteCoordinates([driverLocation, user.pickupCoords]);
+      fetchRoute(driverLocation, user.pickupCoords);
     } else {
       Alert.alert("Error", "Pickup coordinates not available.");
     }
@@ -164,7 +190,9 @@ export default function DriverHome() {
               coordinate={routeCoordinates[routeCoordinates.length - 1]}
               title="Pickup Location"
             >
-              <FontAwesome6 name="location-dot" size={28} color="white" />
+              <View style={[styles.driverMarker, { backgroundColor: "#FF5733" }]}>
+                <Ionicons name="location-sharp" size={24} color="#fff" />
+              </View>
             </Marker>
           </>
         )}
