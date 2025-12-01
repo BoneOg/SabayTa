@@ -15,11 +15,12 @@ import {
   View,
 } from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
+import { BASE_URL } from "../../config";
 
 const { height } = Dimensions.get("window");
 
 interface User {
-  id: number;
+  id: string;
   name: string;
   pickup: string;
   destination: string;
@@ -44,63 +45,32 @@ export default function DriverHome() {
   const slideAnim = useRef(new Animated.Value(height)).current;
   const modalSlideAnim = useRef(new Animated.Value(height * 0.3)).current;
 
-  const [users] = useState<User[]>([
-    {
-      id: 1,
-      name: "Alice Santos",
-      pickup: "CDO City Hall",
-      destination: "USTP",
-      date: "Nov 28, 2025",
-      time: "8:00 AM",
-      pickupCoords: { latitude: 8.4545, longitude: 124.6312 },
-    },
-    {
-      id: 2,
-      name: "Bob Ramirez",
-      pickup: "SM CDO",
-      destination: "Agora",
-      date: "Nov 28, 2025",
-      time: "10:00 AM",
-      pickupCoords: { latitude: 8.4853, longitude: 124.6489 },
-    },
-    {
-      id: 3,
-      name: "Charlie Mendoza",
-      pickup: "Bulua",
-      destination: "Gusa",
-      date: "Nov 28, 2025",
-      time: "11:00 AM",
-      pickupCoords: { latitude: 8.4780, longitude: 124.6350 },
-    },
-    {
-      id: 4,
-      name: "David Rivera",
-      pickup: "Lumbia",
-      destination: "Lapasan",
-      date: "Nov 28, 2025",
-      time: "11:00 AM",
-      pickupCoords: { latitude: 8.4829, longitude: 124.6640 },
-    },
-    {
-      id: 5,
-      name: "Emily Torres",
-      pickup: "Pueblo de Oro",
-      destination: "Limketkai",
-      date: "Nov 28, 2025",
-      time: "1:00 PM",
-      pickupCoords: { latitude: 8.4548, longitude: 124.6483 },
-    },
-    {
-      id: 6,
-      name: "Frank Delgado",
-      pickup: "Macasandig",
-      destination: "Divisoria",
-      date: "Nov 28, 2025",
-      time: "2:30 PM",
-      pickupCoords: { latitude: 8.4647, longitude: 124.6549 },
-    },
+  const [users, setUsers] = useState<User[]>([]);
 
-  ]);
+  const fetchBookings = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/api/bookings/pending`);
+      const data = await response.json();
+
+      if (response.ok) {
+        const mappedUsers = data.map((booking: any) => ({
+          id: booking._id,
+          name: booking.userId?.name || "Unknown User",
+          pickup: booking.pickupLocation.name,
+          destination: booking.dropoffLocation.name,
+          date: new Date(booking.createdAt).toLocaleDateString(),
+          time: new Date(booking.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          pickupCoords: {
+            latitude: booking.pickupLocation.lat,
+            longitude: booking.pickupLocation.lon
+          }
+        }));
+        setUsers(mappedUsers);
+      }
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+    }
+  };
 
   const [fontsLoaded] = useFonts({ Poppins_400Regular });
 
@@ -149,6 +119,7 @@ export default function DriverHome() {
   );
 
   const handleStart = () => {
+    fetchBookings();
     setShowModal(false);
     setShowUsers(true);
     Animated.timing(slideAnim, {
@@ -320,32 +291,34 @@ export default function DriverHome() {
                       </Text>
                     </View>
 
-                    {/* Locations */}
+                    {/* Locations - Vertical Layout */}
                     <View style={styles.locationContainer}>
-                      <View style={styles.locationRow}>
-                        <Ionicons
-                          name="location-sharp"
-                          size={20}
-                          color="green"
-                          style={styles.locationIcon}
-                        />
-                        <View>
+                      <View style={styles.locationRowVertical}>
+                        <View style={styles.locationHeader}>
+                          <Ionicons
+                            name="location-sharp"
+                            size={18}
+                            color="green"
+                            style={styles.locationIcon}
+                          />
                           <Text style={styles.locationLabel}>From</Text>
-                          <Text style={styles.locationText}>{user.pickup}</Text>
                         </View>
+                        <Text style={styles.locationText} numberOfLines={2} ellipsizeMode="tail">{user.pickup}</Text>
                       </View>
 
-                      <View style={styles.locationRow}>
-                        <Ionicons
-                          name="location-sharp"
-                          size={20}
-                          color="red"
-                          style={styles.locationIcon}
-                        />
-                        <View>
+                      <View style={styles.dividerLine} />
+
+                      <View style={styles.locationRowVertical}>
+                        <View style={styles.locationHeader}>
+                          <Ionicons
+                            name="location-sharp"
+                            size={18}
+                            color="red"
+                            style={styles.locationIcon}
+                          />
                           <Text style={styles.locationLabel}>To</Text>
-                          <Text style={styles.locationText}>{user.destination}</Text>
                         </View>
+                        <Text style={styles.locationText} numberOfLines={2} ellipsizeMode="tail">{user.destination}</Text>
                       </View>
                     </View>
                   </View>
@@ -403,7 +376,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
-    paddingBottom: 70, // Add padding to avoid navbar overlap
+    paddingBottom: 70,
   },
   modalText: {
     fontSize: 18,
@@ -448,7 +421,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     textAlign: "center",
   },
-
   usersHeaderText: {
     fontSize: 20,
     fontFamily: "Poppins_400Regular,",
@@ -491,12 +463,33 @@ const styles = StyleSheet.create({
   icon: { marginRight: 6 },
   dateTime: { fontSize: 14, fontFamily: "Poppins_400Regular", color: "#666" },
   locationContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     marginBottom: 5,
   },
-  locationRow: { flexDirection: "row", alignItems: "flex-start", width: "55%" },
-  locationIcon: { marginRight: 8, marginTop: 2 },
-  locationLabel: { fontSize: 12, fontFamily: "Poppins_400Regular", color: "#888" },
-  locationText: { fontSize: 14, fontFamily: "Poppins_400Regular,", color: "#333" },
+  locationRowVertical: {
+    marginBottom: 10,
+  },
+  locationHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  locationIcon: { marginRight: 6 },
+  locationLabel: {
+    fontSize: 13,
+    fontFamily: "Poppins_400Regular",
+    color: "#888",
+    fontWeight: "600",
+  },
+  locationText: {
+    fontSize: 13,
+    fontFamily: "Poppins_400Regular,",
+    color: "#333",
+    lineHeight: 18,
+    paddingLeft: 24,
+  },
+  dividerLine: {
+    height: 1,
+    backgroundColor: "#E0E0E0",
+    marginVertical: 8,
+  },
 });

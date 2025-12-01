@@ -2,6 +2,7 @@ import 'dotenv/config.js';
 import express from 'express';
 import { connectDB } from './lib/db.js';
 import authRoutes from './routes/authRoutes.js';
+import bookingRoutes from './routes/bookingRoutes.js';
 import driverProfileRoutes from './routes/driverProfileRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
 
@@ -12,6 +13,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/driver/profile', driverProfileRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 connectDB()
     .then(() => {
