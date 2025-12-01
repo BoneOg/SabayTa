@@ -1,9 +1,11 @@
 import BackButton from '@/components/BackButton';
 import Button from '@/components/Button';
 import { Entypo, FontAwesome } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useState } from 'react';
 import {
+  Alert,
   Platform,
   Pressable,
   ScrollView,
@@ -13,9 +15,75 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import { BASE_URL } from "../../config";
 
 export default function SignUpPage() {
   const router = useRouter();
+
+  // State for form inputs
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [gender, setGender] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const BACKEND_URL = `${BASE_URL}/api/auth/register`;
+
+  // Function to handle signup
+  const handleSignUp = async () => {
+    // Client-side validation (mirrors backend)
+    if (!name || !email || !phone || !gender || !password || !confirmPassword) {
+      Alert.alert('Error', 'All fields are required.');
+      return;
+    }
+    if (password.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match.');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(BACKEND_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          phone: `+63${phone}`, // Prepend country code as in your UI
+          gender,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Store token for authentication
+        await AsyncStorage.setItem('token', data.token);
+        // Optionally store user data
+        await AsyncStorage.setItem('user', JSON.stringify(data.user));
+
+        Alert.alert('Success', 'Account created successfully!');
+        router.push('/auth/CompleteProfile'); // Navigate on success
+      } else {
+        Alert.alert('Error', data.message || 'Signup failed. Please try again.');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Network error. Please check your connection.');
+      console.error('Signup error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -23,17 +91,21 @@ export default function SignUpPage() {
 
       <Text style={styles.title}>Sign up with your email or phone number</Text>
 
-      {/* Inputs */}
+      {/* Inputs with state */}
       <TextInput
         style={styles.input}
         placeholder="Name"
         placeholderTextColor="#D0D0D0"
+        value={name}
+        onChangeText={setName}
       />
       <TextInput
         style={styles.input}
         placeholder="Email"
         placeholderTextColor="#D0D0D0"
         keyboardType="email-address"
+        value={email}
+        onChangeText={setEmail}
       />
 
       {/* Mobile Input */}
@@ -46,6 +118,8 @@ export default function SignUpPage() {
           placeholder="Your mobile number"
           placeholderTextColor="#D0D0D0"
           keyboardType="phone-pad"
+          value={phone}
+          onChangeText={setPhone}
         />
       </View>
 
@@ -54,6 +128,28 @@ export default function SignUpPage() {
         style={styles.input}
         placeholder="Gender"
         placeholderTextColor="#D0D0D0"
+        value={gender}
+        onChangeText={setGender}
+      />
+
+      {/* Password */}
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        placeholderTextColor="#D0D0D0"
+        secureTextEntry={true}
+        value={password}
+        onChangeText={setPassword}
+      />
+
+      {/* Confirm Password */}
+      <TextInput
+        style={styles.input}
+        placeholder="Confirm Password"
+        placeholderTextColor="#D0D0D0"
+        secureTextEntry={true}
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
       />
 
       {/* Terms */}
@@ -68,9 +164,10 @@ export default function SignUpPage() {
 
       {/* Sign Up Button */}
       <Button
-        label="Sign Up"
-        onPress={() => router.push('/auth/PhoneVerification')}
+        label={isLoading ? "Signing Up..." : "Sign Up"}
+        onPress={handleSignUp}
         style={{ marginVertical: 10 }}
+        disabled={isLoading}
       />
 
       {/* Divider with OR */}
@@ -108,6 +205,7 @@ export default function SignUpPage() {
   );
 }
 
+// Styles remain unchanged
 const styles = StyleSheet.create({
   container: {
     flex: 1,
