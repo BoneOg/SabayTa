@@ -1,155 +1,306 @@
-import BackButton from '@/components/BackButton';
-import Button from '@/components/Button';
-import { Entypo } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { Alert, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
-import { BASE_URL } from "../../config"; // Ensure this is your config file
+import { Entypo } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  Image,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
+import BackButton from "@/components/BackButton";
+import Button from "@/components/Button";
+import { BASE_URL } from "../../config";
+
+// 1. Define the type for the Profile state
+interface ProfileState {
+  name: string;
+  mobile: string;
+  email: string;
+  street: string;
+  city: string;
+  district: string;
+}
 
 export default function CompleteProfile() {
   const router = useRouter();
-  const [profile, setProfile] = useState({
-    name: '',
-    mobile: '',
-    email: '',
-    street: '',
-    city: '',
-    district: '',
-  });
-  const [isLoading, setIsLoading] = useState(false); // For save button loading
 
-  // Fetch user data from AsyncStorage on component mount
+  const [profile, setProfile] = useState<ProfileState>({
+    name: "",
+    mobile: "",
+    email: "",
+    street: "",
+    city: "",
+    district: "",
+  });
+
+  // 2. Define the type for the image URI state (string or null)
+  const [image, setImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  /* ---------------------- LOAD USER DATA ---------------------- */
   useEffect(() => {
-    const fetchUserData = async () => {
+    const loadUserData = async () => {
       try {
-        const userData = await AsyncStorage.getItem('user');
-        if (userData) {
-          const user = JSON.parse(userData);
-          setProfile(prev => ({
-            ...prev,
-            name: user.name || '',
-            email: user.email || '',
-            mobile: user.phone ? user.phone.replace('+63', '') : '', // Remove +63 for display
-          }));
-        } else {
-          Alert.alert('Error', 'No user data found. Please sign up first.');
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-        Alert.alert('Error', 'Failed to load profile data.');
+        const userData = await AsyncStorage.getItem("user");
+        if (!userData) return;
+
+        const user = JSON.parse(userData);
+        setProfile({
+          name: user.name || "",
+          email: user.email || "",
+          mobile: user.phone ? user.phone.replace("+63", "") : "",
+          street: user.street || "",
+          city: user.city || "",
+          district: user.district || "",
+        });
+
+        if (user.profileImage) setImage(user.profileImage);
+      } catch (err) {
+        console.log("Error loading user:", err);
+        Alert.alert("Error", "Unable to load profile information.");
       }
     };
-    fetchUserData();
+
+    loadUserData();
   }, []);
 
-  // Handle saving profile to backend
+  /* ---------------------- REQUEST PERMISSIONS ---------------------- */
+  const requestImagePermissions = async () => {
+    const result = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!result.granted) {
+      Alert.alert(
+        "Permission required",
+        "Permission to access photos is required to upload a profile picture."
+      );
+      return false;
+    }
+    return true;
+  };
+
+  /* ---------------------- PICK IMAGE ---------------------- */
+  const pickImage = async () => {
+    try {
+      const hasPermission = await requestImagePermissions();
+      if (!hasPermission) return;
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 0.8,
+      });
+
+      if (result.canceled) return;
+
+      // 3. Fix: Ensure that uri exists and is a string before setting state
+      if (result.assets && result.assets.length > 0 && result.assets[0].uri) {
+        // Assertion: result.assets[0].uri is a string
+        setImage(result.assets[0].uri);
+      } else if (result.uri) {
+        // This 'else if' is technically not needed for modern ImagePicker, 
+        // but if it runs, we ensure the type is string.
+        setImage(result.uri);
+      }
+    } catch (err) {
+      console.log("Image picker error DETAILS:", err);
+      Alert.alert("Error", "Could not pick image.");
+    }
+  };
+
+  /* ---------------------- HELPERS ---------------------- */
+  // 4. Fix: Explicitly define the type for the 'filename' parameter as string | null
+  const guessMimeType = (filename: string | null): string => {
+    // 5. Fix: Use null check and treat as string
+    const ext = (filename || "").split(".").pop()?.toLowerCase() ?? "jpeg";
+    if (ext === "jpg" || ext === "jpeg") return "image/jpeg";
+    if (ext === "png") return "image/png";
+    if (ext === "gif") return "image/gif";
+    return "image/jpeg";
+  };
+
+  /* ---------------------- SAVE PROFILE ---------------------- */
   const handleSave = async () => {
-    // Client-side validation
-    if (!profile.name || !profile.email || !profile.mobile || !profile.street || !profile.city || !profile.district) {
-      Alert.alert('Error', 'All fields are required.');
+    // ... (Validation remains the same)
+
+    if (
+      !profile.name ||
+      !profile.email ||
+      !profile.mobile ||
+      !profile.street ||
+      !profile.city ||
+      !profile.district
+    ) {
+      Alert.alert("Error", "Please fill out all fields.");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const token = await AsyncStorage.getItem('token');
+      const token = await AsyncStorage.getItem("token");
       if (!token) {
-        Alert.alert('Error', 'No authentication token found. Please log in.');
+        Alert.alert("Error", "You are not logged in.");
+        setIsLoading(false);
         return;
       }
 
+      const formData = new FormData();
+      formData.append("name", profile.name);
+      formData.append("email", profile.email);
+      formData.append("phone", `+63${profile.mobile}`);
+      formData.append("street", profile.street);
+      formData.append("city", profile.city);
+      formData.append("district", profile.district);
+
+      /* ==================================================== */
+      /* 🛠️ TypeScript Fixes in handleSave                   */
+      /* ==================================================== */
+      
+      // 6. Fix: Check if image is a string AND doesn't start with "http"
+      if (typeof image === 'string' && !image.startsWith("http")) {
+        // Since 'image' is guaranteed to be a string here:
+        const fileName = image.split("/").pop() || "photo.jpg";
+        const mimeType = guessMimeType(fileName);
+
+        const uri = image; 
+
+        // The type for the second argument of append needs to match the required type for file upload
+        formData.append("profileImage", {
+          uri,
+          name: fileName,
+          type: mimeType,
+          // TypeScript typically requires this object to conform to a specific type
+        } as unknown as Blob); // Use 'as unknown as Blob' to satisfy the FormData interface
+
+        console.log("File prepared for upload:", { uri, name: fileName, type: mimeType });
+      }
+
       const response = await fetch(`${BASE_URL}/api/profile`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          name: profile.name,
-          email: profile.email,
-          phone: `+63${profile.mobile}`, // Prepend +63 for backend
-          street: profile.street,
-          city: profile.city,
-          district: profile.district,
-        }),
+        body: formData,
       });
 
-      const data = await response.json();
+      const text = await response.text();
+      let json = null;
+      try {
+        json = JSON.parse(text);
+      } catch (e) {
+        console.log("Failed to parse JSON response:", text);
+      }
 
       if (response.ok) {
-        Alert.alert('Success', 'Profile updated successfully!');
-        router.push('/auth/Login'); // Navigate after save
+        Alert.alert("Success", json?.message || "Profile updated!");
+        
+        if (json?.profile) {
+          const stored = await AsyncStorage.getItem("user");
+          const parsed = stored ? JSON.parse(stored) : {};
+          
+          const updatedUser = {
+            ...parsed,
+            ...json.profile, 
+            profileImage: json.profile.profileImage || parsed.profileImage,
+          };
+          
+          await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+        }
+        
+        router.push("/auth/Login");
       } else {
-        Alert.alert('Error', data.message || 'Failed to update profile.');
+        Alert.alert("Error", json?.message || "Unable to update profile.");
       }
-    } catch (error) {
-      Alert.alert('Error', 'Network error. Please check your connection.');
-      console.error('Save profile error:', error);
+    } catch (err) {
+      console.log("Save profile error:", err);
+      Alert.alert("Error", "Network or server error.");
     } finally {
       setIsLoading(false);
     }
   };
 
+  /* ---------------------- UI ---------------------- */
   return (
     <View style={styles.container}>
       <BackButton />
       <Text style={styles.title}>Profile</Text>
+
       <View style={styles.avatarWrapper}>
-        <View style={styles.avatar}>
-          {/* If you want to allow changing the profile pic, add logic here */}
-          <Entypo name="camera" size={20} color="#534889" style={styles.cameraIcon} />
-        </View>
+        <TouchableOpacity onPress={pickImage}>
+          {image ? (
+            // Ensure Image source has a URI property
+            <Image source={{ uri: image }} style={styles.avatarImage} />
+          ) : (
+            <View style={styles.avatar}>
+              <Entypo name="camera" size={28} color="#534889" />
+            </View>
+          )}
+        </TouchableOpacity>
+        <Text style={styles.uploadText}>Tap to upload photo</Text>
       </View>
+      
+      {/* ... (Rest of the UI remains the same) */}
+
       <TextInput
         style={styles.input}
         placeholder="Full Name"
         placeholderTextColor="#D0D0D0"
         value={profile.name}
-        onChangeText={txt => setProfile(p => ({ ...p, name: txt }))}
+        onChangeText={(text) => setProfile({ ...profile, name: text })}
       />
+
       <View style={styles.rowInput}>
         <View style={styles.countryCodeBox}>
           <Text style={styles.countryCode}>+63</Text>
         </View>
         <TextInput
           style={[styles.input, styles.mobileInput]}
-          placeholder="Your mobile number"
+          placeholder="Mobile Number"
           placeholderTextColor="#D0D0D0"
-          keyboardType="phone-pad"
+          keyboardType="number-pad"
           value={profile.mobile}
-          onChangeText={txt => setProfile(p => ({ ...p, mobile: txt }))}
+          onChangeText={(text) => setProfile({ ...profile, mobile: text })}
         />
       </View>
+
       <TextInput
         style={styles.input}
         placeholder="Email"
         placeholderTextColor="#D0D0D0"
         keyboardType="email-address"
         value={profile.email}
-        onChangeText={txt => setProfile(p => ({ ...p, email: txt }))}
+        onChangeText={(text) => setProfile({ ...profile, email: text })}
+        editable={!profile.email} 
       />
+
       <TextInput
         style={styles.input}
         placeholder="Street"
         placeholderTextColor="#D0D0D0"
         value={profile.street}
-        onChangeText={txt => setProfile(p => ({ ...p, street: txt }))}
+        onChangeText={(text) => setProfile({ ...profile, street: text })}
       />
+
       <TextInput
         style={styles.input}
         placeholder="City"
         placeholderTextColor="#D0D0D0"
         value={profile.city}
-        onChangeText={txt => setProfile(p => ({ ...p, city: txt }))}
+        onChangeText={(text) => setProfile({ ...profile, city: text })}
       />
+
       <TextInput
         style={styles.input}
         placeholder="District"
         placeholderTextColor="#D0D0D0"
         value={profile.district}
-        onChangeText={txt => setProfile(p => ({ ...p, district: txt }))}
+        onChangeText={(text) => setProfile({ ...profile, district: text })}
       />
 
       <View style={styles.buttonRow}>
@@ -170,26 +321,73 @@ export default function CompleteProfile() {
   );
 }
 
+// ... (Styles remain the same)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 24,
-    backgroundColor: '#fff',
-    paddingTop: Platform.OS === 'android' ? 50 : 20,
+    paddingTop: Platform.OS === "android" ? 50 : 20,
+    backgroundColor: "#fff",
   },
-  title: { fontFamily: 'Poppins', fontSize: 22, color: '#414141', fontWeight: '600', marginBottom: 4, marginTop: 4, textAlign: 'center' },
-  avatarWrapper: { alignItems: 'center', marginBottom: 16 },
-  avatar: { width: 80, height: 80, backgroundColor: '#D0D0D0', borderRadius: 40, justifyContent: 'center', alignItems: 'center' },
-  cameraIcon: { position: 'absolute', bottom: -10, right: 0 },
+  title: {
+    fontSize: 22,
+    fontFamily: "Poppins",
+    fontWeight: "600",
+    color: "#414141",
+    textAlign: "center",
+  },
+  avatarWrapper: {
+    alignItems: "center",
+    marginVertical: 16,
+  },
+  avatar: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: "#D0D0D0",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatarImage: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+  },
+  uploadText: {
+    fontFamily: "Poppins",
+    fontSize: 13,
+    marginTop: 5,
+    color: "#534889",
+  },
   input: {
-    fontFamily: 'Poppins', fontSize: 15, color: '#414141', borderWidth: 1,
-    borderColor: '#D0D0D0', backgroundColor: '#fff', borderRadius: 6,
-    paddingVertical: 12, paddingHorizontal: 14, marginVertical: 7,
+    fontFamily: "Poppins",
+    borderWidth: 1,
+    borderColor: "#D0D0D0",
+    borderRadius: 6,
+    padding: 12,
+    marginVertical: 7,
+    backgroundColor: "#fff",
+    color: "#414141",
   },
-  rowInput: { flexDirection: 'row', alignItems: 'center', marginVertical: 7 },
-  countryCodeBox: { borderWidth: 1, borderColor: '#D0D0D0', borderRadius: 6, paddingVertical: 10, paddingHorizontal: 10, marginRight: 8, backgroundColor: '#fff' },
-  countryCode: { fontFamily: 'Poppins', color: '#414141', fontSize: 15 },
-  mobileInput: { flex: 1, marginLeft: 0 },
-  buttonRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 20, gap: 12 },
+  rowInput: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 7,
+  },
+  countryCodeBox: {
+    borderWidth: 1,
+    borderColor: "#D0D0D0",
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  countryCode: { fontFamily: "Poppins", fontSize: 15 },
+  mobileInput: { flex: 1 },
+  buttonRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 20,
+  },
   halfButton: { flex: 1 },
 });

@@ -1,69 +1,125 @@
+import { v2 as cloudinary } from "cloudinary";
 import express from "express";
 import jwt from "jsonwebtoken";
+import multer from "multer";
 import Profile from "../models/Profile.js";
-import User from "../models/User.js"; // Import User model to get email from token
+import User from "../models/User.js";
 
 const router = express.Router();
 
-// Inline auth middleware
-const protect = async (req, res, next) => {
-    const token = req.header("Authorization")?.replace("Bearer ", "");
-    if (!token) {
-        return res.status(401).json({ message: "No token provided" });
-    }
-
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findById(decoded.userId).select("-password"); // Fetch user without password
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-        req.user = user; // Attach user to req
-        next();
-    } catch (error) {
-        return res.status(401).json({ message: "Invalid token" });
-    }
-};
-
-// GET /api/profile - Fetch profile for authenticated user
-router.get("/", protect, async (req, res) => {
-    try {
-        const profile = await Profile.findOne({ email: req.user.email });
-        if (!profile) {
-            return res.status(404).json({ message: "Profile not found" });
-        }
-        res.json(profile);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Server error" });
-    }
+/* ================== CLOUDINARY CONFIG ================== */
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// PUT /api/profile - Update or create profile for authenticated user
-router.put("/", protect, async (req, res) => {
-    try {
-        const { name, email, phone, street, city, district } = req.body;
+/* ================== MULTER CONFIG ================== */
+const storage = multer.diskStorage({});
+const upload = multer({ storage });
 
-        // Validation
-        if (!name || !email || !phone || !street || !city || !district) {
-            return res.status(400).json({ message: "All fields are required" });
-        }
+/* ================== AUTH MIDDLEWARE ================== */
+const protect = async (req, res, next) => {
+  const token = req.header("Authorization")?.replace("Bearer ", "");
+  if (!token) return res.status(401).json({ message: "No token provided" });
 
-        // Find and update profile, or create if it doesn't exist
-        const profile = await Profile.findOneAndUpdate(
-            { email: req.user.email },
-            { name, email, phone, street, city, district },
-            { new: true, runValidators: true, upsert: true } // Added upsert: true to create if not found
-        );
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-        res.json({ message: "Profile updated successfully", profile });
-    } catch (error) {
-        console.error(error);
-        if (error.code === 11000) { // Duplicate key error (e.g., unique email)
-            return res.status(400).json({ message: "Email already exists" });
-        }
-        res.status(500).json({ message: "Server error" });
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error("Auth error:", error);
+    res.status(401).json({ message: "Invalid token" });
+  }
+};
+
+/* ================== ADMIN CHECK MIDDLEWARE ================== */
+const adminProtect = (req, res, next) => {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ message: "Access denied. Admins only." });
+  }
+  next();
+};
+
+/* ================== GET PROFILE ================== */
+router.get("/", protect, async (req, res) => {
+  try {
+    const profile = await Profile.findOne({ email: req.user.email });
+    if (!profile) return res.status(404).json({ message: "Profile not found" });
+
+    res.json({
+      profile,
+      role: req.user.role, // return role for frontend navigation
+    });
+  } catch (error) {
+    console.error("Get profile error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+/* ================== GET ALL PROFILES (ADMIN ONLY) ================== */
+router.get("/all", protect, adminProtect, async (req, res) => {
+  try {
+    const profiles = await Profile.find();
+    res.json({ profiles });
+  } catch (error) {
+    console.error("Get all profiles error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+/* ================== UPDATE PROFILE ================== */
+router.put("/", protect, upload.single("profileImage"), async (req, res) => {
+  try {
+    const { name, email, phone, street, city, district } = req.body;
+
+    if (!name || !email || !phone || !street || !city || !district) {
+      return res.status(400).json({ message: "All fields are required" });
     }
+
+    let profileImageUrl;
+    if (req.file) {
+      const uploaded = await cloudinary.uploader.upload(req.file.path, {
+        folder: "SabayTa_Profiles",
+      });
+      profileImageUrl = uploaded.secure_url;
+    }
+
+    const updatedProfile = await Profile.findOneAndUpdate(
+      { email: req.user.email },
+      {
+        name,
+        email,
+        phone,
+        street,
+        city,
+        district,
+        ...(profileImageUrl && { profileImage: profileImageUrl }),
+      },
+      { new: true, upsert: true }
+    );
+
+    res.json({
+      message: "Profile updated successfully",
+      profile: updatedProfile,
+      role: req.user.role,
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+
+    if (error.http_code || error.message.includes("Cloudinary")) {
+      return res.status(500).json({ message: "Failed to upload image to Cloudinary" });
+    }
+
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "Duplicate field value" });
+    }
+
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 export default router;

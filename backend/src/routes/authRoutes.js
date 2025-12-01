@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import express from "express";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
@@ -8,6 +9,7 @@ const generateToken = (userId) => {
     return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "15d" });
 };
 
+// ---------------- REGISTER ----------------
 router.post("/register", async (req, res) => {
     try {
         const { name, email, phone, gender, password } = req.body;
@@ -30,7 +32,8 @@ router.post("/register", async (req, res) => {
             email,
             phone,
             gender,
-            password
+            password,
+            role: "user" // default role
         });
 
         await user.save();
@@ -43,19 +46,59 @@ router.post("/register", async (req, res) => {
                 name: user.name,
                 email: user.email,
                 phone: user.phone,
-                gender: user.gender
+                gender: user.gender,
+                role: user.role
             }
         });
 
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Internal Server Error" });
-
     }
 });
 
+// ---------------- LOGIN ----------------
 router.post("/login", async (req, res) => {
-    res.send("login");
+    try {
+        const { emailOrPhone, password } = req.body;
+
+        if (!emailOrPhone || !password) {
+            return res.status(400).json({ message: "Email/Phone and password are required" });
+        }
+
+        // Find user by email or phone
+        const user = await User.findOne({
+            $or: [{ email: emailOrPhone }, { phone: emailOrPhone }]
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Compare password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: "Invalid password" });
+        }
+
+        const token = generateToken(user._id);
+
+        res.json({
+            token,
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                gender: user.gender,
+                role: user.role
+            }
+        });
+
+    } catch (error) {
+        console.error("Login error:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
 });
 
 export default router;

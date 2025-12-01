@@ -1,39 +1,20 @@
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
 
-
 const userSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    phone: {
-        type: String,
-        required: true
-    },
-    gender: {
-        type: String,
-        required: true
-    },
-    password: {
-        type: String,
-        required: true,
-        minlength: 6
-    },
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    phone: { type: String, required: true },
+    gender: { type: String, required: true },
+    password: { type: String, required: true, minlength: 6 },
+    role: { type: String, enum: ['user', 'admin'], default: 'user' } // <-- default role
 });
 
 userSchema.pre("save", async function (next) {
     if (!this.isModified("password")) return next();
-
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
 });
 
 const User = mongoose.model("User", userSchema);
-
 export default User;
