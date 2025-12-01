@@ -71,7 +71,8 @@ export default function SignUpPage() {
         await AsyncStorage.setItem('user', JSON.stringify(data.user));
 
         Alert.alert('Success', 'Account created successfully!');
-        router.push(data.user.role === 'admin' ? '/admin/AdminDashboard' : '/user/UserDashboard');
+        router.push('/auth/Login');
+
       } else {
         Alert.alert('Error', data.message || 'Signup failed.');
       }
