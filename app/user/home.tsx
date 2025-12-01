@@ -236,6 +236,17 @@ export default function HomeScreen() {
       console.log("Confirmed Trip Details:", fromLocation, toLocation);
       fetchRoute(fromLocation, toLocation);
       closeModal();
+
+      // Navigate to booking details
+      router.push({
+        pathname: '/user/booking-details',
+        params: {
+          from: fromLocation.name,
+          to: toLocation.name,
+          distance: '5.2 km',
+          time: '15 mins'
+        }
+      });
     } else {
       alert("Please select both From and To locations.");
     }

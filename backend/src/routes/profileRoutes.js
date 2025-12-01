@@ -122,4 +122,37 @@ router.put("/", protect, upload.single("profileImage"), async (req, res) => {
   }
 });
 
+/* ================== UPDATE PROFILE PHOTO ONLY ================== */
+router.put("/photo", protect, upload.single("profileImage"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No image file provided" });
+    }
+
+    const uploaded = await cloudinary.uploader.upload(req.file.path, {
+      folder: "SabayTa_Profiles",
+    });
+
+    const updatedProfile = await Profile.findOneAndUpdate(
+      { email: req.user.email },
+      { profileImage: uploaded.secure_url },
+      { new: true, upsert: true }
+    );
+
+    res.json({
+      message: "Profile photo updated successfully",
+      profileImage: uploaded.secure_url,
+      profile: updatedProfile,
+    });
+  } catch (error) {
+    console.error("Update profile photo error:", error);
+
+    if (error.http_code || error.message.includes("Cloudinary")) {
+      return res.status(500).json({ message: "Failed to upload image to Cloudinary" });
+    }
+
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 export default router;
