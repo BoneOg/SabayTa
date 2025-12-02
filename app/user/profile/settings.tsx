@@ -1,8 +1,8 @@
+import BackButton from '@/components/ui/BackButton';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { Alert, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import BackButton from '../../../components/BackButton';
 
 const options = ['Change Password', 'Privacy Policy', 'Contact Us', 'Delete Account'];
 

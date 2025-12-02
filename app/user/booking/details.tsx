@@ -1,109 +1,32 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Alert, Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { BASE_URL } from '../../config';
+import React from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function BookingDetailsScreen() {
     const router = useRouter();
     const params = useLocalSearchParams();
-    const [showConfirmModal, setShowConfirmModal] = useState(false);
-    const [isSearching, setIsSearching] = useState(false);
-    const [bookingId, setBookingId] = useState<string | null>(null);
 
     const fromLocation = params.from as string || 'Unknown';
     const toLocation = params.to as string || 'Unknown';
     const distance = params.distance as string || '5.2 km';
     const time = params.time as string || '15 mins';
 
-    const handleConfirmRide = async () => {
-        setIsSearching(true);
-        setShowConfirmModal(true);
-
-        try {
-            const userStr = await AsyncStorage.getItem('user');
-            if (!userStr) {
-                Alert.alert("Error", "User not found. Please login again.");
-                setIsSearching(false);
-                setShowConfirmModal(false);
-                return;
-            }
-            const user = JSON.parse(userStr);
-
-            const bookingData = {
-                userId: user._id,
-                pickupLocation: {
-                    lat: parseFloat(params.fromLat as string),
-                    lon: parseFloat(params.fromLon as string),
-                    name: fromLocation
-                },
-                dropoffLocation: {
-                    lat: parseFloat(params.toLat as string),
-                    lon: parseFloat(params.toLon as string),
-                    name: toLocation
-                },
-                distance: distance,
-                estimatedTime: time
-            };
-
-            const response = await fetch(`${BASE_URL}/api/bookings/create`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(bookingData)
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                setBookingId(data.booking._id);
-            } else {
-                Alert.alert("Error", data.message || "Failed to create booking");
-                setIsSearching(false);
-                setShowConfirmModal(false);
-            }
-
-        } catch (error) {
-            console.error("Booking error:", error);
-            Alert.alert("Error", "Network error. Please try again.");
-            setIsSearching(false);
-            setShowConfirmModal(false);
-        }
-    };
-
-    const handleDone = () => {
-        setShowConfirmModal(false);
+    const handleConfirmRide = () => {
         router.push({
-            pathname: '/user/driver-tracking',
-            params: { from: fromLocation, to: toLocation }
-        });
-    };
-
-    const handleCancelBooking = async () => {
-        if (!bookingId) {
-            setShowConfirmModal(false);
-            setIsSearching(false);
-            return;
-        }
-
-        try {
-            const response = await fetch(`${BASE_URL}/api/bookings/${bookingId}/cancel`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-            if (response.ok) {
-                setShowConfirmModal(false);
-                setIsSearching(false);
-                setBookingId(null);
-                Alert.alert("Cancelled", "Your booking has been cancelled.");
-            } else {
-                Alert.alert("Error", "Failed to cancel booking.");
+            pathname: '/user/home',
+            params: {
+                action: 'search_driver',
+                fromLat: params.fromLat,
+                fromLon: params.fromLon,
+                fromName: fromLocation,
+                toLat: params.toLat,
+                toLon: params.toLon,
+                toName: toLocation,
+                distance: distance,
+                time: time
             }
-        } catch (error) {
-            console.error("Error cancelling booking:", error);
-            Alert.alert("Error", "Network error.");
-        }
+        });
     };
 
     return (
@@ -160,45 +83,7 @@ export default function BookingDetailsScreen() {
                     <Text style={styles.confirmButtonText}>Confirm Ride</Text>
                 </TouchableOpacity>
             </View>
-
-            <Modal visible={showConfirmModal} transparent animationType="fade">
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        {isSearching ? (
-                            <View style={{ alignItems: 'center', padding: 20 }}>
-                                <Image
-                                    source={require('../../assets/images/SabayTa_logo...png')}
-                                    style={{ width: 100, height: 100, marginBottom: 20 }}
-                                    resizeMode="contain"
-                                />
-                                <Text style={[styles.modalTitle, { fontSize: 18, textAlign: 'center' }]}>Searching for drivers...</Text>
-                                <Text style={styles.modalMessage}>Please wait while we find a driver near you.</Text>
-                                <TouchableOpacity style={styles.cancelButton} onPress={handleCancelBooking}>
-                                    <Text style={styles.cancelButtonText}>Cancel</Text>
-                                </TouchableOpacity>
-                            </View>
-                        ) : (
-                            <>
-                                <View style={styles.checkmarkContainer}>
-                                    <View style={styles.checkmarkBadge}>
-                                        <Ionicons name="checkmark" size={60} color="#534889" />
-                                    </View>
-                                </View>
-
-                                <Text style={styles.modalTitle}>Ride Booked</Text>
-                                <Text style={styles.modalMessage}>
-                                    You've successfully confirmed your ride. Sit tight while your driver heads your way.
-                                </Text>
-
-                                <TouchableOpacity style={styles.doneButton} onPress={handleDone}>
-                                    <Text style={styles.doneButtonText}>Done</Text>
-                                </TouchableOpacity>
-                            </>
-                        )}
-                    </View>
-                </View>
-            </Modal>
-        </View >
+        </View>
     );
 }
 
@@ -210,19 +95,21 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingTop: 50,
-        paddingBottom: 20,
+        paddingHorizontal: 15,
+        paddingTop: 15, // Reduced top padding
+        paddingBottom: 15, // Reduced bottom padding
         borderBottomWidth: 1,
-        borderBottomColor: '#F0F0F0',
+        borderBottomColor: '#eee', // Lighter border color to match modal
     },
     backButton: {
-        marginRight: 15,
+        padding: 5, // Added padding for touch area
+        marginRight: 10, // Reduced margin
     },
     headerTitle: {
-        fontSize: 20,
-        fontWeight: '600',
+        fontSize: 18, // Slightly smaller font to match modal title
+        fontWeight: 'bold',
         color: '#000',
+        marginLeft: 5,
     },
     content: {
         flex: 1,
@@ -292,21 +179,31 @@ const styles = StyleSheet.create({
         color: '#534889',
     },
     footer: {
-        padding: 20,
-        backgroundColor: '#fff',
-        borderTopWidth: 1,
-        borderTopColor: '#F0F0F0',
-        paddingBottom: 130,
+        position: 'absolute',
+        bottom: 100,
+        left: 20,
+        right: 20,
+        backgroundColor: 'transparent',
+        zIndex: 1000,
     },
     confirmButton: {
         backgroundColor: '#534889',
         padding: 16,
-        borderRadius: 14,
+        borderRadius: 12,
         alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
     confirmButtonText: {
         color: '#fff',
-        fontSize: 18,
+        fontSize: 16, // Match modal button text size
         fontWeight: 'bold',
     },
     modalOverlay: {
@@ -359,8 +256,8 @@ const styles = StyleSheet.create({
     },
     cancelButton: {
         backgroundColor: '#E35A5A',
-        paddingVertical: 12,
-        paddingHorizontal: 40,
+        paddingVertical: 16,
+        paddingHorizontal: 64,
         borderRadius: 14,
         marginTop: 10,
     },

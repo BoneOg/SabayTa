@@ -1,7 +1,7 @@
+import BackButton from '@/components/ui/BackButton';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import BackButton from '../../../components/BackButton';
 
 export const options = {
     tabBarStyle: { display: 'none' },

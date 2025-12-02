@@ -1,7 +1,7 @@
+import BackButton from '@/components/ui/BackButton';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
-import BackButton from '../../../components/BackButton';
 
 const PrivacyPolicy = () => {
   const router = useRouter();

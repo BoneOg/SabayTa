@@ -14,8 +14,8 @@ import {
   View,
 } from "react-native";
 
-import BackButton from "@/components/BackButton";
 import Button from "@/components/Button";
+import BackButton from "@/components/ui/BackButton";
 import { BASE_URL } from "../../config";
 
 // 1. Define the type for the Profile state
@@ -161,14 +161,14 @@ export default function CompleteProfile() {
       /* ==================================================== */
       /* 🛠️ TypeScript Fixes in handleSave                   */
       /* ==================================================== */
-      
+
       // 6. Fix: Check if image is a string AND doesn't start with "http"
       if (typeof image === 'string' && !image.startsWith("http")) {
         // Since 'image' is guaranteed to be a string here:
         const fileName = image.split("/").pop() || "photo.jpg";
         const mimeType = guessMimeType(fileName);
 
-        const uri = image; 
+        const uri = image;
 
         // The type for the second argument of append needs to match the required type for file upload
         formData.append("profileImage", {
@@ -199,20 +199,20 @@ export default function CompleteProfile() {
 
       if (response.ok) {
         Alert.alert("Success", json?.message || "Profile updated!");
-        
+
         if (json?.profile) {
           const stored = await AsyncStorage.getItem("user");
           const parsed = stored ? JSON.parse(stored) : {};
-          
+
           const updatedUser = {
             ...parsed,
-            ...json.profile, 
+            ...json.profile,
             profileImage: json.profile.profileImage || parsed.profileImage,
           };
-          
+
           await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
         }
-        
+
         router.push("/auth/Login");
       } else {
         Alert.alert("Error", json?.message || "Unable to update profile.");
@@ -244,7 +244,7 @@ export default function CompleteProfile() {
         </TouchableOpacity>
         <Text style={styles.uploadText}>Tap to upload photo</Text>
       </View>
-      
+
       {/* ... (Rest of the UI remains the same) */}
 
       <TextInput
@@ -276,7 +276,7 @@ export default function CompleteProfile() {
         keyboardType="email-address"
         value={profile.email}
         onChangeText={(text) => setProfile({ ...profile, email: text })}
-        editable={!profile.email} 
+        editable={!profile.email}
       />
 
       <TextInput

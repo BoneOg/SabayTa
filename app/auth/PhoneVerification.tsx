@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import BackButton from '@/components/BackButton';
 import Button from '@/components/Button';
-import { Platform, StyleSheet, Text, TextInput, View } from 'react-native';
+import BackButton from '@/components/ui/BackButton';
 import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export default function PhoneVerification() {
   const router = useRouter();

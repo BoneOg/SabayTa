@@ -1,5 +1,5 @@
-import BackButton from '@/components/BackButton';
 import Button from '@/components/Button';
+import BackButton from '@/components/ui/BackButton';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';

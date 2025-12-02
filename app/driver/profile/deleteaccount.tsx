@@ -1,3 +1,4 @@
+import BackButton from '@/components/ui/BackButton';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import {
@@ -9,7 +10,6 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import BackButton from '../../../components/BackButton';
 
 const DriverDeleteAccount = () => {
     const router = useRouter();

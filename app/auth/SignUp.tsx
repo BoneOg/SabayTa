@@ -1,5 +1,5 @@
-import BackButton from '@/components/BackButton';
 import Button from '@/components/Button';
+import BackButton from '@/components/ui/BackButton';
 import { Entypo, FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';

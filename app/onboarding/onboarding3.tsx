@@ -1,7 +1,7 @@
-import ArrowButton from '@/components/ArrowButton';
-import SkipButton from '@/components/SkipButton';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import ArrowButton from '@/components/ui/ArrowButton';
+import SkipButton from '@/components/ui/SkipButton';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { StyleSheet } from 'react-native';

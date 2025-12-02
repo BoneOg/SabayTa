@@ -1,3 +1,4 @@
+import BackButton from '@/components/ui/BackButton';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
@@ -11,7 +12,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import BackButton from '../../../components/BackButton';
 
 const complaintTypes = [
   'Vehicle not clean',
