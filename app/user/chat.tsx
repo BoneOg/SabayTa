@@ -156,14 +156,14 @@ export default function ChatScreen() {
 
             <View style={[styles.inputContainer, { paddingBottom: isKeyboardVisible ? 60 : 90 }]}>
                 <TouchableOpacity onPress={pickImage} style={styles.iconButton}>
-                    <Ionicons name="image" size={24} color="#622C9B" />
+                    <Ionicons name="image" size={24} color="#534889" />
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     onPress={() => setShowEmojiPicker(!showEmojiPicker)}
                     style={styles.iconButton}
                 >
-                    <Ionicons name="happy" size={24} color="#622C9B" />
+                    <Ionicons name="happy" size={24} color="#534889" />
                 </TouchableOpacity>
 
                 <TextInput
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     },
     userMessage: {
         alignSelf: 'flex-end',
-        backgroundColor: '#622C9B',
+        backgroundColor: '#534889',
     },
     driverMessage: {
         alignSelf: 'flex-start',
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
         color: '#000',
     },
     sendButton: {
-        backgroundColor: '#622C9B',
+        backgroundColor: '#534889',
         width: 40,
         height: 40,
         borderRadius: 20,

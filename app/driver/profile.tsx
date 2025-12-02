@@ -147,7 +147,7 @@ export default function DriverProfileScreen() {
                 {/* Profile Info */}
                 <View style={styles.profileSection}>
                     {loading ? (
-                        <ActivityIndicator size="large" color="#622C9B" style={{ marginVertical: 20 }} />
+                        <ActivityIndicator size="large" color="#534889" style={{ marginVertical: 20 }} />
                     ) : (
                         <>
                             <View style={styles.profileImageContainer}>
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 0,
         right: 0,
-        backgroundColor: '#622C9B',
+        backgroundColor: '#534889',
         width: 36,
         height: 36,
         borderRadius: 18,
@@ -339,12 +339,12 @@ const styles = StyleSheet.create({
     },
 
     activeToggle: {
-        backgroundColor: '#622C9B',
+        backgroundColor: '#534889',
     },
 
     toggleText: {
         fontSize: 15,
-        color: '#622C9B',
+        color: '#534889',
         fontFamily: 'Poppins',
     },
 

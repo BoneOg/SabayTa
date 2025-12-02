@@ -2,7 +2,7 @@ import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, Keyboard, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Animated, Dimensions, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 
 const { height, width } = Dimensions.get('window');
@@ -43,7 +43,9 @@ export default function HomeScreen() {
   const mapRef = useRef<MapView>(null);
 
   const toFieldRef = useRef<TextInput>(null);
+  const fromFieldRef = useRef<TextInput>(null);
   const searchTimeoutRef = useRef<number | null>(null);
+  const isManualSearch = useRef(false);
 
   const [fromText, setFromText] = useState('');
   const [fromSuggestions, setFromSuggestions] = useState<NominatimResult[]>([]);
@@ -55,7 +57,16 @@ export default function HomeScreen() {
   const [routeCoords, setRouteCoords] = useState<{ latitude: number; longitude: number }[]>([]);
   const [tripDetails, setTripDetails] = useState<{ distance: string; duration: string } | null>(null);
   const [selectingLocation, setSelectingLocation] = useState<'from' | 'to' | null>(null);
-  const [isManualSearch, setIsManualSearch] = useState(false);
+
+  // New Search Modal State
+  const [searchModalVisible, setSearchModalVisible] = useState(false);
+  const [activeSearchField, setActiveSearchField] = useState<'from' | 'to' | null>(null);
+  const [searchText, setSearchText] = useState('');
+  const [searchSuggestions, setSearchSuggestions] = useState<NominatimResult[]>([]);
+  const searchInputRef = useRef<TextInput>(null);
+
+  // Force refresh
+
 
   // ====================================================================
   // LOCATION TRACKING
@@ -198,25 +209,72 @@ export default function HomeScreen() {
     checkAndShrinkModal(fromLocation, selected);
   };
 
-  const setFromToCurrentLocation = async () => {
+  const openSearchModal = (type: 'from' | 'to') => {
+    setActiveSearchField(type);
+    setSearchText(type === 'from' ? fromText : toText);
+    setSearchSuggestions([]); // Clear previous suggestions or fetch new ones if needed
+    setSearchModalVisible(true);
+    // Focus happens automatically via autoFocus on the TextInput in the new modal
+  };
+
+  const handleSearchTextChange = (text: string) => {
+    setSearchText(text);
+    debouncedFetchSuggestions(text, setSearchSuggestions);
+  };
+
+  const clearSearchText = () => {
+    setSearchText('');
+    setSearchSuggestions([]);
+    searchInputRef.current?.focus();
+  };
+
+  const selectLocationFromSearch = (item: NominatimResult) => {
+    const selected = {
+      lat: parseFloat(item.lat),
+      lon: parseFloat(item.lon),
+      name: item.display_name,
+    };
+
+    if (activeSearchField === 'from') {
+      setFromLocation(selected);
+      setFromText(item.display_name);
+      checkAndShrinkModal(selected, toLocation);
+    } else {
+      setToLocation(selected);
+      setToText(item.display_name);
+      checkAndShrinkModal(fromLocation, selected);
+    }
+
+    setSearchModalVisible(false);
+    setActiveSearchField(null);
+  };
+
+  const useCurrentLocation = async () => {
     if (!region) return;
     const address = await getAddressFromCoords(region.latitude, region.longitude);
     const selected = { lat: region.latitude, lon: region.longitude, name: address };
 
-    setFromLocation(selected);
-    setFromText(address);
-    setFromSuggestions([]);
-    checkAndShrinkModal(selected, toLocation);
-    toFieldRef.current?.focus();
+    if (activeSearchField === 'from') {
+      setFromLocation(selected);
+      setFromText(address);
+      checkAndShrinkModal(selected, toLocation);
+    } else {
+      setToLocation(selected);
+      setToText(address);
+      checkAndShrinkModal(fromLocation, selected);
+    }
+    setSearchModalVisible(false);
+    setActiveSearchField(null);
   };
 
-  const handleInputFocus = (type: 'from' | 'to') => {
-    if (isManualSearch) return; // If manually searching, allow default focus behavior
+  const openDropPin = () => {
+    if (!activeSearchField) return;
 
-    // Dismiss keyboard and switch to map mode
-    Keyboard.dismiss();
+    setSearchModalVisible(false);
+    // Close the main modal temporarily to show map
     setModalVisible(false);
-    setSelectingLocation(type);
+
+    setSelectingLocation(activeSearchField);
 
     // Animate pin selection UI up
     Animated.timing(pinSelectionAnim, {
@@ -224,17 +282,19 @@ export default function HomeScreen() {
       duration: 300,
       useNativeDriver: false,
     }).start();
+  };
 
-    // Center map on existing location if available, else current region
-    const targetLoc = type === 'from' ? fromLocation : toLocation;
-    if (targetLoc && mapRef.current) {
-      mapRef.current.animateToRegion({
-        latitude: targetLoc.lat,
-        longitude: targetLoc.lon,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      });
-    }
+  const cancelDropPin = () => {
+    closePinSelection(() => {
+      // Re-open search modal
+      setModalVisible(true); // Ensure main modal is technically "open" (background)
+      setSearchModalVisible(true);
+    });
+  };
+
+  const handleInputFocus = (type: 'from' | 'to') => {
+    // Instead of focusing directly, open the new search modal
+    openSearchModal(type);
   };
 
   const closePinSelection = (callback?: () => void) => {
@@ -268,19 +328,8 @@ export default function HomeScreen() {
   };
 
   const switchToManualSearch = () => {
-    closePinSelection(() => {
-      setIsManualSearch(true);
-      setModalVisible(true);
-      // We need to wait for modal to open before focusing
-      setTimeout(() => {
-        if (selectingLocation === 'from') {
-          // Focus 'from' (not easily accessible via ref here without more changes, but user can tap)
-        } else {
-          toFieldRef.current?.focus();
-        }
-        setIsManualSearch(false); // Reset flag
-      }, 500);
-    });
+    // This function is effectively replaced by cancelDropPin but kept for safety or if needed elsewhere
+    cancelDropPin();
   };
 
   const fetchRoute = useCallback(async (start: SelectedLocation, end: SelectedLocation) => {
@@ -334,7 +383,7 @@ export default function HomeScreen() {
       fetchRoute(fromLocation, toLocation);
       closeModal();
 
-      // Navigate to booking details
+      // Navigate to b
       router.push({
         pathname: '/user/booking-details',
         params: {
@@ -417,6 +466,7 @@ export default function HomeScreen() {
           initialRegion={region} // <-- only sets initial position
           showsMyLocationButton={false}
           onRegionChangeComplete={(r) => setDraggedRegion(r)}
+          userInterfaceStyle="light"
         >
           {/* User location marker - Hide if From location is selected */}
           {!fromLocation && (
@@ -441,7 +491,7 @@ export default function HomeScreen() {
           {/* Optional: Markers for FROM and TO */}
           {fromLocation && (
             <Marker coordinate={{ latitude: fromLocation.lat, longitude: fromLocation.lon }} title="From">
-              <View style={[styles.userMarker, { backgroundColor: "#622C9B" }]}>
+              <View style={[styles.userMarker, { backgroundColor: "#534889" }]}>
                 <Ionicons name="location-sharp" size={24} color="#fff" />
               </View>
             </Marker>
@@ -458,7 +508,7 @@ export default function HomeScreen() {
         {/* CENTER PIN FOR SELECTION */}
         {selectingLocation && (
           <View style={styles.centerPinContainer} pointerEvents="none">
-            <Ionicons name="location-sharp" size={40} color={selectingLocation === 'from' ? "#622C9B" : "#EA4335"} />
+            <Ionicons name="location-sharp" size={40} color={selectingLocation === 'from' ? "#534889" : "#EA4335"} />
           </View>
         )}
 
@@ -469,8 +519,8 @@ export default function HomeScreen() {
               Drag map to select {selectingLocation === 'from' ? "Pickup" : "Drop-off"} Location
             </Text>
             <View style={styles.pinSelectionButtons}>
-              <TouchableOpacity style={styles.secondaryButton} onPress={switchToManualSearch}>
-                <Text style={styles.secondaryButtonText}>Search Instead</Text>
+              <TouchableOpacity style={styles.secondaryButton} onPress={cancelDropPin}>
+                <Text style={styles.secondaryButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.primaryButton} onPress={confirmPinLocation}>
                 <Text style={styles.primaryButtonText}>Confirm Location</Text>
@@ -518,58 +568,22 @@ export default function HomeScreen() {
               <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
                 {/* FROM INPUT */}
                 <View style={{ position: 'relative', marginBottom: 10 }}>
-                  <View style={styles.inputWithIcon}>
+                  <TouchableOpacity style={styles.inputWithIcon} onPress={() => openSearchModal('from')}>
                     <MaterialIcons name="my-location" size={20} color="#494949ff" style={{ marginRight: 8 }} />
-                    <TextInput
-                      placeholder="From"
-                      placeholderTextColor="#494949ff"
-                      style={styles.input}
-                      value={fromText}
-                      onChangeText={handleFromTextChange}
-                      onFocus={() => handleInputFocus('from')}
-                    />
-                    <TouchableOpacity onPress={setFromToCurrentLocation} style={styles.myLocationButton}>
-                      <MaterialIcons name="my-location" size={20} color="#534889" />
-                    </TouchableOpacity>
-                  </View>
-
-                  {fromSuggestions.length > 0 && (
-                    <View style={[styles.suggestionsContainer, { position: 'absolute', top: 45, left: 0, right: 0, zIndex: 1000 }]}>
-                      {fromSuggestions.map(item => (
-                        <TouchableOpacity key={item.place_id} style={styles.suggestionItem} onPress={() => selectFromLocation(item)}>
-                          <Ionicons name="pin-outline" size={18} color="#a2a2a2ff" style={{ marginRight: 8 }} />
-                          <Text style={styles.suggestionText} numberOfLines={1}>{item.display_name}</Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  )}
+                    <Text style={[styles.input, { paddingVertical: 12 }]}>
+                      {fromText || "From"}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
 
                 {/* TO INPUT */}
                 <View style={{ position: 'relative', marginTop: 10 }}>
-                  <View style={styles.inputWithIcon}>
+                  <TouchableOpacity style={styles.inputWithIcon} onPress={() => openSearchModal('to')}>
                     <Ionicons name="location-outline" size={20} color="#494949ff" style={{ marginRight: 8 }} />
-                    <TextInput
-                      ref={toFieldRef}
-                      placeholder="To"
-                      placeholderTextColor="#494949ff"
-                      style={styles.input}
-                      value={toText}
-                      onChangeText={handleToTextChange}
-                      onFocus={() => handleInputFocus('to')}
-                    />
-                  </View>
-
-                  {toSuggestions.length > 0 && (
-                    <View style={[styles.suggestionsContainer, { position: 'absolute', top: 45, left: 0, right: 0, zIndex: 1000 }]}>
-                      {toSuggestions.map(item => (
-                        <TouchableOpacity key={item.place_id} style={styles.suggestionItem} onPress={() => selectToLocation(item)}>
-                          <Ionicons name="pin-outline" size={18} color="#a2a2a2ff" style={{ marginRight: 8 }} />
-                          <Text style={styles.suggestionText} numberOfLines={1}>{item.display_name}</Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  )}
+                    <Text style={[styles.input, { paddingVertical: 12 }]}>
+                      {toText || "To"}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               </ScrollView>
 
@@ -581,6 +595,70 @@ export default function HomeScreen() {
             </Animated.View>
           </View>
         )}
+
+        {/* NEW SEARCH MODAL */}
+        {searchModalVisible && (
+          <View style={styles.fullScreenModal}>
+            <SafeAreaView style={{ flex: 1 }}>
+              <View style={styles.searchModalHeader}>
+                <TouchableOpacity onPress={() => setSearchModalVisible(false)} style={styles.closeSearchButton}>
+                  <Ionicons name="arrow-back" size={24} color="#000" />
+                </TouchableOpacity>
+                <Text style={styles.searchModalTitle}>
+                  {activeSearchField === 'from' ? "Set Pickup Location" : "Set Drop Off Location"}
+                </Text>
+              </View>
+
+              <View style={styles.searchInputContainer}>
+                <View style={styles.searchInputWrapper}>
+                  <Ionicons name="search" size={20} color="#534889" style={{ marginRight: 8 }} />
+                  <TextInput
+                    ref={searchInputRef}
+                    style={styles.searchInput}
+                    placeholder="Search location"
+                    value={searchText}
+                    onChangeText={handleSearchTextChange}
+                    autoFocus={true}
+                  />
+                  {searchText.length > 0 && (
+                    <TouchableOpacity onPress={clearSearchText}>
+                      <Ionicons name="close-circle" size={20} color="#a2a2a2" />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+
+              <TouchableOpacity style={styles.currentLocationRow} onPress={useCurrentLocation}>
+                <View style={styles.currentLocationIcon}>
+                  <MaterialIcons name="my-location" size={22} color="#534889" />
+                </View>
+                <Text style={styles.currentLocationText}>Use my current location</Text>
+              </TouchableOpacity>
+
+              <ScrollView style={styles.searchResultsList} keyboardShouldPersistTaps="handled">
+                {searchSuggestions.map((item) => (
+                  <TouchableOpacity key={item.place_id} style={styles.searchResultItem} onPress={() => selectLocationFromSearch(item)}>
+                    <View style={styles.searchResultIcon}>
+                      <Ionicons name="location-outline" size={20} color="#414141" />
+                    </View>
+                    <Text style={styles.searchResultText}>{item.display_name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={styles.keyboardAvoidingContainer}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+              >
+                <TouchableOpacity style={styles.chooseMapButton} onPress={openDropPin}>
+                  <Ionicons name="map-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
+                  <Text style={styles.chooseMapText}>Choose from map</Text>
+                </TouchableOpacity>
+              </KeyboardAvoidingView>
+            </SafeAreaView>
+          </View>
+        )}
       </SafeAreaView>
     </View>
   );
@@ -590,7 +668,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   notificationButton: { position: 'absolute', right: 20, top: 30, width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(198,185,229,0.5)', alignItems: 'center', justifyContent: 'center' },
   userMarker: {
-    backgroundColor: "#622C9B",
+    backgroundColor: "#534889",
     padding: 10,
     borderRadius: 25,
     borderWidth: 2,
@@ -616,8 +694,25 @@ const styles = StyleSheet.create({
   pinSelectionContainer: { position: 'absolute', bottom: 80, left: 12, right: 12, backgroundColor: 'white', padding: 15, borderRadius: 14, elevation: 10, alignItems: 'center', zIndex: 1000, borderWidth: 1.5, borderColor: '#D0D0D0' },
   pinSelectionText: { fontSize: 16, fontWeight: 'bold', marginBottom: 10, textAlign: 'center' },
   pinSelectionButtons: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', gap: 10 },
-  primaryButton: { flex: 1, backgroundColor: '#622C9B', padding: 12, borderRadius: 10, alignItems: 'center' },
+  primaryButton: { flex: 1, backgroundColor: '#534889', padding: 12, borderRadius: 10, alignItems: 'center' },
   primaryButtonText: { color: 'white', fontWeight: 'bold' },
   secondaryButton: { flex: 1, backgroundColor: '#f0f0f0', padding: 12, borderRadius: 10, alignItems: 'center' },
   secondaryButtonText: { color: '#333', fontWeight: 'bold' },
+  fullScreenModal: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#fff', zIndex: 2000 },
+  searchModalHeader: { flexDirection: 'row', alignItems: 'center', padding: 15, borderBottomWidth: 1, borderBottomColor: '#eee' },
+  closeSearchButton: { padding: 5 },
+  searchModalTitle: { fontSize: 18, fontWeight: 'bold', marginLeft: 15 },
+  searchInputContainer: { padding: 15, paddingBottom: 10 },
+  searchInputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f5f5f5', borderRadius: 10, paddingHorizontal: 12, height: 45 },
+  searchInput: { flex: 1, fontSize: 16, color: '#333' },
+  currentLocationRow: { flexDirection: 'row', alignItems: 'center', padding: 15, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
+  currentLocationIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#F8F6FC', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+  currentLocationText: { fontSize: 16, color: '#333', fontWeight: '500' },
+  searchResultsList: { flex: 1 },
+  searchResultItem: { flexDirection: 'row', alignItems: 'center', padding: 15, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
+  searchResultIcon: { marginRight: 12 },
+  searchResultText: { fontSize: 15, color: '#333' },
+  keyboardAvoidingContainer: { position: 'absolute', bottom: 0, left: 0, right: 0 },
+  chooseMapButton: { flexDirection: 'row', backgroundColor: '#534889', padding: 15, alignItems: 'center', justifyContent: 'center', margin: 15, borderRadius: 12 },
+  chooseMapText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
 });

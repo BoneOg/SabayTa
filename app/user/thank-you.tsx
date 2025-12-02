@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
         marginBottom: 50,
     },
     homeButton: {
-        backgroundColor: '#622C9B',
+        backgroundColor: '#534889',
         paddingVertical: 16,
         paddingHorizontal: 40,
         borderRadius: 14,

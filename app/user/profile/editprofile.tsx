@@ -75,7 +75,7 @@ export default function EditProfileScreen() {
                     <Button
                         label="Save Changes"
                         onPress={() => router.back()}
-                        style={{ marginTop: 30, marginBottom: 30, backgroundColor: '#622C9B' }}
+                        style={{ marginTop: 30, marginBottom: 30, backgroundColor: '#534889' }}
                     />
                 </View>
             </ScrollView>

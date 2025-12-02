@@ -25,7 +25,7 @@ function CustomDrawerContent(props: any) {
                 icon={({ color, size }) => <MaterialIcons name="person" size={size} color={color} />}
                 onPress={() => router.replace('/user/profile')}
                 labelStyle={styles.drawerLabel}
-                activeTintColor="#622C9B"
+                activeTintColor="#534889"
                 inactiveTintColor="#333"
             />
         </DrawerContentScrollView>
@@ -45,12 +45,12 @@ export default function AdminLayout() {
                         borderBottomWidth: 1,
                         borderBottomColor: '#F0F0F0',
                     },
-                    headerTintColor: '#622C9B',
+                    headerTintColor: '#534889',
                     headerTitleStyle: {
                         fontWeight: 'bold',
                         fontFamily: 'Poppins',
                     },
-                    drawerActiveTintColor: '#622C9B',
+                    drawerActiveTintColor: '#534889',
                     drawerInactiveTintColor: '#555',
                     drawerLabelStyle: {
                         fontFamily: 'Poppins',
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     drawerTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#622C9B',
+        color: '#534889',
         fontFamily: 'Poppins',
     },
     drawerSubtitle: {

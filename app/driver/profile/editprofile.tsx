@@ -113,7 +113,7 @@ export default function DriverEditProfileScreen() {
                     <Button
                         label="Save Changes"
                         onPress={() => router.back()}
-                        style={{ marginTop: 30, marginBottom: 30, backgroundColor: '#622C9B' }}
+                        style={{ marginTop: 30, marginBottom: 30, backgroundColor: '#534889' }}
                     />
                 </View>
             </ScrollView>
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#622C9B',
+        color: '#534889',
         fontFamily: 'Poppins',
         marginBottom: 12,
     },

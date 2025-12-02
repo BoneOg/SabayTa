@@ -47,7 +47,7 @@ export default function DriverTrackingScreen() {
                 }}
             >
                 <Marker coordinate={driverLocation}>
-                    <View style={[styles.marker, { backgroundColor: '#622C9B' }]}>
+                    <View style={[styles.marker, { backgroundColor: '#534889' }]}>
                         <Ionicons name="car" size={20} color="#fff" />
                     </View>
                 </Marker>
@@ -66,7 +66,7 @@ export default function DriverTrackingScreen() {
 
                 <Polyline
                     coordinates={[driverLocation, userLocation, destination]}
-                    strokeColor="#622C9B"
+                    strokeColor="#534889"
                     strokeWidth={4}
                 />
             </MapView>
@@ -186,7 +186,7 @@ export default function DriverTrackingScreen() {
                 <View style={styles.modalOverlay}>
                     <View style={styles.alertModal}>
                         <View style={styles.alertIcon}>
-                            <Ionicons name="location" size={80} color="#622C9B" />
+                            <Ionicons name="location" size={80} color="#534889" />
                         </View>
                         <Text style={styles.alertTitle}>Destination Reached!</Text>
                         <Text style={styles.alertMessage}>You have arrived at your destination</Text>
@@ -303,19 +303,19 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
         borderWidth: 2,
-        borderColor: '#622C9B',
+        borderColor: '#534889',
         padding: 14,
         borderRadius: 14,
         alignItems: 'center',
     },
     detailsButtonText: {
-        color: '#622C9B',
+        color: '#534889',
         fontSize: 16,
         fontWeight: 'bold',
     },
     messageButton: {
         flex: 1,
-        backgroundColor: '#622C9B',
+        backgroundColor: '#534889',
         padding: 14,
         borderRadius: 14,
         alignItems: 'center',
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     confirmButton: {
-        backgroundColor: '#622C9B',
+        backgroundColor: '#534889',
         padding: 16,
         borderRadius: 14,
         alignItems: 'center',
@@ -440,7 +440,7 @@ const styles = StyleSheet.create({
         marginBottom: 25,
     },
     alertButton: {
-        backgroundColor: '#622C9B',
+        backgroundColor: '#534889',
         paddingVertical: 14,
         paddingHorizontal: 60,
         borderRadius: 14,

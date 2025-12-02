@@ -141,7 +141,7 @@ export default function ProfileScreen() {
       text: 'Apply as Driver',
       library: MaterialIcons,
       route: '/driver/apply_as_driver',
-      color: '#622C9B',
+      color: '#534889',
     },
     {
       icon: 'logout',
@@ -162,7 +162,7 @@ export default function ProfileScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Profile</Text>
         <TouchableOpacity style={styles.adminButton} onPress={() => router.push('/admin')}>
-          <MaterialIcons name="security" size={24} color="#622C9B" />
+          <MaterialIcons name="security" size={24} color="#534889" />
         </TouchableOpacity>
       </View>
 
@@ -170,7 +170,7 @@ export default function ProfileScreen() {
         {/* Profile Info */}
         <View style={styles.profileSection}>
           {loading ? (
-            <ActivityIndicator size="large" color="#622C9B" style={{ marginVertical: 20 }} />
+            <ActivityIndicator size="large" color="#534889" style={{ marginVertical: 20 }} />
           ) : (
             <>
               <View style={styles.profileImageContainer}>
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     right: 0,
-    backgroundColor: '#622C9B',
+    backgroundColor: '#534889',
     width: 36,
     height: 36,
     borderRadius: 18,
@@ -370,12 +370,12 @@ const styles = StyleSheet.create({
   },
 
   activeToggle: {
-    backgroundColor: '#622C9B',
+    backgroundColor: '#534889',
   },
 
   toggleText: {
     fontSize: 15,
-    color: '#622C9B',
+    color: '#534889',
     fontFamily: 'Poppins',
   },
 

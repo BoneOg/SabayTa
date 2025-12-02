@@ -142,13 +142,13 @@ export default function BookingDetailsScreen() {
 
                 <View style={styles.detailsCard}>
                     <View style={styles.detailRow}>
-                        <MaterialIcons name="straighten" size={24} color="#622C9B" />
+                        <MaterialIcons name="straighten" size={24} color="#534889" />
                         <Text style={styles.detailLabel}>Distance</Text>
                         <Text style={styles.detailValue}>{distance}</Text>
                     </View>
 
                     <View style={styles.detailRow}>
-                        <MaterialIcons name="access-time" size={24} color="#622C9B" />
+                        <MaterialIcons name="access-time" size={24} color="#534889" />
                         <Text style={styles.detailLabel}>Estimated Time</Text>
                         <Text style={styles.detailValue}>{time}</Text>
                     </View>
@@ -181,7 +181,7 @@ export default function BookingDetailsScreen() {
                             <>
                                 <View style={styles.checkmarkContainer}>
                                     <View style={styles.checkmarkBadge}>
-                                        <Ionicons name="checkmark" size={60} color="#622C9B" />
+                                        <Ionicons name="checkmark" size={60} color="#534889" />
                                     </View>
                                 </View>
 
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     detailValue: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#622C9B',
+        color: '#534889',
     },
     footer: {
         padding: 20,
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
         paddingBottom: 130,
     },
     confirmButton: {
-        backgroundColor: '#622C9B',
+        backgroundColor: '#534889',
         padding: 16,
         borderRadius: 14,
         alignItems: 'center',
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
         lineHeight: 20,
     },
     doneButton: {
-        backgroundColor: '#622C9B',
+        backgroundColor: '#534889',
         paddingVertical: 14,
         paddingHorizontal: 80,
         borderRadius: 14,

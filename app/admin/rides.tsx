@@ -66,7 +66,7 @@ export default function RidesManagement() {
             <View style={styles.cardHeader}>
                 <View style={{ flex: 1 }}>
                     <View style={styles.rideInfo}>
-                        <MaterialIcons name="two-wheeler" size={20} color="#622C9B" />
+                        <MaterialIcons name="two-wheeler" size={20} color="#534889" />
                         <Text style={styles.cardTitle}>{item.rider} → {item.driver}</Text>
                     </View>
                     <Text style={styles.cardSubtitle}>{item.pickup} to {item.dropoff}</Text>
@@ -123,7 +123,7 @@ export default function RidesManagement() {
                         {selectedRide && (
                             <View style={styles.modalBody}>
                                 <View style={styles.rideHeader}>
-                                    <MaterialIcons name="two-wheeler" size={40} color="#622C9B" />
+                                    <MaterialIcons name="two-wheeler" size={40} color="#534889" />
                                     <Text style={styles.rideTitle}>Motorcycle Ride</Text>
                                 </View>
 
@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
     rideTitle: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#622C9B',
+        color: '#534889',
         fontFamily: 'Poppins',
         marginTop: 8,
     },
@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
         fontStyle: 'italic',
     },
     closeButton: {
-        backgroundColor: '#622C9B',
+        backgroundColor: '#534889',
         padding: 15,
         alignItems: 'center',
     },

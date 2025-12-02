@@ -238,7 +238,7 @@ export default function DriverHome() {
                 <FontAwesome5
                   name="user-alt"
                   size={35}
-                  color="#622C9B"
+                  color="#534889"
                   style={{ marginBottom: 10 }}
                 />
 
@@ -274,7 +274,7 @@ export default function DriverHome() {
             {users.map((user) => (
               <TouchableOpacity key={user.id} onPress={() => handleUserSelect(user)}>
                 <View style={styles.userCard}>
-                  <Ionicons name="person" size={40} color="#622C9B" style={styles.userIcon} />
+                  <Ionicons name="person" size={40} color="#534889" style={styles.userIcon} />
                   <View style={styles.cardContent}>
                     <Text style={styles.name}>{user.name}</Text>
 
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   menuButton: { padding: 8, backgroundColor: "#6A4C93AA", borderRadius: 8 },
   notificationButton: { padding: 8, backgroundColor: "#6A4C93AA", borderRadius: 8 },
   driverMarker: {
-    backgroundColor: "#622C9B",
+    backgroundColor: "#534889",
     padding: 10,
     borderRadius: 25,
     borderWidth: 2,
@@ -381,11 +381,11 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: 18,
     fontFamily: "Poppins_400Regular,",
-    color: "#622C9B",
+    color: "#534889",
     marginBottom: 10,
   },
   modalButton: {
-    backgroundColor: "#622C9B",
+    backgroundColor: "#534889",
     paddingVertical: 10,
     paddingHorizontal: 60,
     borderRadius: 5,

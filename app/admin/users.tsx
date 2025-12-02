@@ -235,7 +235,7 @@ export default function UsersManagement() {
                                         <Text style={styles.docSectionTitle}>Student Documents</Text>
 
                                         <View style={styles.docItem}>
-                                            <MaterialIcons name="badge" size={20} color="#622C9B" />
+                                            <MaterialIcons name="badge" size={20} color="#534889" />
                                             <View style={styles.docInfo}>
                                                 <Text style={styles.docLabel}>School ID</Text>
                                                 <Text style={styles.docStatus}>{viewingUser.schoolId || 'Not uploaded'}</Text>
@@ -243,7 +243,7 @@ export default function UsersManagement() {
                                         </View>
 
                                         <View style={styles.docItem}>
-                                            <MaterialIcons name="description" size={20} color="#622C9B" />
+                                            <MaterialIcons name="description" size={20} color="#534889" />
                                             <View style={styles.docInfo}>
                                                 <Text style={styles.docLabel}>Certificate of Registration</Text>
                                                 <Text style={styles.docStatus}>{viewingUser.cor || 'Not uploaded'}</Text>
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
     },
     createButton: {
         flexDirection: 'row',
-        backgroundColor: '#622C9B',
+        backgroundColor: '#534889',
         marginHorizontal: 15,
         marginBottom: 15,
         padding: 15,
@@ -495,7 +495,7 @@ const styles = StyleSheet.create({
     },
     docUserRole: {
         fontSize: 14,
-        color: '#622C9B',
+        color: '#534889',
         fontFamily: 'Poppins',
         marginBottom: 20,
     },
@@ -534,7 +534,7 @@ const styles = StyleSheet.create({
         marginTop: 2,
     },
     closeButton: {
-        backgroundColor: '#622C9B',
+        backgroundColor: '#534889',
         padding: 15,
         alignItems: 'center',
     },
@@ -600,8 +600,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     roleButtonActive: {
-        backgroundColor: '#622C9B',
-        borderColor: '#622C9B',
+        backgroundColor: '#534889',
+        borderColor: '#534889',
     },
     roleButtonText: {
         color: '#7F8C8D',
@@ -634,7 +634,7 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 12,
         borderRadius: 8,
-        backgroundColor: '#622C9B',
+        backgroundColor: '#534889',
         alignItems: 'center',
     },
     saveButtonText: {

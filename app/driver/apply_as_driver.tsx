@@ -198,7 +198,7 @@ export default function ApplyAsDriver() {
                 {/* Application Process Info */}
                 <View style={styles.infoBox}>
                     <View style={styles.infoTitleRow}>
-                        <MaterialIcons name="assignment" size={18} color="#622C9B" />
+                        <MaterialIcons name="assignment" size={18} color="#534889" />
                         <Text style={styles.infoTitle}>Application Process</Text>
                     </View>
                     <Text style={styles.infoText}>
@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins',
     },
     submitButton: {
-        backgroundColor: '#622C9B',
+        backgroundColor: '#534889',
         borderRadius: 10,
     },
 });
