@@ -19,6 +19,7 @@ export default function Layout() {
     "complain",
     "contactus",
     "deleteaccount",
+    "editprofile",
   ]);
   const shouldShowTabBar = !hiddenRoutes.has(currentRoute);
 
@@ -98,7 +99,7 @@ const styles = StyleSheet.create({
       android: { elevation: 20 },
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: -8 },
+        shadowOffset: { width: 0, height: -2 },
         shadowOpacity: 0.35,
         shadowRadius: 12,
       },
@@ -113,7 +114,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    paddingHorizontal: 4,
+
   },
 
   tabItem: {

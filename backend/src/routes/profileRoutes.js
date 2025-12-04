@@ -3,6 +3,7 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import multer from "multer";
 import User from "../models/User.js";
+import UserProfile from "../models/UserProfile.js";
 
 const router = express.Router();
 
@@ -49,15 +50,24 @@ router.get("/", protect, async (req, res) => {
     const user = await User.findById(req.user._id).select("-password");
     if (!user) return res.status(404).json({ message: "User not found" });
 
+    // Get or create user profile
+    let userProfile = await UserProfile.findOne({ userId: user._id });
+    if (!userProfile) {
+      userProfile = await UserProfile.create({ userId: user._id });
+    }
+
     res.json({
       profile: {
         name: user.name,
         email: user.email,
         phone: user.phone,
-        street: user.street,
-        city: user.city,
-        district: user.district,
-        profileImage: user.profileImage
+        gender: user.gender,
+        street: userProfile.street,
+        barangay: userProfile.barangay,
+        city: userProfile.city,
+        province: userProfile.province,
+        postalCode: userProfile.postalCode,
+        profileImage: userProfile.profileImage
       },
       role: user.role,
     });
@@ -71,15 +81,24 @@ router.get("/", protect, async (req, res) => {
 router.get("/all", protect, adminProtect, async (req, res) => {
   try {
     const users = await User.find().select("-password");
-    const profiles = users.map(user => ({
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      street: user.street,
-      city: user.city,
-      district: user.district,
-      profileImage: user.profileImage
+    const profiles = await Promise.all(users.map(async (user) => {
+      let userProfile = await UserProfile.findOne({ userId: user._id });
+      if (!userProfile) {
+        userProfile = { street: "", city: "", district: "", profileImage: "" };
+      }
+
+      return {
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        gender: user.gender,
+        street: userProfile.street,
+        city: userProfile.city,
+        district: userProfile.district,
+        profileImage: userProfile.profileImage
+      };
     }));
+
     res.json({ profiles });
   } catch (error) {
     console.error("Get all profiles error:", error);
@@ -90,10 +109,10 @@ router.get("/all", protect, adminProtect, async (req, res) => {
 /* ================== UPDATE PROFILE ================== */
 router.put("/", protect, upload.single("profileImage"), async (req, res) => {
   try {
-    const { name, email, phone, street, city, district } = req.body;
+    const { name, email, phone, street, barangay, city, province, postalCode } = req.body;
 
-    if (!name || !email || !phone || !street || !city || !district) {
-      return res.status(400).json({ message: "All fields are required" });
+    if (!name || !email || !phone) {
+      return res.status(400).json({ message: "Name, email, and phone are required" });
     }
 
     let profileImageUrl;
@@ -104,24 +123,31 @@ router.put("/", protect, upload.single("profileImage"), async (req, res) => {
       profileImageUrl = uploaded.secure_url;
     }
 
-    const updateData = {
-      name,
-      email,
-      phone,
-      street,
-      city,
-      district,
+    // Update User model (name, email, phone)
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { name, email, phone },
+      { new: true }
+    ).select("-password");
+
+    // Update or create UserProfile
+    const profileUpdateData = {
+      street: street || "",
+      barangay: barangay || "",
+      city: city || "",
+      province: province || "",
+      postalCode: postalCode || ""
     };
 
     if (profileImageUrl) {
-      updateData.profileImage = profileImageUrl;
+      profileUpdateData.profileImage = profileImageUrl;
     }
 
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user._id,
-      updateData,
-      { new: true }
-    ).select("-password");
+    const updatedProfile = await UserProfile.findOneAndUpdate(
+      { userId: req.user._id },
+      profileUpdateData,
+      { new: true, upsert: true }
+    );
 
     res.json({
       message: "Profile updated successfully",
@@ -129,10 +155,13 @@ router.put("/", protect, upload.single("profileImage"), async (req, res) => {
         name: updatedUser.name,
         email: updatedUser.email,
         phone: updatedUser.phone,
-        street: updatedUser.street,
-        city: updatedUser.city,
-        district: updatedUser.district,
-        profileImage: updatedUser.profileImage
+        gender: updatedUser.gender,
+        street: updatedProfile.street,
+        barangay: updatedProfile.barangay,
+        city: updatedProfile.city,
+        province: updatedProfile.province,
+        postalCode: updatedProfile.postalCode,
+        profileImage: updatedProfile.profileImage
       },
       role: updatedUser.role,
     });
@@ -162,23 +191,28 @@ router.put("/photo", protect, upload.single("profileImage"), async (req, res) =>
       folder: "SabayTa_Profiles",
     });
 
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user._id,
+    const updatedProfile = await UserProfile.findOneAndUpdate(
+      { userId: req.user._id },
       { profileImage: uploaded.secure_url },
-      { new: true }
-    ).select("-password");
+      { new: true, upsert: true }
+    );
+
+    const user = await User.findById(req.user._id).select("-password");
 
     res.json({
       message: "Profile photo updated successfully",
       profileImage: uploaded.secure_url,
       profile: {
-        name: updatedUser.name,
-        email: updatedUser.email,
-        phone: updatedUser.phone,
-        street: updatedUser.street,
-        city: updatedUser.city,
-        district: updatedUser.district,
-        profileImage: updatedUser.profileImage
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        gender: user.gender,
+        street: updatedProfile.street,
+        barangay: updatedProfile.barangay,
+        city: updatedProfile.city,
+        province: updatedProfile.province,
+        postalCode: updatedProfile.postalCode,
+        profileImage: updatedProfile.profileImage
       },
     });
   } catch (error) {

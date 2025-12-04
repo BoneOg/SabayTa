@@ -39,12 +39,32 @@ const protect = async (req, res, next) => {
 /* ================== GET DRIVER PROFILE ================== */
 router.get("/", protect, async (req, res) => {
     try {
-        const profile = await DriverProfile.findOne({ email: req.user.email });
-        if (!profile) return res.status(404).json({ message: "Driver profile not found" });
+        const user = await User.findById(req.user._id).select("-password");
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        // Get or create driver profile
+        let driverProfile = await DriverProfile.findOne({ userId: user._id });
+        if (!driverProfile) {
+            driverProfile = await DriverProfile.create({ userId: user._id });
+        }
 
         res.json({
-            profile,
-            role: req.user.role,
+            profile: {
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                gender: user.gender,
+                street: driverProfile.street,
+                barangay: driverProfile.barangay,
+                city: driverProfile.city,
+                province: driverProfile.province,
+                postalCode: driverProfile.postalCode,
+                profileImage: driverProfile.profileImage,
+                licenseNumber: driverProfile.licenseNumber,
+                vehicleType: driverProfile.vehicleType,
+                vehiclePlateNumber: driverProfile.vehiclePlateNumber
+            },
+            role: user.role,
         });
     } catch (error) {
         console.error("Get driver profile error:", error);
@@ -55,10 +75,10 @@ router.get("/", protect, async (req, res) => {
 /* ================== UPDATE DRIVER PROFILE ================== */
 router.put("/", protect, upload.single("profileImage"), async (req, res) => {
     try {
-        const { name, email, phone, street, city, district, licenseNumber, vehicleType, vehiclePlateNumber } = req.body;
+        const { name, email, phone, street, barangay, city, province, postalCode, licenseNumber, vehicleType, vehiclePlateNumber } = req.body;
 
-        if (!name || !email || !phone || !street || !city || !district) {
-            return res.status(400).json({ message: "All required fields must be filled" });
+        if (!name || !email || !phone) {
+            return res.status(400).json({ message: "Name, email, and phone are required" });
         }
 
         let profileImageUrl;
@@ -69,27 +89,53 @@ router.put("/", protect, upload.single("profileImage"), async (req, res) => {
             profileImageUrl = uploaded.secure_url;
         }
 
+        // Update User model (name, email, phone)
+        const updatedUser = await User.findByIdAndUpdate(
+            req.user._id,
+            { name, email, phone },
+            { new: true }
+        ).select("-password");
+
+        // Update or create DriverProfile
+        const profileUpdateData = {
+            street: street || "",
+            barangay: barangay || "",
+            city: city || "",
+            province: province || "",
+            postalCode: postalCode || "",
+            licenseNumber: licenseNumber || "",
+            vehicleType: vehicleType || "",
+            vehiclePlateNumber: vehiclePlateNumber || ""
+        };
+
+        if (profileImageUrl) {
+            profileUpdateData.profileImage = profileImageUrl;
+        }
+
         const updatedProfile = await DriverProfile.findOneAndUpdate(
-            { email: req.user.email },
-            {
-                name,
-                email,
-                phone,
-                street,
-                city,
-                district,
-                licenseNumber,
-                vehicleType,
-                vehiclePlateNumber,
-                ...(profileImageUrl && { profileImage: profileImageUrl }),
-            },
+            { userId: req.user._id },
+            profileUpdateData,
             { new: true, upsert: true }
         );
 
         res.json({
             message: "Driver profile updated successfully",
-            profile: updatedProfile,
-            role: req.user.role,
+            profile: {
+                name: updatedUser.name,
+                email: updatedUser.email,
+                phone: updatedUser.phone,
+                gender: updatedUser.gender,
+                street: updatedProfile.street,
+                barangay: updatedProfile.barangay,
+                city: updatedProfile.city,
+                province: updatedProfile.province,
+                postalCode: updatedProfile.postalCode,
+                profileImage: updatedProfile.profileImage,
+                licenseNumber: updatedProfile.licenseNumber,
+                vehicleType: updatedProfile.vehicleType,
+                vehiclePlateNumber: updatedProfile.vehiclePlateNumber
+            },
+            role: updatedUser.role,
         });
     } catch (error) {
         console.error("Update driver profile error:", error);
@@ -118,15 +164,31 @@ router.put("/photo", protect, upload.single("profileImage"), async (req, res) =>
         });
 
         const updatedProfile = await DriverProfile.findOneAndUpdate(
-            { email: req.user.email },
+            { userId: req.user._id },
             { profileImage: uploaded.secure_url },
             { new: true, upsert: true }
         );
 
+        const user = await User.findById(req.user._id).select("-password");
+
         res.json({
             message: "Profile photo updated successfully",
             profileImage: uploaded.secure_url,
-            profile: updatedProfile,
+            profile: {
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                gender: user.gender,
+                street: updatedProfile.street,
+                barangay: updatedProfile.barangay,
+                city: updatedProfile.city,
+                province: updatedProfile.province,
+                postalCode: updatedProfile.postalCode,
+                profileImage: updatedProfile.profileImage,
+                licenseNumber: updatedProfile.licenseNumber,
+                vehicleType: updatedProfile.vehicleType,
+                vehiclePlateNumber: updatedProfile.vehiclePlateNumber
+            },
         });
     } catch (error) {
         console.error("Update driver profile photo error:", error);

@@ -1,7 +1,6 @@
 import { BASE_URL } from '@/config';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -9,9 +8,10 @@ import { ActivityIndicator, Alert, Image, Platform, ScrollView, StyleSheet, Text
 export default function ProfileScreen() {
   const router = useRouter();
   const [name, setName] = useState('John Doe');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [profileImage, setProfileImage] = useState('');
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
 
   const [selectedRole, setSelectedRole] = useState<'rider' | 'driver'>('rider');
 
@@ -38,70 +38,14 @@ export default function ProfileScreen() {
 
       if (response.ok && data.profile) {
         setName(data.profile.name || 'John Doe');
+        setEmail(data.profile.email || '');
+        setPhone(data.profile.phone || '');
         setProfileImage(data.profile.profileImage || '');
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleUpdatePhoto = async () => {
-    try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'We need camera roll permissions to update your photo');
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        setUploading(true);
-        const imageUri = result.assets[0].uri;
-
-        const token = await AsyncStorage.getItem('token');
-        if (!token) {
-          Alert.alert('Error', 'No authentication token found');
-          setUploading(false);
-          return;
-        }
-
-        const formData = new FormData();
-        formData.append('profileImage', {
-          uri: imageUri,
-          type: 'image/jpeg',
-          name: 'profile.jpg',
-        } as any);
-
-        const response = await fetch(`${BASE_URL}/api/profile/photo`, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-          body: formData,
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          setProfileImage(data.profileImage);
-          Alert.alert('Success', 'Profile photo updated successfully');
-        } else {
-          Alert.alert('Error', data.message || 'Failed to update photo');
-        }
-      }
-    } catch (error) {
-      console.error('Error updating photo:', error);
-      Alert.alert('Error', 'Failed to update photo');
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -185,22 +129,15 @@ export default function ProfileScreen() {
                   source={profileImage ? { uri: profileImage } : require('@/assets/images/cat5.jpg')}
                   style={styles.profileImage}
                 />
-                <TouchableOpacity
-                  style={styles.updatePhotoButton}
-                  onPress={handleUpdatePhoto}
-                  disabled={uploading}
-                >
-                  {uploading ? (
-                    <ActivityIndicator size="small" color="#fff" />
-                  ) : (
-                    <MaterialIcons name="camera-alt" size={20} color="#fff" />
-                  )}
-                </TouchableOpacity>
               </View>
 
               <Text style={styles.name} numberOfLines={1}>
                 {name}
               </Text>
+
+              {/* Email and Phone Subtext */}
+              <Text style={styles.subText}>{email}</Text>
+              <Text style={styles.subText}>{phone}</Text>
             </>
           )}
 
@@ -292,7 +229,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: Platform.OS === 'android' ? 20 : 20,
+    paddingTop: Platform.OS === 'android' ? 20 : 0,
   },
 
   header: {
@@ -339,32 +276,25 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
 
-  updatePhotoButton: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: '#534889',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: '#fff',
-  },
-
   name: {
     fontSize: 22,
     fontWeight: 'bold',
     color: '#000',
     fontFamily: 'Poppins',
-    marginBottom: 10,
+    marginBottom: 5,
+  },
+
+  subText: {
+    fontSize: 14,
+    color: '#666',
+    fontFamily: 'Poppins',
+    marginBottom: 3,
   },
 
   /* ROLE TOGGLE BUTTONS */
   toggleContainer: {
     flexDirection: 'row',
-    marginTop: 5,
+    marginTop: 15,
     backgroundColor: '#f1e8ff',
     padding: 5,
     borderRadius: 25,

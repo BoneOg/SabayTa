@@ -1,84 +1,303 @@
-import Button from '@/components/Button';
-import BackButton from '@/components/ui/BackButton';
+import FieldEditModal from '@/components/FieldEditModal';
+import ProfileFormFields from '@/components/ProfileFormFields';
+import ProfileHeader from '@/components/ProfileHeader';
+import ProfileImageSection from '@/components/ProfileImageSection';
+import SaveButton from '@/components/SaveButton';
+import { BASE_URL } from '@/config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Image, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Platform, ScrollView, StyleSheet, View } from 'react-native';
 
 export default function EditProfileScreen() {
     const router = useRouter();
 
-    const [name, setName] = useState('John Doe');
+    const [loading, setLoading] = useState(true);
+    const [uploading, setUploading] = useState(false);
+    const [saving, setSaving] = useState(false);
+
+    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [gender, setGender] = useState('');
-    const [address, setAddress] = useState('');
+    const [street, setStreet] = useState('');
+    const [barangay, setBarangay] = useState('');
+    const [city, setCity] = useState('');
+    const [province, setProvince] = useState('');
+    const [postalCode, setPostalCode] = useState('');
+    const [profileImage, setProfileImage] = useState('');
+
+    const [focusedField, setFocusedField] = useState<string | null>(null);
+    const [modalValue, setModalValue] = useState('');
+
+    useEffect(() => {
+        fetchProfile();
+    }, []);
+
+    const fetchProfile = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                Alert.alert('Error', 'No authentication token found');
+                setLoading(false);
+                return;
+            }
+
+            const response = await fetch(`${BASE_URL}/api/profile`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.profile) {
+                setName(data.profile.name || '');
+                setEmail(data.profile.email || '');
+                const phoneNumber = data.profile.phone || '';
+                setPhone(phoneNumber.startsWith('+63') ? phoneNumber.substring(3) : phoneNumber);
+                setGender(data.profile.gender || '');
+                setStreet(data.profile.street || '');
+                setBarangay(data.profile.barangay || '');
+                setCity(data.profile.city || '');
+                setProvince(data.profile.province || '');
+                setPostalCode(data.profile.postalCode || '');
+                setProfileImage(data.profile.profileImage || '');
+            }
+        } catch (error) {
+            console.error('Error fetching profile:', error);
+            Alert.alert('Error', 'Failed to load profile');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleUpdatePhoto = async () => {
+        try {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permission Denied', 'We need camera roll permissions to update your photo');
+                return;
+            }
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 0.8,
+            });
+
+            if (!result.canceled && result.assets[0]) {
+                setUploading(true);
+                const imageUri = result.assets[0].uri;
+
+                const token = await AsyncStorage.getItem('token');
+                if (!token) {
+                    Alert.alert('Error', 'No authentication token found');
+                    setUploading(false);
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('profileImage', {
+                    uri: imageUri,
+                    type: 'image/jpeg',
+                    name: 'profile.jpg',
+                } as any);
+
+                const response = await fetch(`${BASE_URL}/api/profile/photo`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: formData,
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    setProfileImage(data.profileImage);
+                    Alert.alert('Success', 'Profile photo updated successfully');
+                } else {
+                    Alert.alert('Error', data.message || 'Failed to update photo');
+                }
+            }
+        } catch (error) {
+            console.error('Error updating photo:', error);
+            Alert.alert('Error', 'Failed to update photo');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleSaveChanges = async () => {
+        try {
+            if (!name || !email || !phone) {
+                Alert.alert('Error', 'Name, email, and phone are required');
+                return;
+            }
+
+            setSaving(true);
+
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                Alert.alert('Error', 'No authentication token found');
+                setSaving(false);
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('email', email);
+            formData.append('phone', `+63${phone}`);
+            formData.append('street', street);
+            formData.append('barangay', barangay);
+            formData.append('city', city);
+            formData.append('province', province);
+            formData.append('postalCode', postalCode);
+
+            const response = await fetch(`${BASE_URL}/api/profile`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                Alert.alert('Success', 'Profile updated successfully');
+                router.back();
+            } else {
+                Alert.alert('Error', data.message || 'Failed to update profile');
+            }
+        } catch (error) {
+            console.error('Error saving profile:', error);
+            Alert.alert('Error', 'Failed to save changes');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const openFieldModal = (key: string, value: string) => {
+        setFocusedField(key);
+        setModalValue(value);
+    };
+
+    const closeFieldModal = () => {
+        setFocusedField(null);
+        setModalValue('');
+    };
+
+    const saveFieldValue = () => {
+        if (focusedField) {
+            const setters: { [key: string]: (value: string) => void } = {
+                name: setName,
+                email: setEmail,
+                phone: setPhone,
+                gender: setGender,
+                street: setStreet,
+                barangay: setBarangay,
+                city: setCity,
+                province: setProvince,
+                postalCode: setPostalCode,
+            };
+            setters[focusedField]?.(modalValue);
+        }
+        closeFieldModal();
+    };
+
+    const getFieldLabel = (key: string) => {
+        const labels: { [key: string]: string } = {
+            name: 'Name',
+            email: 'Email',
+            phone: 'Phone Number',
+            gender: 'Gender',
+            street: 'Street',
+            barangay: 'Barangay',
+            city: 'City',
+            province: 'Province',
+            postalCode: 'Postal Code',
+        };
+        return labels[key] || key;
+    };
+
+    const getKeyboardType = (key: string) => {
+        if (key === 'email') return 'email-address';
+        if (key === 'phone' || key === 'postalCode') return 'phone-pad';
+        return 'default';
+    };
+
+    if (loading) {
+        return (
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <ActivityIndicator size="large" color="#534889" />
+            </View>
+        );
+    }
+
+    const formFields = [
+        { key: 'name', label: 'Name', value: name },
+        { key: 'email', label: 'Email', value: email },
+        { key: 'phone', label: 'Phone Number', value: phone },
+        { key: 'gender', label: 'Gender', value: gender },
+        { key: 'street', label: 'Street', value: street },
+        { key: 'barangay', label: 'Barangay', value: barangay },
+        { key: 'city', label: 'City', value: city },
+        { key: 'province', label: 'Province', value: province },
+        { key: 'postalCode', label: 'Postal Code', value: postalCode },
+    ];
+
+    const sections = [
+        {
+            title: 'Personal Information',
+            fieldKeys: ['name', 'email', 'phone', 'gender'],
+        },
+        {
+            title: 'Address',
+            fieldKeys: ['street', 'barangay', 'city', 'province', 'postalCode'],
+        },
+    ];
 
     return (
         <View style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <View style={styles.backButtonContainer}>
-                    <BackButton onPress={() => router.back()} />
-                </View>
-                <Text style={styles.headerTitle}>Edit Profile</Text>
-            </View>
+            <ProfileHeader onBack={() => router.back()} />
 
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-                {/* Centered Content */}
                 <View style={styles.centeredContent}>
-                    <Image
-                        source={require('@/assets/images/cat5.jpg')}
-                        style={styles.profileImage}
-                    />
-                    <Text style={styles.name}>{name}</Text>
-
-                    <TextInput
-                        style={styles.input}
-                        value={email}
-                        onChangeText={setEmail}
-                        placeholder="Email"
-                        placeholderTextColor="#D0D0D0"
-                        keyboardType="email-address"
+                    <ProfileImageSection
+                        profileImage={profileImage}
+                        name={name}
+                        uploading={uploading}
+                        onUpdatePhoto={handleUpdatePhoto}
                     />
 
-                    <View style={styles.rowInput}>
-                        <View style={styles.countryCodeBox}>
-                            <Text style={styles.countryCode}>🇵🇭 +63</Text>
-                        </View>
-                        <TextInput
-                            style={styles.phoneInput}
-                            value={phone}
-                            onChangeText={setPhone}
-                            placeholder="Phone Number"
-                            placeholderTextColor="#D0D0D0"
-                            keyboardType="phone-pad"
-                        />
-                    </View>
-
-                    <TextInput
-                        style={styles.input}
-                        value={gender}
-                        onChangeText={setGender}
-                        placeholder="Gender"
-                        placeholderTextColor="#D0D0D0"
+                    <ProfileFormFields
+                        fields={formFields}
+                        onFieldPress={openFieldModal}
+                        sections={sections}
                     />
 
-                    <TextInput
-                        style={[styles.input, { height: 80 }]}
-                        value={address}
-                        onChangeText={setAddress}
-                        placeholder="Address"
-                        placeholderTextColor="#D0D0D0"
-                        multiline
-                    />
-
-                    <Button
-                        label="Save Changes"
-                        onPress={() => router.back()}
-                        style={{ marginTop: 30, marginBottom: 30, backgroundColor: '#534889' }}
-                    />
+                    <View style={{ height: 100 }} />
                 </View>
             </ScrollView>
+
+            <SaveButton
+                onPress={handleSaveChanges}
+                loading={saving}
+            />
+
+            <FieldEditModal
+                visible={focusedField !== null}
+                fieldLabel={focusedField ? getFieldLabel(focusedField) : ''}
+                value={modalValue}
+                onChangeText={setModalValue}
+                onClose={closeFieldModal}
+                onSave={saveFieldValue}
+                keyboardType={focusedField ? getKeyboardType(focusedField) : 'default'}
+            />
         </View>
     );
 }
@@ -89,89 +308,13 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         paddingTop: Platform.OS === 'android' ? 20 : 20
     },
-    header: {
-        height: 60,
-        justifyContent: 'center',
-        alignItems: 'center',
-        position: 'relative',
-        flexDirection: 'row',
-    },
-    backButtonContainer: {
-        position: 'absolute',
-        left: 20,
-        zIndex: 10,
-    },
-    headerTitle: {
-        fontSize: 20,
-        color: '#000000',
-        fontFamily: 'Poppins',
-        fontWeight: 'bold',
-    },
     scrollContainer: {
         flexGrow: 1,
+        paddingBottom: 20,
     },
     centeredContent: {
         alignItems: 'center',
         paddingHorizontal: 20,
         paddingTop: 20,
-    },
-    profileImage: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        marginBottom: 10,
-        backgroundColor: '#D0D0D0',
-    },
-    name: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#000000',
-        fontFamily: 'Poppins',
-        marginBottom: 20,
-    },
-    input: {
-        width: '100%',
-        borderWidth: 1,
-        borderColor: '#D0D0D0',
-        borderRadius: 10,
-        paddingVertical: 10,
-        paddingHorizontal: 12,
-        fontSize: 16,
-        color: '#414141',
-        backgroundColor: '#F8F8F8',
-        fontFamily: 'Poppins',
-        marginBottom: 15,
-    },
-    rowInput: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '100%',
-        marginBottom: 15,
-    },
-    countryCodeBox: {
-        borderWidth: 1,
-        borderColor: '#D0D0D0',
-        borderRadius: 6,
-        paddingVertical: 10,
-        paddingHorizontal: 10,
-        marginRight: 8,
-        backgroundColor: '#fff',
-    },
-    countryCode: {
-        fontFamily: 'Poppins',
-        color: '#414141',
-        fontSize: 15,
-    },
-    phoneInput: {
-        flex: 1,
-        borderWidth: 1,
-        borderColor: '#D0D0D0',
-        borderRadius: 10,
-        paddingVertical: 10,
-        paddingHorizontal: 12,
-        fontSize: 16,
-        color: '#414141',
-        backgroundColor: '#F8F8F8',
-        fontFamily: 'Poppins',
     },
 });
