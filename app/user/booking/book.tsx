@@ -7,6 +7,8 @@ import { BASE_URL } from '../../../config';
 
 // Custom Hooks & Components
 import { useHomeAnimations } from '../../../components/animations/HomeAnimations';
+import { DriverArrival } from '../../../components/DriverArrival';
+import { DriverDetails } from '../../../components/DriverDetails';
 import { DriverSearchLoading } from '../../../components/Loading';
 import { LocationModals } from '../../../components/Location';
 import { useLocationSearch } from '../../../components/LocationSearch';
@@ -71,6 +73,8 @@ export const BookingComponent = ({
 
     // Driver Search State
     const [driverSearchVisible, setDriverSearchVisible] = useState(false);
+    const [driverArrivalVisible, setDriverArrivalVisible] = useState(false);
+    const [showDriverDetails, setShowDriverDetails] = useState(false);
     const [bookingId, setBookingId] = useState<string | null>(null);
 
     // Search Modal State
@@ -398,6 +402,30 @@ export const BookingComponent = ({
                 visible={driverSearchVisible}
                 onCancel={handleCancelBooking}
             />
+
+            {/* DRIVER ARRIVAL */}
+            <DriverArrival
+                isSearching={driverSearchVisible}
+                visible={driverArrivalVisible}
+                onArrivalShow={() => {
+                    setDriverSearchVisible(false);
+                    setDriverArrivalVisible(true);
+                }}
+                onClose={() => setDriverArrivalVisible(false)}
+                onMessagePress={() => {
+                    setDriverArrivalVisible(false);
+                    router.push('/user/chat');
+                }}
+                onDetailsPress={() => {
+                    setDriverArrivalVisible(false);
+                    setShowDriverDetails(true);
+                }}
+            />
+
+            {/* DRIVER DETAILS OVERLAY */}
+            {showDriverDetails && (
+                <DriverDetails onClose={() => setShowDriverDetails(false)} />
+            )}
         </>
     );
 };
