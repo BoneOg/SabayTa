@@ -2,7 +2,7 @@ import BackButton from '@/components/ui/BackButton';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Alert, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const options = ['Change Password', 'Privacy Policy', 'Contact Us', 'Delete Account'];
 
@@ -29,7 +29,7 @@ const SettingsScreen = () => {
 
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.content}>
         <View style={styles.header}>
           <BackButton style={{ marginBottom: 0 }} />
@@ -44,7 +44,7 @@ const SettingsScreen = () => {
           </TouchableOpacity>
         ))}
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

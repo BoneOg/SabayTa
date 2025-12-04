@@ -131,7 +131,5 @@ const styles = StyleSheet.create({
     marginTop: 4,
     textAlign: "center",
     width: '100%',
-    // includeFontPadding: false, // Removed to prevent clipping issues on some devices
-    // flexWrap: "wrap", // Removed to prevent wrapping
   },
 });

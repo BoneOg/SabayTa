@@ -2,7 +2,7 @@ import BackButton from '@/components/ui/BackButton';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const DriverChangePassword = () => {
     const router = useRouter();
@@ -15,7 +15,6 @@ const DriverChangePassword = () => {
     const [newVisible, setNewVisible] = useState(false);
     const [confirmVisible, setConfirmVisible] = useState(false);
 
-    // Disable save button if any field is empty OR new password != confirm password
     const isSaveDisabled = useMemo(
         () =>
             !oldPassword || !newPassword || !confirmPassword || newPassword !== confirmPassword,
@@ -23,15 +22,13 @@ const DriverChangePassword = () => {
     );
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <View style={styles.content}>
 
                 {/* Header */}
                 <View style={styles.header}>
                     <BackButton style={{ marginBottom: 0 }} />
-
                     <Text style={styles.title}>Change Password</Text>
-
                     <View style={{ width: 40 }} />
                 </View>
 
@@ -108,7 +105,7 @@ const DriverChangePassword = () => {
                     </TouchableOpacity>
                 </View>
             </View>
-        </SafeAreaView>
+        </View>
     );
 };
 
@@ -122,8 +119,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 30,
     },
-
-
 
     title: {
         fontSize: 20,

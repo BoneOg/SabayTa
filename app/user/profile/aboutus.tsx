@@ -1,10 +1,10 @@
 import BackButton from '@/components/ui/BackButton';
 import React from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 const AboutUsScreen = () => {
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <BackButton style={{ marginBottom: 0 }} />
@@ -31,7 +31,7 @@ const AboutUsScreen = () => {
           in USTP, no student rides alone.
         </Text>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

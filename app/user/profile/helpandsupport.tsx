@@ -1,12 +1,10 @@
 import BackButton from '@/components/ui/BackButton';
 import React from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 const HelpAndSupportScreen = () => {
-
-
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <BackButton style={{ marginBottom: 0 }} />
@@ -16,7 +14,7 @@ const HelpAndSupportScreen = () => {
 
         <Text style={styles.sectionTitle}>Need help?</Text>
         <Text style={styles.bodyText}>
-          Need help? We’ve got you covered! SabayTa is here to make your ride-sharing experience smooth
+          Need help? We've got you covered! SabayTa is here to make your ride-sharing experience smooth
           and safe.
         </Text>
 
@@ -29,8 +27,8 @@ const HelpAndSupportScreen = () => {
 
         <Text style={styles.sectionTitle}>If something goes wrong</Text>
         <Text style={styles.bodyText}>
-          If your driver doesn’t arrive on time, try contacting them via Message or Call Driver. If
-          there’s no response, you can cancel and find another ride. For issues or safety concerns, go
+          If your driver doesn't arrive on time, try contacting them via Message or Call Driver. If
+          there's no response, you can cancel and find another ride. For issues or safety concerns, go
           to Help & Support → Report an Issue, and our team will assist you. You can also edit or cancel
           your active rides under My Rides.
         </Text>
@@ -38,16 +36,16 @@ const HelpAndSupportScreen = () => {
         <Text style={styles.sectionTitle}>Need to reach us?</Text>
         <Text style={styles.bodyText}>
           For further assistance, email us at support@sabayta.com or call (+63) 917 555 1234, available
-          Monday–Saturday, 8:00 AM–6:00 PM.
+          Monday-Saturday, 8:00 AM-6:00 PM.
         </Text>
 
         <Text style={styles.sectionTitle}>Ride safely</Text>
         <Text style={styles.bodyText}>
-          Your safety matters to us. Always confirm your driver’s USTP ID, wear your helmet, and ride
-          responsibly. Together, let’s make every SabayTa ride safe and reliable!
+          Your safety matters to us. Always confirm your driver's USTP ID, wear your helmet, and ride
+          responsibly. Together, let's make every SabayTa ride safe and reliable!
         </Text>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

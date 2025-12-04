@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView from 'react-native-maps';
 
 // Custom Hooks & Components
@@ -57,9 +57,9 @@ export default function HomeScreen() {
 
   if (!region) {
     return (
-      <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <Text>Fetching location...</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
@@ -68,7 +68,7 @@ export default function HomeScreen() {
   // ====================================================================
   return (
     <View style={{ flex: 1 }}>
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         {/* MAP */}
         <MapComponent
           mapRef={mapRef}
@@ -106,7 +106,7 @@ export default function HomeScreen() {
         >
           <Ionicons name="locate" size={24} color="#534889" />
         </TouchableOpacity>
-      </SafeAreaView>
+      </View>
     </View>
   );
 }

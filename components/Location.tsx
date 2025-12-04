@@ -1,6 +1,6 @@
 import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
-import { Animated, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Animated, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 // Define types
 interface NominatimResult {
@@ -115,7 +115,7 @@ export const LocationModals = ({
             {/* NEW SEARCH MODAL */}
             {searchModalVisible && (
                 <View style={styles.fullScreenModal}>
-                    <SafeAreaView style={{ flex: 1 }}>
+                <View style={{ flex: 1 }}>
                         <View style={styles.searchModalHeader}>
                             <TouchableOpacity onPress={() => setSearchModalVisible(false)} style={styles.closeSearchButton}>
                                 <Ionicons name="arrow-back" size={24} color="#000" />
@@ -144,12 +144,14 @@ export const LocationModals = ({
                             </View>
                         </View>
 
-                        <TouchableOpacity style={styles.currentLocationRow} onPress={useCurrentLocation}>
-                            <View style={styles.currentLocationIcon}>
-                                <MaterialIcons name="my-location" size={22} color="#534889" />
-                            </View>
-                            <Text style={styles.currentLocationText}>Use my current location</Text>
-                        </TouchableOpacity>
+                        {activeSearchField === 'from' && (
+                            <TouchableOpacity style={styles.currentLocationRow} onPress={useCurrentLocation}>
+                                <View style={styles.currentLocationIcon}>
+                                    <MaterialIcons name="my-location" size={22} color="#534889" />
+                                </View>
+                                <Text style={styles.currentLocationText}>Use my current location</Text>
+                            </TouchableOpacity>
+                        )}
 
                         <ScrollView style={styles.searchResultsList} keyboardShouldPersistTaps="handled">
                             {searchSuggestions.map((item) => (
@@ -172,7 +174,7 @@ export const LocationModals = ({
                                 <Text style={styles.chooseMapText}>Choose from map</Text>
                             </TouchableOpacity>
                         </KeyboardAvoidingView>
-                    </SafeAreaView>
+                    </View>
                 </View>
             )}
         </>

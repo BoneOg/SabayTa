@@ -3,12 +3,11 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import {
   Alert,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 
 const DeleteAccount = () => {
@@ -30,7 +29,7 @@ const DeleteAccount = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         {/* Header */}
         <View style={styles.header}>
@@ -56,7 +55,7 @@ const DeleteAccount = () => {
         </TouchableOpacity>
 
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

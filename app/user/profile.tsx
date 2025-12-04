@@ -112,9 +112,6 @@ export default function ProfileScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Profile</Text>
-        <TouchableOpacity style={styles.adminButton} onPress={() => router.push('/admin')}>
-          <MaterialIcons name="security" size={24} color="#534889" />
-        </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -246,12 +243,6 @@ const styles = StyleSheet.create({
     fontSize: 19,
     color: '#000',
     fontFamily: 'Poppins',
-  },
-
-  adminButton: {
-    position: 'absolute',
-    right: 20,
-    padding: 5,
   },
 
   scrollContainer: {
