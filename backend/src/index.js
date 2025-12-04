@@ -4,6 +4,7 @@ import { connectDB } from './lib/db.js';
 import authRoutes from './routes/authRoutes.js';
 import bookingRoutes from './routes/bookingRoutes.js';
 import driverProfileRoutes from './routes/driverProfileRoutes.js';
+import favoriteRoutes from './routes/favoriteRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
 
 const app = express();
@@ -14,6 +15,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/driver/profile', driverProfileRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/favorites', favoriteRoutes);
 
 connectDB()
     .then(() => {
