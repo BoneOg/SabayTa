@@ -2,14 +2,8 @@ import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Animated,
-  Dimensions,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+  Animated, Dimensions,
+  StyleSheet, Text, TextInput, TouchableOpacity, View
 } from 'react-native';
 import MapView, { Circle, Marker } from 'react-native-maps';
 
@@ -76,14 +70,14 @@ export default function OfferARideMap() {
 
   if (!region) {
     return (
-      <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+    <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <Text>Fetching location...</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {/* Map Background */}
       <MapView
         style={StyleSheet.absoluteFill}
@@ -151,7 +145,7 @@ export default function OfferARideMap() {
           </Animated.View>
         </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 

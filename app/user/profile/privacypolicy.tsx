@@ -1,13 +1,13 @@
 import BackButton from '@/components/ui/BackButton';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 const PrivacyPolicy = () => {
   const router = useRouter();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.content}>
 
         {/* Header */}
@@ -34,7 +34,7 @@ const PrivacyPolicy = () => {
         </ScrollView>
 
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

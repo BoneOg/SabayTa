@@ -1,21 +1,19 @@
 import BackButton from '@/components/ui/BackButton';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 const DriverPrivacyPolicy = () => {
     const router = useRouter();
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <View style={styles.content}>
 
                 {/* Header */}
                 <View style={styles.header}>
                     <BackButton style={{ marginBottom: 0 }} />
-
                     <Text style={styles.title}>Privacy Policy</Text>
-
                     <View style={{ width: 40 }} />
                 </View>
 
@@ -34,7 +32,7 @@ const DriverPrivacyPolicy = () => {
                 </ScrollView>
 
             </View>
-        </SafeAreaView>
+        </View>
     );
 };
 
@@ -48,8 +46,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 30,
     },
-
-
 
     title: {
         fontSize: 20,

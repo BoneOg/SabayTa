@@ -1,7 +1,7 @@
 import BackButton from '@/components/ui/BackButton';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export const options = {
   tabBarStyle: { display: 'none' },
@@ -19,7 +19,7 @@ const ContactUs = () => {
   const isSendDisabled = useMemo(() => !name || !email || !mobile || !message, [name, email, mobile, message]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.content}>
 
         {/* Header */}
@@ -94,7 +94,7 @@ const ContactUs = () => {
         </View>
 
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
