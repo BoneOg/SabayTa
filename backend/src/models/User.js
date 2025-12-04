@@ -7,7 +7,11 @@ const userSchema = new mongoose.Schema({
     phone: { type: String, required: true },
     gender: { type: String, required: true },
     password: { type: String, required: true, minlength: 6 },
-    role: { type: String, enum: ['user', 'driver', 'admin'], default: 'user' } // <-- default role
+    role: { type: String, enum: ['user', 'driver', 'admin'], default: 'user' },
+    profileImage: { type: String, default: "" },
+    street: { type: String, default: "" },
+    city: { type: String, default: "" },
+    district: { type: String, default: "" }
 });
 
 userSchema.pre("save", async function (next) {

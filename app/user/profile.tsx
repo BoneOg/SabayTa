@@ -154,6 +154,13 @@ export default function ProfileScreen() {
   ];
 
   const handlePress = (route?: string, replace?: boolean) => {
+    if (!route) return; // Prevent undefined
+
+    if (replace) {
+      router.replace(route as any);
+    } else {
+      router.push(route as any);
+    }
   };
 
   return (

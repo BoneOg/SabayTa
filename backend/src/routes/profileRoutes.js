@@ -2,7 +2,6 @@ import { v2 as cloudinary } from "cloudinary";
 import express from "express";
 import jwt from "jsonwebtoken";
 import multer from "multer";
-import Profile from "../models/Profile.js";
 import User from "../models/User.js";
 
 const router = express.Router();
@@ -47,12 +46,20 @@ const adminProtect = (req, res, next) => {
 /* ================== GET PROFILE ================== */
 router.get("/", protect, async (req, res) => {
   try {
-    const profile = await Profile.findOne({ email: req.user.email });
-    if (!profile) return res.status(404).json({ message: "Profile not found" });
+    const user = await User.findById(req.user._id).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     res.json({
-      profile,
-      role: req.user.role, // return role for frontend navigation
+      profile: {
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        street: user.street,
+        city: user.city,
+        district: user.district,
+        profileImage: user.profileImage
+      },
+      role: user.role,
     });
   } catch (error) {
     console.error("Get profile error:", error);
@@ -63,7 +70,16 @@ router.get("/", protect, async (req, res) => {
 /* ================== GET ALL PROFILES (ADMIN ONLY) ================== */
 router.get("/all", protect, adminProtect, async (req, res) => {
   try {
-    const profiles = await Profile.find();
+    const users = await User.find().select("-password");
+    const profiles = users.map(user => ({
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      street: user.street,
+      city: user.city,
+      district: user.district,
+      profileImage: user.profileImage
+    }));
     res.json({ profiles });
   } catch (error) {
     console.error("Get all profiles error:", error);
@@ -88,24 +104,37 @@ router.put("/", protect, upload.single("profileImage"), async (req, res) => {
       profileImageUrl = uploaded.secure_url;
     }
 
-    const updatedProfile = await Profile.findOneAndUpdate(
-      { email: req.user.email },
-      {
-        name,
-        email,
-        phone,
-        street,
-        city,
-        district,
-        ...(profileImageUrl && { profileImage: profileImageUrl }),
-      },
-      { new: true, upsert: true }
-    );
+    const updateData = {
+      name,
+      email,
+      phone,
+      street,
+      city,
+      district,
+    };
+
+    if (profileImageUrl) {
+      updateData.profileImage = profileImageUrl;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      updateData,
+      { new: true }
+    ).select("-password");
 
     res.json({
       message: "Profile updated successfully",
-      profile: updatedProfile,
-      role: req.user.role,
+      profile: {
+        name: updatedUser.name,
+        email: updatedUser.email,
+        phone: updatedUser.phone,
+        street: updatedUser.street,
+        city: updatedUser.city,
+        district: updatedUser.district,
+        profileImage: updatedUser.profileImage
+      },
+      role: updatedUser.role,
     });
   } catch (error) {
     console.error("Update profile error:", error);
@@ -133,16 +162,24 @@ router.put("/photo", protect, upload.single("profileImage"), async (req, res) =>
       folder: "SabayTa_Profiles",
     });
 
-    const updatedProfile = await Profile.findOneAndUpdate(
-      { email: req.user.email },
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
       { profileImage: uploaded.secure_url },
-      { new: true, upsert: true }
-    );
+      { new: true }
+    ).select("-password");
 
     res.json({
       message: "Profile photo updated successfully",
       profileImage: uploaded.secure_url,
-      profile: updatedProfile,
+      profile: {
+        name: updatedUser.name,
+        email: updatedUser.email,
+        phone: updatedUser.phone,
+        street: updatedUser.street,
+        city: updatedUser.city,
+        district: updatedUser.district,
+        profileImage: updatedUser.profileImage
+      },
     });
   } catch (error) {
     console.error("Update profile photo error:", error);
