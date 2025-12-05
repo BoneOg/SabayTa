@@ -86,18 +86,19 @@ export default function DriverHome() {
     }
   };
 
-  const handleAcceptBooking = async () => {
+const handleAcceptBooking = async () => {
     if (!selectedUser) return;
 
     console.log("✅ Accepting booking for:", selectedUser?.name);
     setShowConfirmModal(false);
 
     const success = await acceptBooking(selectedUser.id, driverLocation);
+
     if (success) {
-      setSelectedUser(null);
-      clearRoute();
+        console.log("Route stays on map.");
     }
-  };
+};
+
 
   const handleCancelBooking = () => {
     console.log("❌ Booking cancelled");
