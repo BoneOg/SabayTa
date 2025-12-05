@@ -83,6 +83,42 @@ export const BookingComponent = ({
     const [searchText, setSearchText] = useState('');
     const [searchSuggestions, setSearchSuggestions] = useState<NominatimResult[]>([]);
 
+    // Poll for booking status updates - driver acceptance
+    useEffect(() => {
+        if (!bookingId || !driverSearchVisible) return;
+
+        const pollInterval = setInterval(async () => {
+            try {
+                const response = await fetch(`${BASE_URL}/api/bookings/${bookingId}`);
+                
+                if (!response.ok) {
+                    console.warn("Booking status response not ok:", response.status);
+                    return;
+                }
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    console.warn("Response is not JSON:", contentType);
+                    return;
+                }
+
+                const data = await response.json();
+                console.log("📱 Booking status:", data);
+
+                if (data.booking && data.booking.status === 'accepted') {
+                    console.log('✅ Driver accepted booking!');
+                    setDriverSearchVisible(false);
+                    setDriverArrivalVisible(true);
+                    clearInterval(pollInterval);
+                }
+            } catch (error) {
+                console.error("Error polling booking status:", error);
+            }
+        }, 1000); // Poll every second
+
+        return () => clearInterval(pollInterval);
+    }, [bookingId, driverSearchVisible]);
+
     // Notify parent of location changes
     useEffect(() => {
         if (onLocationChange) {
@@ -404,23 +440,19 @@ export const BookingComponent = ({
             />
 
             {/* DRIVER ARRIVAL */}
-            <DriverArrival
-                isSearching={driverSearchVisible}
-                visible={driverArrivalVisible}
-                onArrivalShow={() => {
-                    setDriverSearchVisible(false);
-                    setDriverArrivalVisible(true);
-                }}
-                onClose={() => setDriverArrivalVisible(false)}
-                onMessagePress={() => {
-                    setDriverArrivalVisible(false);
-                    router.push('/user/chat');
-                }}
-                onDetailsPress={() => {
-                    setDriverArrivalVisible(false);
-                    setShowDriverDetails(true);
-                }}
-            />
+            {driverArrivalVisible && (
+                <DriverArrival
+                    isSearching={driverSearchVisible}
+                    visible={driverArrivalVisible}
+                    onClose={() => setDriverArrivalVisible(false)}
+                    onMessagePress={() => {
+                        router.push('/user/chat');
+                    }}
+                    onDetailsPress={() => {
+                        setShowDriverDetails(true);
+                    }}
+                />
+            )}
 
             {/* DRIVER DETAILS OVERLAY */}
             {showDriverDetails && (

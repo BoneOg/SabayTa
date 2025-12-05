@@ -43,6 +43,59 @@ router.get('/pending', async (req, res) => {
     }
 });
 
+// Get a specific booking by ID
+router.get('/:id', async (req, res) => {
+    try {
+        const booking = await Booking.findById(req.params.id)
+            .populate('userId', 'name phone gender')
+            .populate('driverId', 'name phone vehicle');
+
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+
+        res.status(200).json({ booking });
+    } catch (error) {
+        console.error("Error fetching booking:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// Accept a booking (driver accepts)
+router.post('/:id/accept', async (req, res) => {
+    try {
+        const { driverId, driverLocation, acceptedAt } = req.body;
+
+        console.log("📱 Accept booking request:", { bookingId: req.params.id, driverId, driverLocation });
+
+        const booking = await Booking.findById(req.params.id);
+
+        if (!booking) {
+            console.warn("❌ Booking not found:", req.params.id);
+            return res.status(404).json({ message: "Booking not found" });
+        }
+
+        if (booking.status !== 'pending') {
+            console.warn("⚠️ Booking not in pending status:", booking.status);
+            return res.status(400).json({ message: "Booking is not available" });
+        }
+
+        // Update booking
+        booking.status = 'accepted';
+        booking.driverId = driverId || 'unknown-driver';
+        booking.driverLocation = driverLocation || {};
+        booking.acceptedAt = acceptedAt ? new Date(acceptedAt) : new Date();
+
+        const updatedBooking = await booking.save();
+        console.log("✅ Booking accepted successfully:", { id: updatedBooking._id, status: updatedBooking.status });
+
+        res.status(200).json({ message: "Booking accepted", booking: updatedBooking });
+    } catch (error) {
+        console.error("❌ Error accepting booking:", error.message);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+});
+
 // Cancel a booking
 router.post('/:id/cancel', async (req, res) => {
     try {

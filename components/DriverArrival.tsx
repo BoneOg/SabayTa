@@ -23,19 +23,13 @@ export const DriverArrival = ({
     const slideAnim = new Animated.Value(500);
 
     useEffect(() => {
-        if (isSearching) {
-            // Show the arrival modal 2 seconds after search starts
-            const timer = setTimeout(() => {
-                setShowArrival(true);
-                // Call the callback to hide the loading modal
-                onArrivalShow?.();
-            }, 2000);
-
-            return () => clearTimeout(timer);
+        // Driver arrival only shows when visible prop is true (set when driver accepts)
+        if (visible) {
+            setShowArrival(true);
         } else {
             setShowArrival(false);
         }
-    }, [isSearching, onArrivalShow]);
+    }, [visible]);
 
     useEffect(() => {
         if (showArrival || visible) {

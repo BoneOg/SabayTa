@@ -202,11 +202,41 @@ export default function DriverHome() {
     }
   };
 
-  const handleAcceptBooking = () => {
-    console.log("✅ Booking accepted for:", selectedUser?.name);
+  const handleAcceptBooking = async () => {
+    if (!selectedUser) return;
+    
+    console.log("✅ Accepting booking for:", selectedUser?.name);
     setShowConfirmModal(false);
-    // TODO: Add API call to accept booking
-    Alert.alert("Success", `Booking accepted for ${selectedUser?.name}`);
+    
+    try {
+      console.log("📤 Booking ID:", selectedUser.id);
+      console.log("📤 Driver Location:", driverLocation);
+      
+      const response = await fetch(`${BASE_URL}/api/bookings/${selectedUser.id}/accept`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          driverId: 'driver-001',
+          driverLocation: driverLocation,
+          acceptedAt: new Date().toISOString()
+        })
+      });
+
+      console.log("📥 Response status:", response.status);
+      const data = await response.json();
+      console.log("📥 Accept response:", data);
+
+      if (response.ok) {
+        Alert.alert("Success", `Booking accepted for ${selectedUser?.name}`);
+        fetchBookings();
+      } else {
+        Alert.alert("Error", data.message || "Failed to accept booking");
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to accept booking. Please try again.";
+      console.error("Error accepting booking:", errorMessage);
+      Alert.alert("Error", errorMessage);
+    }
   };
 
   const handleCancelBooking = () => {
