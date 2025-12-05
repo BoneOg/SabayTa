@@ -141,7 +141,7 @@ export default function DriverApplications() {
                         style={[styles.filterButton, filter === f && styles.filterButtonActive]}
                         onPress={() => setFilter(f as any)}
                     >
-                        <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>
+                        <Text numberOfLines={1} style={[styles.filterText, filter === f && styles.filterTextActive]}>
                             {f.charAt(0).toUpperCase() + f.slice(1)}
                         </Text>
                     </TouchableOpacity>
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     filterButton: {
         flex: 1,
         paddingVertical: 8,
-        paddingHorizontal: 12,
+        paddingHorizontal: 8,
         marginHorizontal: 4,
         borderRadius: 20,
         backgroundColor: '#F0F0F0',
@@ -192,11 +192,11 @@ const styles = StyleSheet.create({
     filterText: {
         fontFamily: 'Poppins',
         fontSize: 13,
-        fontWeight: '600',
         color: '#666',
     },
     filterTextActive: {
         color: '#fff',
+        fontWeight: '600',
     },
     listContainer: {
         padding: 16,

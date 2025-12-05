@@ -177,7 +177,7 @@ export default function StudentVerification() {
                         style={[styles.filterButton, filter === f && styles.filterButtonActive]}
                         onPress={() => setFilter(f as any)}
                     >
-                        <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>
+                        <Text numberOfLines={1} style={[styles.filterText, filter === f && styles.filterTextActive]}>
                             {f.charAt(0).toUpperCase() + f.slice(1)}
                         </Text>
                     </TouchableOpacity>
