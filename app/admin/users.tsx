@@ -1,13 +1,15 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import React, { useState } from 'react';
-import { Alert, FlatList, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { BASE_URL } from '../../config';
 
 type User = {
     id: string;
     name: string;
     email: string;
     phone: string;
-    role: 'Rider' | 'Driver';
+    role: 'user' | 'driver' | 'admin';
     status: 'Active' | 'Suspended';
     // Documents
     schoolId?: string;
@@ -17,47 +19,9 @@ type User = {
     vehicleInfo?: string;
 };
 
-const INITIAL_USERS: User[] = [
-    {
-        id: '1',
-        name: 'Alice Smith',
-        email: 'alice@example.com',
-        phone: '09123456789',
-        role: 'Rider',
-        status: 'Active',
-        schoolId: 'School ID uploaded',
-        cor: 'COR uploaded'
-    },
-    {
-        id: '2',
-        name: 'Bob Jones',
-        email: 'bob@example.com',
-        phone: '09123456780',
-        role: 'Driver',
-        status: 'Active',
-        schoolId: 'School ID uploaded',
-        cor: 'COR uploaded',
-        license: 'License uploaded',
-        orCr: 'OR/CR uploaded',
-        vehicleInfo: 'Yamaha NMAX 155'
-    },
-    {
-        id: '3',
-        name: 'Charlie Brown',
-        email: 'charlie@example.com',
-        phone: '09170000000',
-        role: 'Driver',
-        status: 'Suspended',
-        schoolId: 'School ID uploaded',
-        cor: 'COR uploaded',
-        license: 'License uploaded',
-        orCr: 'OR/CR uploaded',
-        vehicleInfo: 'Honda Click 160'
-    },
-];
-
 export default function UsersManagement() {
-    const [users, setUsers] = useState<User[]>(INITIAL_USERS);
+    const [users, setUsers] = useState<User[]>([]);
+    const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
     const [viewModalVisible, setViewModalVisible] = useState(false);
@@ -67,10 +31,56 @@ export default function UsersManagement() {
         name: '',
         email: '',
         phone: '',
-        role: 'Rider' as 'Rider' | 'Driver',
+        role: 'user' as 'user' | 'driver',
         status: 'Active' as 'Active' | 'Suspended',
         vehicleInfo: ''
     });
+
+    useEffect(() => {
+        fetchUsers();
+    }, []);
+
+    const fetchUsers = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                Alert.alert('Error', 'No authentication token found');
+                setLoading(false);
+                return;
+            }
+
+            const response = await fetch(`${BASE_URL}/api/profile/all`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                const mappedUsers = data.profiles.map((p: any) => ({
+                    id: p.id,
+                    name: p.name,
+                    email: p.email,
+                    phone: p.phone,
+                    role: p.role,
+                    status: p.status,
+                    vehicleInfo: p.vehicleInfo,
+                    license: p.license,
+                    schoolId: p.schoolId,
+                    cor: p.cor,
+                    orCr: p.orCr
+                }));
+                setUsers(mappedUsers);
+            } else {
+                console.log("Fetch users failed:", data.message);
+                Alert.alert('Error', data.message || 'Failed to fetch users');
+            }
+        } catch (error) {
+            console.error("Fetch users error:", error);
+            Alert.alert('Error', 'Network error');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const filteredUsers = users.filter(user =>
         user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -80,7 +90,7 @@ export default function UsersManagement() {
     // CREATE
     const handleCreate = () => {
         setEditingUser(null);
-        setFormData({ name: '', email: '', phone: '', role: 'Rider', status: 'Active', vehicleInfo: '' });
+        setFormData({ name: '', email: '', phone: '', role: 'user', status: 'Active', vehicleInfo: '' });
         setModalVisible(true);
     };
 
@@ -97,7 +107,7 @@ export default function UsersManagement() {
             name: user.name,
             email: user.email,
             phone: user.phone,
-            role: user.role,
+            role: user.role as 'user' | 'driver',
             status: user.status,
             vehicleInfo: user.vehicleInfo || ''
         });
@@ -114,33 +124,39 @@ export default function UsersManagement() {
                 {
                     text: 'Delete',
                     style: 'destructive',
-                    onPress: () => setUsers(users.filter(u => u.id !== id))
+                    onPress: async () => {
+                        // Implement delete API call here if backend supports it
+                        // For now, just update local state
+                        setUsers(users.filter(u => u.id !== id));
+                    }
                 }
             ]
         );
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!formData.name || !formData.email || !formData.phone) {
             Alert.alert('Error', 'Please fill all fields');
             return;
         }
 
+        // Implement Save API call here
+        // For now, we'll just update local state to simulate
+        // In a real app, you'd POST/PUT to backend
+
         if (editingUser) {
-            // Update existing user
             setUsers(users.map(u => u.id === editingUser.id ? {
                 ...editingUser,
                 ...formData,
-                vehicleInfo: formData.role === 'Driver' ? formData.vehicleInfo : undefined
+                vehicleInfo: formData.role === 'driver' ? formData.vehicleInfo : undefined
             } : u));
         } else {
-            // Create new user
             const newUser: User = {
                 id: Date.now().toString(),
                 ...formData,
                 schoolId: 'Pending upload',
                 cor: 'Pending upload',
-                ...(formData.role === 'Driver' && {
+                ...(formData.role === 'driver' && {
                     license: 'Pending upload',
                     orCr: 'Pending upload',
                 })
@@ -156,12 +172,12 @@ export default function UsersManagement() {
                 <Text style={styles.userName}>{item.name}</Text>
                 <Text style={styles.userDetail}>{item.email}</Text>
                 <Text style={styles.userDetail}>{item.phone}</Text>
-                {item.role === 'Driver' && item.vehicleInfo && (
+                {item.role === 'driver' && item.vehicleInfo && (
                     <Text style={styles.userDetail}>🏍️ {item.vehicleInfo}</Text>
                 )}
                 <View style={styles.badgeRow}>
-                    <View style={[styles.badge, { backgroundColor: item.role === 'Driver' ? '#FEF9E7' : '#EBF5FB' }]}>
-                        <Text style={[styles.badgeText, { color: item.role === 'Driver' ? '#F1C40F' : '#2980B9' }]}>
+                    <View style={[styles.badge, { backgroundColor: item.role === 'driver' ? '#FEF9E7' : '#EBF5FB' }]}>
+                        <Text style={[styles.badgeText, { color: item.role === 'driver' ? '#F1C40F' : '#2980B9', textTransform: 'capitalize' }]}>
                             {item.role}
                         </Text>
                     </View>
@@ -185,6 +201,14 @@ export default function UsersManagement() {
             </View>
         </View>
     );
+
+    if (loading) {
+        return (
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <ActivityIndicator size="large" color="#534889" />
+            </View>
+        );
+    }
 
     return (
         <View style={styles.container}>
@@ -212,6 +236,8 @@ export default function UsersManagement() {
                 renderItem={renderUserItem}
                 contentContainerStyle={styles.listContent}
                 ListEmptyComponent={<Text style={styles.emptyText}>No users found.</Text>}
+                refreshing={loading}
+                onRefresh={fetchUsers}
             />
 
             {/* View Documents Modal */}
@@ -229,7 +255,7 @@ export default function UsersManagement() {
                             {viewingUser && (
                                 <>
                                     <Text style={styles.docUserName}>{viewingUser.name}</Text>
-                                    <Text style={styles.docUserRole}>{viewingUser.role}</Text>
+                                    <Text style={[styles.docUserRole, { textTransform: 'capitalize' }]}>{viewingUser.role}</Text>
 
                                     <View style={styles.docSection}>
                                         <Text style={styles.docSectionTitle}>Student Documents</Text>
@@ -251,7 +277,7 @@ export default function UsersManagement() {
                                         </View>
                                     </View>
 
-                                    {viewingUser.role === 'Driver' && (
+                                    {viewingUser.role === 'driver' && (
                                         <View style={styles.docSection}>
                                             <Text style={styles.docSectionTitle}>Driver Documents</Text>
 
@@ -334,20 +360,20 @@ export default function UsersManagement() {
                             <Text style={styles.label}>Role</Text>
                             <View style={styles.roleButtons}>
                                 <TouchableOpacity
-                                    style={[styles.roleButton, formData.role === 'Rider' && styles.roleButtonActive]}
-                                    onPress={() => setFormData({ ...formData, role: 'Rider' })}
+                                    style={[styles.roleButton, formData.role === 'user' && styles.roleButtonActive]}
+                                    onPress={() => setFormData({ ...formData, role: 'user' })}
                                 >
-                                    <Text style={[styles.roleButtonText, formData.role === 'Rider' && styles.roleButtonTextActive]}>Rider</Text>
+                                    <Text style={[styles.roleButtonText, formData.role === 'user' && styles.roleButtonTextActive]}>Rider</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
-                                    style={[styles.roleButton, formData.role === 'Driver' && styles.roleButtonActive]}
-                                    onPress={() => setFormData({ ...formData, role: 'Driver' })}
+                                    style={[styles.roleButton, formData.role === 'driver' && styles.roleButtonActive]}
+                                    onPress={() => setFormData({ ...formData, role: 'driver' })}
                                 >
-                                    <Text style={[styles.roleButtonText, formData.role === 'Driver' && styles.roleButtonTextActive]}>Driver</Text>
+                                    <Text style={[styles.roleButtonText, formData.role === 'driver' && styles.roleButtonTextActive]}>Driver</Text>
                                 </TouchableOpacity>
                             </View>
 
-                            {formData.role === 'Driver' && (
+                            {formData.role === 'driver' && (
                                 <>
                                     <Text style={styles.label}>Vehicle Information</Text>
                                     <TextInput
