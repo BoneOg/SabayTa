@@ -148,9 +148,15 @@ export default function StudentVerification() {
                 </View>
             </View>
 
-            <Text style={styles.dateText}>
-                Submitted: {new Date(item.createdAt).toLocaleDateString()}
-            </Text>
+            <View style={styles.cardFooter}>
+                <Text style={styles.dateText}>
+                    Submitted: {new Date(item.createdAt).toLocaleDateString('en-US', {
+                        month: '2-digit',
+                        day: '2-digit',
+                        year: '2-digit'
+                    })}
+                </Text>
+            </View>
         </TouchableOpacity>
     );
 
@@ -405,11 +411,15 @@ const styles = StyleSheet.create({
         color: '#333',
         marginLeft: 8,
     },
+    cardFooter: {
+        paddingTop: 12,
+        borderTopWidth: 1,
+        borderTopColor: '#F0F0F0',
+    },
     dateText: {
         fontFamily: 'Poppins',
         fontSize: 12,
         color: '#999',
-        marginTop: 8,
     },
     emptyContainer: {
         alignItems: 'center',

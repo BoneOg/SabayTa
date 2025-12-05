@@ -21,6 +21,7 @@ export default function Layout() {
     "deleteaccount",
     "editprofile",
     "studentverification",
+    "apply_as_driver",
   ]);
   const shouldShowTabBar = !hiddenRoutes.has(currentRoute);
 

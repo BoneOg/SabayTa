@@ -13,13 +13,27 @@ export default function ProfileScreen() {
   const [profileImage, setProfileImage] = useState('');
   const [loading, setLoading] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
+  const [userRole, setUserRole] = useState<string>('user');
 
   const [selectedRole, setSelectedRole] = useState<'rider' | 'driver'>('rider');
 
   useEffect(() => {
     fetchProfile();
     checkVerificationStatus();
+    checkUserRole();
   }, []);
+
+  const checkUserRole = async () => {
+    try {
+      const userStr = await AsyncStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        setUserRole(user.role || 'user');
+      }
+    } catch (error) {
+      console.error('Error checking user role:', error);
+    }
+  };
 
   const fetchProfile = async () => {
     try {
@@ -111,7 +125,7 @@ export default function ProfileScreen() {
       route: '/user/profile/helpandsupport',
     },
     {
-      icon: 'car-repair',
+      icon: 'sports-motorsports',
       text: 'Apply as Driver',
       library: MaterialIcons,
       route: '/user/profile/apply_as_driver',
@@ -168,45 +182,47 @@ export default function ProfileScreen() {
             </>
           )}
 
-          {/* Role Toggle Buttons */}
-          <View style={styles.toggleContainer}>
-            <TouchableOpacity
-              style={[
-                styles.toggleButton,
-                selectedRole === 'rider' ? styles.activeToggle : {},
-              ]}
-              onPress={() => setSelectedRole('rider')}
-            >
-              <Text
+          {/* Role Toggle Buttons - Only show for drivers */}
+          {userRole === 'driver' && (
+            <View style={styles.toggleContainer}>
+              <TouchableOpacity
                 style={[
-                  styles.toggleText,
-                  selectedRole === 'rider' ? styles.activeToggleText : {},
+                  styles.toggleButton,
+                  selectedRole === 'rider' ? styles.activeToggle : {},
                 ]}
+                onPress={() => setSelectedRole('rider')}
               >
-                Rider
-              </Text>
-            </TouchableOpacity>
+                <Text
+                  style={[
+                    styles.toggleText,
+                    selectedRole === 'rider' ? styles.activeToggleText : {},
+                  ]}
+                >
+                  Rider
+                </Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[
-                styles.toggleButton,
-                selectedRole === 'driver' ? styles.activeToggle : {},
-              ]}
-              onPress={() => {
-                setSelectedRole('driver');
-                router.push("/driver/profile");
-              }}
-            >
-              <Text
+              <TouchableOpacity
                 style={[
-                  styles.toggleText,
-                  selectedRole === 'driver' ? styles.activeToggleText : {},
+                  styles.toggleButton,
+                  selectedRole === 'driver' ? styles.activeToggle : {},
                 ]}
+                onPress={() => {
+                  setSelectedRole('driver');
+                  router.push("/driver/profile");
+                }}
               >
-                Driver
-              </Text>
-            </TouchableOpacity>
-          </View>
+                <Text
+                  style={[
+                    styles.toggleText,
+                    selectedRole === 'driver' ? styles.activeToggleText : {},
+                  ]}
+                >
+                  Driver
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         {/* Menu Items */}

@@ -4,6 +4,7 @@ import { connectDB } from './lib/db.js';
 import authRoutes from './routes/authRoutes.js';
 import bookingRoutes from './routes/bookingRoutes.js';
 import conversationRoutes from './routes/conversationRoutes.js';
+import driverApplicationRoutes from './routes/driverApplicationRoutes.js';
 import driverProfileRoutes from './routes/driverProfileRoutes.js';
 import favoriteRoutes from './routes/favoriteRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
@@ -20,6 +21,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/student-verification', studentVerificationRoutes);
 app.use('/api/conversations', conversationRoutes);
+app.use('/api/driver-application', driverApplicationRoutes);
 
 connectDB()
     .then(() => {

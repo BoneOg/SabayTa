@@ -1,12 +1,42 @@
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Slot, useRouter, useSegments } from "expo-router";
-import React from "react";
-import { Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function DriverLayout() {
     const router = useRouter();
     const segments = useSegments();
     const currentRoute = segments[segments.length - 1] || "home";
+    const [isDriver, setIsDriver] = useState<boolean | null>(null);
+
+    useEffect(() => {
+        checkDriverRole();
+    }, []);
+
+    const checkDriverRole = async () => {
+        try {
+            const userStr = await AsyncStorage.getItem('user');
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                if (user.role === 'driver') {
+                    setIsDriver(true);
+                } else {
+                    // Not a driver, redirect to user home
+                    setIsDriver(false);
+                    router.replace('/user/home');
+                }
+            } else {
+                // No user, redirect to welcome
+                setIsDriver(false);
+                router.replace('/auth/Welcome');
+            }
+        } catch (error) {
+            console.error('Error checking driver role:', error);
+            setIsDriver(false);
+            router.replace('/user/home');
+        }
+    };
 
     const isActive = (routeName: string) => currentRoute === routeName;
 
@@ -14,6 +44,20 @@ export default function DriverLayout() {
         "notification",
     ]);
     const shouldShowTabBar = !hiddenRoutes.has(currentRoute);
+
+    // Show loading while checking role
+    if (isDriver === null) {
+        return (
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <ActivityIndicator size="large" color="#534889" />
+            </View>
+        );
+    }
+
+    // Don't render anything if not a driver (will redirect)
+    if (!isDriver) {
+        return null;
+    }
 
     return (
         <View style={styles.container}>

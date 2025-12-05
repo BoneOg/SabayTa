@@ -162,14 +162,11 @@ export default function StudentVerification() {
                             {existingRequest.verificationStatus === 'pending' ? 'Verification Pending' :
                                 existingRequest.verificationStatus === 'verified' ? 'Account Verified!' : 'Verification Rejected'}
                         </Text>
-                        <Text style={[styles.infoMessage, {
-                            color: existingRequest.verificationStatus === 'pending' ? '#534889' :
-                                existingRequest.verificationStatus === 'verified' ? '#4CAF50' : '#E91E63'
-                        }]}>
+                        <Text style={styles.infoMessage}>
                             {existingRequest.verificationStatus === 'pending' ?
                                 'Your verification request is being reviewed by our admin team. You will be notified once it\'s processed.' :
                                 existingRequest.verificationStatus === 'verified' ?
-                                    'Your student account has been successfully verified!' :
+                                    'Your student status has been successfully verified. You may now proceed using SabayTa.' :
                                     'Your verification request was rejected. Please contact support for more information.'}
                         </Text>
                         <View style={styles.requestDetails}>
@@ -448,42 +445,45 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     infoCard: {
-        margin: 20,
-        padding: 24,
         borderRadius: 12,
+        padding: 20,
         alignItems: 'center',
+        marginBottom: 20,
     },
     infoTitle: {
         fontFamily: 'Poppins',
         fontSize: 20,
         fontWeight: '600',
+        color: '#333',
         marginTop: 16,
         marginBottom: 8,
+        textAlign: 'center',
     },
     infoMessage: {
         fontFamily: 'Poppins',
         fontSize: 14,
+        color: '#666',
         textAlign: 'center',
-        lineHeight: 20,
+        lineHeight: 22,
         marginBottom: 20,
     },
     requestDetails: {
         flexDirection: 'row',
+        justifyContent: 'space-between',
         width: '100%',
         paddingVertical: 8,
-        borderTopWidth: 1,
-        borderTopColor: 'rgba(0,0,0,0.1)',
+        borderBottomWidth: 1,
+        borderBottomColor: '#E0E0E0',
     },
     detailLabel: {
         fontFamily: 'Poppins',
         fontSize: 14,
         fontWeight: '600',
-        flex: 1,
+        color: '#666',
     },
     detailValue: {
         fontFamily: 'Poppins',
         fontSize: 14,
-        flex: 1,
-        textAlign: 'right',
+        color: '#333',
     },
 });

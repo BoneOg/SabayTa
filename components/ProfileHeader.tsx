@@ -20,7 +20,7 @@ export default function ProfileHeader({ onBack, title = 'Edit Profile' }: Profil
 
 const styles = StyleSheet.create({
     header: {
-        height: 40,
+        height: 60,
         justifyContent: 'center',
         alignItems: 'center',
         flexDirection: 'row',
@@ -38,6 +38,5 @@ const styles = StyleSheet.create({
         color: '#000000',
         fontFamily: 'Poppins',
         fontWeight: 'bold',
-        marginTop: -20,
     },
 });

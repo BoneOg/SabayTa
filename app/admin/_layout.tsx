@@ -114,6 +114,13 @@ export default function AdminLayout() {
                     }}
                 />
                 <Drawer.Screen
+                    name="driver-application-details"
+                    options={{
+                        drawerItemStyle: { display: 'none' },
+                        headerShown: false,
+                    }}
+                />
+                <Drawer.Screen
                     name="rides"
                     options={{
                         drawerLabel: 'Rides',

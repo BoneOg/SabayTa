@@ -1,221 +1,295 @@
-import Button from '@/components/Button';
-import BackButton from '@/components/ui/BackButton';
+import ProfileHeader from '@/components/ProfileHeader';
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import {
-    Image,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Image, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { BASE_URL } from '../../../config';
 
 export default function ApplyAsDriver() {
     const router = useRouter();
+    const [loading, setLoading] = useState(false);
+    const [checkingStatus, setCheckingStatus] = useState(true);
+    const [existingApplication, setExistingApplication] = useState<any>(null);
     const [plateNumber, setPlateNumber] = useState('');
     const [motorcycleModel, setMotorcycleModel] = useState('');
-    const [documents, setDocuments] = useState({
-        license: false,
-        orCr: false,
-        cor: false,
-        schoolId: false,
-    });
+    const [driversLicenseFile, setDriversLicenseFile] = useState<{ uri: string; type: string; name: string } | null>(null);
+    const [vehicleORCRFile, setVehicleORCRFile] = useState<{ uri: string; type: string; name: string } | null>(null);
 
-    const handleUpload = (docType: keyof typeof documents) => {
-        // Simulate upload
-        setDocuments(prev => ({ ...prev, [docType]: true }));
+    useEffect(() => {
+        checkApplicationStatus();
+    }, []);
+
+    const checkApplicationStatus = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) return;
+
+            const response = await fetch(`${BASE_URL}/api/driver-application/status`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.hasApplication) {
+                    setExistingApplication(data.application);
+                }
+            }
+        } catch (error) {
+            console.error('Error checking application status:', error);
+        } finally {
+            setCheckingStatus(false);
+        }
     };
 
-    const isFormComplete = plateNumber && motorcycleModel &&
-        documents.license && documents.orCr &&
-        documents.cor && documents.schoolId;
+    const pickFile = async (setFile: (file: { uri: string; type: string; name: string }) => void) => {
+        try {
+            const result = await DocumentPicker.getDocumentAsync({
+                type: ['image/*', 'application/pdf'],
+                copyToCacheDirectory: true
+            });
 
-    const handleSubmit = () => {
-        // Here you would typically upload documents and submit data to your backend
-        // For now, we'll simulate a successful submission
-        router.back();
+            if (!result.canceled && result.assets[0]) {
+                const { uri, mimeType, name } = result.assets[0];
+                setFile({
+                    uri,
+                    type: mimeType || 'application/pdf',
+                    name: name || 'document'
+                });
+            }
+        } catch (error) {
+            console.error('Error picking file:', error);
+        }
     };
+
+    const handleSubmit = async () => {
+        if (!plateNumber || !motorcycleModel) {
+            Alert.alert('Error', 'Please fill in plate number and motorcycle model.');
+            return;
+        }
+
+        if (!driversLicenseFile || !vehicleORCRFile) {
+            Alert.alert('Error', 'Please upload both Driver\'s License and Vehicle OR/CR.');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                Alert.alert('Error', 'No authentication token found');
+                setLoading(false);
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('plateNumber', plateNumber);
+            formData.append('motorcycleModel', motorcycleModel);
+
+            formData.append('driversLicense', {
+                uri: Platform.OS === 'ios' ? driversLicenseFile.uri.replace('file://', '') : driversLicenseFile.uri,
+                type: driversLicenseFile.type,
+                name: driversLicenseFile.name,
+            } as any);
+
+            formData.append('vehicleORCR', {
+                uri: Platform.OS === 'ios' ? vehicleORCRFile.uri.replace('file://', '') : vehicleORCRFile.uri,
+                type: vehicleORCRFile.type,
+                name: vehicleORCRFile.name,
+            } as any);
+
+            const response = await fetch(`${BASE_URL}/api/driver-application/submit`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: formData,
+            });
+
+            console.log('Response status:', response.status);
+            const text = await response.text();
+            console.log('Response text:', text);
+
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (parseError) {
+                console.error('JSON parse error. Response was:', text);
+                Alert.alert('Error', 'Server error. Please check if backend is running.');
+                setLoading(false);
+                return;
+            }
+
+            if (response.ok) {
+                Alert.alert('Success', 'Driver application submitted successfully!', [
+                    { text: 'OK', onPress: () => router.back() }
+                ]);
+            } else {
+                Alert.alert('Error', data.message || 'Failed to submit application');
+            }
+
+        } catch (error) {
+            console.error(error);
+            Alert.alert('Error', 'Failed to submit application');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (checkingStatus) {
+        return (
+            <View style={styles.container}>
+                <ProfileHeader onBack={() => router.back()} title="Apply as Driver" />
+                <ActivityIndicator size="large" color="#534889" style={{ marginTop: 50 }} />
+            </View>
+        );
+    }
 
     return (
         <View style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <BackButton onPress={() => router.back()} style={{ marginBottom: 0 }} />
+            <ProfileHeader onBack={() => router.back()} title="Apply as Driver" />
 
-                <Text style={styles.headerTitle}>Apply as Driver</Text>
+            {existingApplication ? (
+                <ScrollView style={styles.content}>
+                    <View style={[styles.infoCard, {
+                        backgroundColor: existingApplication.applicationStatus === 'pending' ? '#E8E0F5' :
+                            existingApplication.applicationStatus === 'approved' ? '#D4E8D4' : '#F5E0E8'
+                    }]}>
+                        <MaterialIcons
+                            name={existingApplication.applicationStatus === 'pending' ? 'schedule' :
+                                existingApplication.applicationStatus === 'approved' ? 'check-circle' : 'cancel'}
+                            size={48}
+                            color={existingApplication.applicationStatus === 'pending' ? '#534889' :
+                                existingApplication.applicationStatus === 'approved' ? '#4CAF50' : '#E91E63'}
+                        />
+                        <Text style={[styles.infoTitle, {
+                            color: existingApplication.applicationStatus === 'pending' ? '#534889' :
+                                existingApplication.applicationStatus === 'approved' ? '#4CAF50' : '#E91E63'
+                        }]}>
+                            {existingApplication.applicationStatus === 'pending' ? 'Application Pending' :
+                                existingApplication.applicationStatus === 'approved' ? 'Application Approved!' :
+                                    'Application Rejected'}
+                        </Text>
+                        <Text style={styles.infoMessage}>
+                            {existingApplication.applicationStatus === 'pending' ?
+                                'Your driver application is currently under review by our admin team.' :
+                                existingApplication.applicationStatus === 'approved' ?
+                                    'Congratulations! Your driver application has been approved. Please log out and log back in to access driver features.' :
+                                    'Unfortunately, your driver application was not approved. Please contact support for more information.'}
+                        </Text>
 
-                <View style={{ width: 40 }} />
-            </View>
-
-            <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-
-                {/* Applicant Information */}
-                <View style={styles.card}>
-                    <Text style={styles.cardTitle}>Applicant Information</Text>
-                    <View style={styles.applicantRow}>
-                        <View style={styles.avatarContainer}>
-                            <Image
-                                source={require('@/assets/images/cat5.jpg')}
-                                style={styles.profileImage}
-                            />
+                        <View style={styles.applicationDetails}>
+                            <Text style={styles.detailLabel}>Motorcycle Model:</Text>
+                            <Text style={styles.detailValue}>{existingApplication.motorcycleModel}</Text>
                         </View>
-                        <View style={styles.applicantDetails}>
-                            <Text style={styles.applicantName}>John Doe</Text>
-                            <Text style={styles.applicantEmail}>john.doe@ustp.edu.ph</Text>
-                            <Text style={styles.applicantUniversity}>University of Science and Technology of Southern Philippines</Text>
-                        </View>
-                    </View>
-                </View>
 
-                {/* Required Documents */}
-                <View style={styles.card}>
-                    <Text style={styles.cardTitle}>Required Documents</Text>
-
-                    {/* Driver's License */}
-                    <View style={styles.documentSection}>
-                        <View style={styles.documentLabelRow}>
-                            <MaterialIcons name="credit-card" size={16} color="#666" />
-                            <Text style={styles.documentLabel}>Driver's License</Text>
+                        <View style={styles.applicationDetails}>
+                            <Text style={styles.detailLabel}>Plate Number:</Text>
+                            <Text style={styles.detailValue}>{existingApplication.plateNumber}</Text>
                         </View>
-                        <TouchableOpacity
-                            style={[styles.uploadBox, documents.license && styles.uploadBoxActive]}
-                            onPress={() => handleUpload('license')}
-                        >
-                            <MaterialIcons
-                                name={documents.license ? "check-circle" : "file-upload"}
-                                size={24}
-                                color={documents.license ? "#4CAF50" : "#888"}
-                            />
-                            <Text style={styles.uploadText}>
-                                {documents.license ? "Uploaded" : "Tap to upload"}
+
+                        <View style={styles.applicationDetails}>
+                            <Text style={styles.detailLabel}>Submitted:</Text>
+                            <Text style={styles.detailValue}>
+                                {new Date(existingApplication.createdAt).toLocaleDateString()}
                             </Text>
-                            {!documents.license && (
-                                <Text style={styles.uploadSubText}>PDF or Image (Max 5MB)</Text>
-                            )}
-                        </TouchableOpacity>
-                    </View>
-
-                    {/* Vehicle OR/CR */}
-                    <View style={styles.documentSection}>
-                        <View style={styles.documentLabelRow}>
-                            <MaterialIcons name="description" size={16} color="#666" />
-                            <Text style={styles.documentLabel}>Vehicle OR/CR</Text>
                         </View>
-                        <TouchableOpacity
-                            style={[styles.uploadBox, documents.orCr && styles.uploadBoxActive]}
-                            onPress={() => handleUpload('orCr')}
-                        >
-                            <MaterialIcons
-                                name={documents.orCr ? "check-circle" : "file-upload"}
-                                size={24}
-                                color={documents.orCr ? "#4CAF50" : "#888"}
-                            />
-                            <Text style={styles.uploadText}>
-                                {documents.orCr ? "Uploaded" : "Tap to upload"}
-                            </Text>
-                            {!documents.orCr && (
-                                <Text style={styles.uploadSubText}>PDF or Image (Max 5MB)</Text>
-                            )}
-                        </TouchableOpacity>
                     </View>
-
-                    {/* School Certificate of Registration (COR) */}
-                    <View style={styles.documentSection}>
-                        <View style={styles.documentLabelRow}>
-                            <MaterialIcons name="description" size={16} color="#666" />
-                            <Text style={styles.documentLabel}>School Certificate of Registration (COR)</Text>
-                        </View>
-                        <TouchableOpacity
-                            style={[styles.uploadBox, documents.cor && styles.uploadBoxActive]}
-                            onPress={() => handleUpload('cor')}
-                        >
-                            <MaterialIcons
-                                name={documents.cor ? "check-circle" : "file-upload"}
-                                size={24}
-                                color={documents.cor ? "#4CAF50" : "#888"}
-                            />
-                            <Text style={styles.uploadText}>
-                                {documents.cor ? "Uploaded" : "Tap to upload"}
-                            </Text>
-                            {!documents.cor && (
-                                <Text style={styles.uploadSubText}>PDF or Image (Max 5MB)</Text>
-                            )}
-                        </TouchableOpacity>
-                    </View>
-
-                    {/* School ID */}
-                    <View style={styles.documentSection}>
-                        <View style={styles.documentLabelRow}>
-                            <MaterialIcons name="badge" size={16} color="#666" />
-                            <Text style={styles.documentLabel}>School ID</Text>
-                        </View>
-                        <TouchableOpacity
-                            style={[styles.uploadBox, documents.schoolId && styles.uploadBoxActive]}
-                            onPress={() => handleUpload('schoolId')}
-                        >
-                            <MaterialIcons
-                                name={documents.schoolId ? "check-circle" : "file-upload"}
-                                size={24}
-                                color={documents.schoolId ? "#4CAF50" : "#888"}
-                            />
-                            <Text style={styles.uploadText}>
-                                {documents.schoolId ? "Uploaded" : "Tap to upload"}
-                            </Text>
-                            {!documents.schoolId && (
-                                <Text style={styles.uploadSubText}>PDF or Image (Max 5MB)</Text>
-                            )}
-                        </TouchableOpacity>
-                    </View>
-                </View>
-
-                {/* Vehicle Information */}
-                <View style={styles.card}>
-                    <Text style={styles.cardTitle}>Vehicle Information</Text>
-
-                    <Text style={styles.inputLabel}>Plate Number</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={plateNumber}
-                        onChangeText={setPlateNumber}
-                        placeholder="ABC 1234"
-                        placeholderTextColor="#D0D0D0"
-                    />
-
-                    <Text style={styles.inputLabel}>Motorcycle Model</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={motorcycleModel}
-                        onChangeText={setMotorcycleModel}
-                        placeholder="e.g., Honda Click 125"
-                        placeholderTextColor="#D0D0D0"
-                    />
-                </View>
-
-                {/* Application Process Info */}
-                <View style={styles.infoBox}>
-                    <View style={styles.infoTitleRow}>
-                        <MaterialIcons name="assignment" size={18} color="#534889" />
-                        <Text style={styles.infoTitle}>Application Process</Text>
-                    </View>
-                    <Text style={styles.infoText}>
-                        Your application will be reviewed within 1-3 business days. You'll be notified once approved.
+                </ScrollView>
+            ) : (
+                <ScrollView style={styles.content}>
+                    <Text style={styles.description}>
+                        Please fill in your vehicle details and upload the required documents to apply as a driver.
                     </Text>
-                </View>
 
-                {/* Submit Button */}
-                <Button
-                    label="Submit Application"
-                    onPress={handleSubmit}
-                    style={styles.submitButton}
-                    disabled={!isFormComplete}
-                />
+                    <View style={styles.inputSection}>
+                        <Text style={styles.label}>Plate Number</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Enter your motorcycle plate number"
+                            placeholderTextColor="#999"
+                            value={plateNumber}
+                            onChangeText={setPlateNumber}
+                            autoCapitalize="characters"
+                        />
+                    </View>
 
-                <View style={{ height: 40 }} />
-            </ScrollView>
+                    <View style={styles.inputSection}>
+                        <Text style={styles.label}>Motorcycle Model</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="e.g., Honda Click 150i, Yamaha Mio"
+                            placeholderTextColor="#999"
+                            value={motorcycleModel}
+                            onChangeText={setMotorcycleModel}
+                        />
+                    </View>
+
+                    <View style={styles.uploadSection}>
+                        <Text style={styles.label}>Driver's License</Text>
+                        <TouchableOpacity
+                            style={styles.uploadBox}
+                            onPress={() => pickFile(setDriversLicenseFile)}
+                        >
+                            {driversLicenseFile ? (
+                                driversLicenseFile.type.startsWith('image/') ? (
+                                    <Image source={{ uri: driversLicenseFile.uri }} style={styles.previewImage} />
+                                ) : (
+                                    <View style={styles.uploadContent}>
+                                        <MaterialIcons name="picture-as-pdf" size={48} color="#534889" />
+                                        <Text style={styles.fileName}>{driversLicenseFile.name}</Text>
+                                    </View>
+                                )
+                            ) : (
+                                <View style={styles.placeholder}>
+                                    <MaterialIcons name="add-a-photo" size={40} color="#ccc" />
+                                    <Text style={styles.placeholderText}>Tap to upload Driver's License</Text>
+                                    <Text style={styles.fileTypeText}>PDF or Image</Text>
+                                </View>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.uploadSection}>
+                        <Text style={styles.label}>Vehicle OR/CR</Text>
+                        <TouchableOpacity
+                            style={styles.uploadBox}
+                            onPress={() => pickFile(setVehicleORCRFile)}
+                        >
+                            {vehicleORCRFile ? (
+                                vehicleORCRFile.type.startsWith('image/') ? (
+                                    <Image source={{ uri: vehicleORCRFile.uri }} style={styles.previewImage} />
+                                ) : (
+                                    <View style={styles.uploadContent}>
+                                        <MaterialIcons name="picture-as-pdf" size={48} color="#534889" />
+                                        <Text style={styles.fileName}>{vehicleORCRFile.name}</Text>
+                                    </View>
+                                )
+                            ) : (
+                                <View style={styles.placeholder}>
+                                    <MaterialIcons name="add-a-photo" size={40} color="#ccc" />
+                                    <Text style={styles.placeholderText}>Tap to upload Vehicle OR/CR</Text>
+                                    <Text style={styles.fileTypeText}>PDF or Image</Text>
+                                </View>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+
+                    <TouchableOpacity
+                        style={[styles.submitButton, loading && styles.disabledButton]}
+                        onPress={handleSubmit}
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <ActivityIndicator color="#fff" />
+                        ) : (
+                            <Text style={styles.submitButtonText}>Submit Application</Text>
+                        )}
+                    </TouchableOpacity>
+                </ScrollView>
+            )}
         </View>
     );
 }
@@ -223,165 +297,159 @@ export default function ApplyAsDriver() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff', // White background
-        paddingTop: Platform.OS === 'android' ? 40 : 20,
+        backgroundColor: '#fff',
+        paddingTop: Platform.OS === 'android' ? 20 : 20,
     },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 30,
-        paddingHorizontal: 20,
-    },
-    headerTitle: {
-        fontSize: 20,
-        fontFamily: 'Poppins-SemiBold',
-        color: '#1C1B1F',
-    },
-    scrollContent: {
-        paddingHorizontal: 20,
-        paddingBottom: 20,
-    },
-    card: {
-        backgroundColor: '#F9F9F9',
-        borderRadius: 12,
-        padding: 20,
-        marginBottom: 20,
-        borderWidth: 1,
-        borderColor: '#EFEFEF',
-    },
-    cardTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#414141',
-        marginBottom: 15,
-        fontFamily: 'Poppins',
-    },
-    cardTitleRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 15,
-    },
-    applicantRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    avatarContainer: {
-        marginRight: 15,
-    },
-    profileImage: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        backgroundColor: '#D0D0D0',
-    },
-    applicantDetails: {
+    content: {
         flex: 1,
+        padding: 20,
     },
-    applicantName: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#414141',
-        fontFamily: 'Poppins',
-    },
-    applicantEmail: {
+    description: {
         fontSize: 14,
         color: '#666',
+        marginBottom: 20,
         fontFamily: 'Poppins',
+        lineHeight: 20,
     },
-    applicantUniversity: {
-        fontSize: 12,
-        color: '#888',
-        marginTop: 2,
-        fontFamily: 'Poppins',
-    },
-    documentSection: {
+    inputSection: {
         marginBottom: 20,
     },
-    documentLabelRow: {
+    infoCard: {
+        borderRadius: 12,
+        padding: 20,
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    infoTitle: {
+        fontFamily: 'Poppins',
+        fontSize: 20,
+        fontWeight: '600',
+        color: '#333',
+        marginTop: 16,
+        marginBottom: 8,
+        textAlign: 'center',
+    },
+    infoMessage: {
+        fontFamily: 'Poppins',
+        fontSize: 14,
+        color: '#666',
+        textAlign: 'center',
+        lineHeight: 22,
+        marginBottom: 20,
+    },
+    applicationDetails: {
         flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 8,
+        justifyContent: 'space-between',
+        width: '100%',
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E0E0E0',
     },
-    documentLabel: {
-        fontSize: 14,
-        color: '#414141',
-        marginLeft: 8,
+    detailLabel: {
         fontFamily: 'Poppins',
-    },
-    uploadBox: {
-        borderWidth: 1,
-        borderColor: '#D0D0D0',
-        borderStyle: 'dashed',
-        borderRadius: 10,
-        height: 100,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#fff',
-    },
-    uploadBoxActive: {
-        borderColor: '#4CAF50',
-        backgroundColor: '#F1F8E9',
-        borderStyle: 'solid',
-    },
-    uploadText: {
         fontSize: 14,
-        color: '#414141',
-        marginTop: 10,
-        fontFamily: 'Poppins',
+        fontWeight: '600',
+        color: '#666',
     },
-    uploadSubText: {
-        fontSize: 12,
-        color: '#888',
-        marginTop: 4,
+    detailValue: {
         fontFamily: 'Poppins',
-    },
-    inputLabel: {
         fontSize: 14,
-        color: '#414141',
-        marginBottom: 8,
+        color: '#333',
+    },
+    label: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333',
+        marginBottom: 10,
         fontFamily: 'Poppins',
     },
     input: {
         borderWidth: 1,
-        borderColor: '#D0D0D0',
-        borderRadius: 10,
-        paddingVertical: 10,
-        paddingHorizontal: 12,
-        fontSize: 16,
-        color: '#414141',
+        borderColor: '#ddd',
+        borderRadius: 8,
+        padding: 12,
+        fontSize: 15,
         fontFamily: 'Poppins',
-        marginBottom: 15,
-        backgroundColor: '#F8F8F8',
+        color: '#333',
     },
-    infoBox: {
-        backgroundColor: '#F3E5F5', // Light purple
-        borderRadius: 12,
-        padding: 15,
+    uploadSection: {
         marginBottom: 25,
+    },
+    uploadBox: {
+        height: 200,
+        backgroundColor: '#fff',
+        borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#E1BEE7',
-    },
-    infoTitleRow: {
-        flexDirection: 'row',
+        borderColor: '#ddd',
+        borderStyle: 'dashed',
+        overflow: 'hidden',
+        justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 8,
     },
-    infoTitle: {
+    uploadContent: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    uploadText: {
+        marginTop: 12,
+        fontSize: 15,
+        color: '#666',
+        fontFamily: 'Poppins',
+        fontWeight: '500',
+    },
+    uploadSubtext: {
+        marginTop: 5,
+        fontSize: 12,
+        color: '#bbb',
+        fontFamily: 'Poppins',
+    },
+    previewImage: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+    },
+    fileName: {
+        marginTop: 10,
+        fontFamily: 'Poppins',
         fontSize: 14,
-        fontWeight: 'bold',
-        color: '#4A148C', // Darker purple
-        marginLeft: 8,
-        fontFamily: 'Poppins',
+        color: '#333',
+        textAlign: 'center',
+        paddingHorizontal: 20,
     },
-    infoText: {
-        fontSize: 13,
-        color: '#6A1B9A', // Medium purple
-        lineHeight: 20,
+    placeholder: {
+        alignItems: 'center',
+    },
+    placeholderText: {
+        marginTop: 10,
         fontFamily: 'Poppins',
+        fontSize: 15,
+        color: '#999',
+        fontWeight: '500',
+    },
+    fileTypeText: {
+        marginTop: 5,
+        color: '#bbb',
+        fontFamily: 'Poppins',
+        fontSize: 12,
     },
     submitButton: {
         backgroundColor: '#534889',
-        borderRadius: 10,
+        paddingVertical: 16,
+        borderRadius: 12,
+        alignItems: 'center',
+        marginTop: 10,
+        marginBottom: 30,
+        elevation: 2,
+    },
+    disabledButton: {
+        backgroundColor: '#9fa8da',
+    },
+    submitButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+        fontFamily: 'Poppins',
     },
 });
