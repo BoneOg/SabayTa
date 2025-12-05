@@ -16,7 +16,6 @@ import {
     View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { WebView } from 'react-native-webview';
 import { BASE_URL } from '../../config';
 
 interface StudentVerificationRequest {
@@ -302,51 +301,6 @@ export default function StudentVerification() {
                                 </>
                             )}
                         </ScrollView>
-                    </View>
-                </View>
-            </Modal>
-
-            {/* Document Viewer Modal */}
-            <Modal
-                visible={documentViewerVisible}
-                animationType="slide"
-                presentationStyle="fullScreen"
-                onRequestClose={() => setDocumentViewerVisible(false)}
-            >
-                <View style={{ flex: 1, backgroundColor: 'red' }}>
-                    <View style={styles.documentViewerHeader}>
-                        <Text style={styles.documentViewerTitle}>{viewingDocument?.title || 'Document'}</Text>
-                        <TouchableOpacity onPress={() => {
-                            console.log('Closing document viewer');
-                            setDocumentViewerVisible(false);
-                        }}>
-                            <MaterialIcons name="close" size={28} color="#fff" />
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.documentViewerContent}>
-                        {viewingDocument?.url ? (
-                            viewingDocument.url.toLowerCase().endsWith('.pdf') ? (
-                                <WebView
-                                    source={{ uri: `https://docs.google.com/viewer?url=${encodeURIComponent(viewingDocument.url)}&embedded=true` }}
-                                    style={{ flex: 1, width: '100%', backgroundColor: '#fff' }}
-                                    startInLoadingState={true}
-                                    renderLoading={() => (
-                                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
-                                            <ActivityIndicator size="large" color="#fff" />
-                                            <Text style={{ color: '#fff', marginTop: 10, fontFamily: 'Poppins' }}>Loading PDF...</Text>
-                                        </View>
-                                    )}
-                                />
-                            ) : (
-                                <Image
-                                    source={{ uri: viewingDocument.url }}
-                                    style={styles.documentImage}
-                                    resizeMode="contain"
-                                />
-                            )
-                        ) : (
-                            <Text style={{ color: '#fff', fontFamily: 'Poppins' }}>No document to display</Text>
-                        )}
                     </View>
                 </View>
             </Modal>
