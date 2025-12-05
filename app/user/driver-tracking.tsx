@@ -1,8 +1,9 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Dimensions, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
+import { BASE_URL } from '../../config';
 
 const { height } = Dimensions.get('window');
 
@@ -13,10 +14,102 @@ export default function DriverTrackingScreen() {
     const [showDriverDetails, setShowDriverDetails] = useState(false);
     const [showArrivalModal, setShowArrivalModal] = useState(false);
     const [showDestinationModal, setShowDestinationModal] = useState(false);
+    const [passengerPickedUp, setPassengerPickedUp] = useState(false);
+    const [bookingId, setBookingId] = useState(params.bookingId as string || null);
 
-    const driverLocation = { latitude: 8.4595, longitude: 124.6330 };
-    const userLocation = { latitude: 8.4590, longitude: 124.6322 };
-    const destination = { latitude: 8.4650, longitude: 124.6400 };
+    // Real booking data from backend
+    const [driverLocation, setDriverLocation] = useState({ latitude: 8.4595, longitude: 124.6330 });
+    const [userLocation, setUserLocation] = useState({ latitude: 8.4590, longitude: 124.6322 });
+    const [destination, setDestination] = useState({ latitude: 8.4650, longitude: 124.6400 });
+    const [routeCoordinates, setRouteCoordinates] = useState<{ latitude: number, longitude: number }[]>([]);
+
+    // Poll for booking status to detect when passenger is picked up
+    useEffect(() => {
+        if (!bookingId) return;
+
+        const pollBookingStatus = async () => {
+            try {
+                const response = await fetch(`${BASE_URL}/api/bookings/${bookingId}`);
+                const data = await response.json();
+
+                if (data.booking) {
+                    const booking = data.booking;
+
+                    // Update driver location if available
+                    if (booking.driverLocation?.latitude && booking.driverLocation?.longitude) {
+                        setDriverLocation({
+                            latitude: booking.driverLocation.latitude,
+                            longitude: booking.driverLocation.longitude
+                        });
+                    }
+
+                    // Update pickup and dropoff locations
+                    if (booking.pickupLocation) {
+                        setUserLocation({
+                            latitude: booking.pickupLocation.lat,
+                            longitude: booking.pickupLocation.lon
+                        });
+                    }
+
+                    if (booking.dropoffLocation) {
+                        setDestination({
+                            latitude: booking.dropoffLocation.lat,
+                            longitude: booking.dropoffLocation.lon
+                        });
+                    }
+
+                    // Check if passenger was picked up
+                    if (booking.passengerPickedUp && !passengerPickedUp) {
+                        console.log("✅ Passenger picked up - updating user UI and fetching route");
+                        setPassengerPickedUp(true);
+
+                        // Fetch route from pickup to dropoff
+                        if (booking.pickupLocation && booking.dropoffLocation) {
+                            fetchRouteFromPickupToDropoff(
+                                { latitude: booking.pickupLocation.lat, longitude: booking.pickupLocation.lon },
+                                { latitude: booking.dropoffLocation.lat, longitude: booking.dropoffLocation.lon }
+                            );
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Error polling booking status:", error);
+            }
+        };
+
+        // Poll every 3 seconds
+        const interval = setInterval(pollBookingStatus, 3000);
+        pollBookingStatus(); // Initial call
+
+        return () => clearInterval(interval);
+    }, [bookingId, passengerPickedUp]);
+
+    // Fetch route from pickup to dropoff using OSRM
+    const fetchRouteFromPickupToDropoff = async (
+        pickup: { latitude: number; longitude: number },
+        dropoff: { latitude: number; longitude: number }
+    ) => {
+        try {
+            const url = `https://router.project-osrm.org/route/v1/driving/${pickup.longitude},${pickup.latitude};${dropoff.longitude},${dropoff.latitude}?overview=full&geometries=geojson`;
+
+            console.log("🗺️ Fetching route from pickup to dropoff...");
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.routes && data.routes.length > 0) {
+                const route = data.routes[0];
+                const coordinates = route.geometry.coordinates.map((coord: number[]) => ({
+                    latitude: coord[1],
+                    longitude: coord[0],
+                }));
+
+                setRouteCoordinates(coordinates);
+                console.log(`✅ Route fetched! ${coordinates.length} points`);
+            }
+        } catch (error) {
+            console.error("Error fetching route:", error);
+        }
+    };
 
     const handleMessage = () => {
         router.push('/user/chat');
@@ -65,7 +158,11 @@ export default function DriverTrackingScreen() {
                 </Marker>
 
                 <Polyline
-                    coordinates={[driverLocation, userLocation, destination]}
+                    coordinates={
+                        passengerPickedUp && routeCoordinates.length > 0
+                            ? routeCoordinates
+                            : [driverLocation, userLocation, destination]
+                    }
                     strokeColor="#534889"
                     strokeWidth={4}
                 />
@@ -76,7 +173,9 @@ export default function DriverTrackingScreen() {
             <View style={styles.bottomSheet}>
                 <View style={styles.handle} />
 
-                <Text style={styles.statusText}>Your rider is 5 mins away</Text>
+                <Text style={styles.statusText}>
+                    {passengerPickedUp ? "Driver is taking you to your destination" : "Your rider is 5 mins away"}
+                </Text>
 
                 <View style={styles.driverCard}>
                     <Image

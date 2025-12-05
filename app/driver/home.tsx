@@ -36,6 +36,7 @@ export default function DriverHome() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showOnTheWay, setShowOnTheWay] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [passengerPickedUp, setPassengerPickedUp] = useState(false);
 
   // Animations
   const slideAnim = useRef(new Animated.Value(height)).current;
@@ -211,8 +212,33 @@ export default function DriverHome() {
   };
 
   const handlePickedUp = async () => {
-    console.log("✅ Rider picked up");
+    console.log("✅ Rider picked up - updating route to destination");
+
+    if (selectedUser?.pickupCoords && selectedUser?.destinationCoords) {
+      // Notify backend that passenger has been picked up
+      try {
+        await fetch(`${BASE_URL}/api/bookings/${selectedUser.id}/pickup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        console.log("📡 Notified backend: passenger picked up");
+      } catch (error) {
+        console.error("Failed to notify backend:", error);
+      }
+
+      // Update route to show pickup → destination
+      console.log("🗺️ Fetching route from pickup to destination");
+      fetchRoute(selectedUser.pickupCoords, selectedUser.destinationCoords);
+      setPassengerPickedUp(true);
+    }
+  };
+
+  const handleCompleteTrip = async () => {
+    console.log("✅ Trip completed - passenger dropped off");
     setShowOnTheWay(false);
+    setPassengerPickedUp(false);
+    setSelectedUser(null);
+    clearRoute();
     await AsyncStorage.removeItem('activeDriverBooking'); // Clear saved booking
   };
 
@@ -231,6 +257,7 @@ export default function DriverHome() {
         driverLocation={driverLocation}
         routeCoordinates={routeCoordinates}
         onTheWay={showOnTheWay}
+        passengerPickedUp={passengerPickedUp}
       />
 
       {/* Header */}
@@ -270,8 +297,10 @@ export default function DriverHome() {
           riderName={selectedUser?.name || "Rider"}
           distance={distance}
           duration={duration}
+          passengerPickedUp={passengerPickedUp}
           onCancel={handleCancelOnTheWay}
           onPickedUp={handlePickedUp}
+          onCompleteTrip={handleCompleteTrip}
           onChatPress={() => setShowChat(true)}
         />
       )}

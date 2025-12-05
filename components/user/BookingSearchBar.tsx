@@ -6,6 +6,7 @@ import { SelectedLocation } from './hooks/useBookingState';
 interface BookingSearchBarProps {
     selectingLocation: 'from' | 'to' | null;
     bookingAccepted: boolean;
+    passengerPickedUp?: boolean;
     fromLocation: SelectedLocation | null;
     toLocation: SelectedLocation | null;
     onSearchPress: () => void;
@@ -15,6 +16,7 @@ interface BookingSearchBarProps {
 export const BookingSearchBar: React.FC<BookingSearchBarProps> = ({
     selectingLocation,
     bookingAccepted,
+    passengerPickedUp = false,
     fromLocation,
     toLocation,
     onSearchPress,
@@ -23,7 +25,7 @@ export const BookingSearchBar: React.FC<BookingSearchBarProps> = ({
     if (selectingLocation) return null;
 
     if (bookingAccepted) {
-        return <DriverOnTheWayBar onPress={onDriverBarPress} />;
+        return <DriverOnTheWayBar passengerPickedUp={passengerPickedUp} onPress={onDriverBarPress} />;
     }
 
     return (

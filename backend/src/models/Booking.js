@@ -20,6 +20,7 @@ const bookingSchema = new mongoose.Schema({
         latitude: { type: Number },
         longitude: { type: Number }
     },
+    passengerPickedUp: { type: Boolean, default: false },
     acceptedAt: { type: Date },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }

@@ -3,17 +3,20 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface DriverOnTheWayBarProps {
+    passengerPickedUp?: boolean;
     onPress: () => void;
 }
 
-export const DriverOnTheWayBar = ({ onPress }: DriverOnTheWayBarProps) => {
+export const DriverOnTheWayBar = ({ passengerPickedUp = false, onPress }: DriverOnTheWayBarProps) => {
     return (
         <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.8}>
             <View style={styles.iconContainer}>
                 <FontAwesome name="motorcycle" size={24} color="#534889" />
             </View>
             <View style={styles.textContainer}>
-                <Text style={styles.title}>Driver is on the way</Text>
+                <Text style={styles.title}>
+                    {passengerPickedUp ? "Driver is taking you to your destination" : "Driver is on the way"}
+                </Text>
                 <Text style={styles.subtitle}>Tap to view details</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#999" />

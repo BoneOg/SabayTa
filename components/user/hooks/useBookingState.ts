@@ -31,6 +31,7 @@ export const useBookingState = () => {
     const [toLocation, setToLocation] = useState<SelectedLocation | null>(null);
     const [fromText, setFromText] = useState('');
     const [toText, setToText] = useState('');
+    const [passengerPickedUp, setPassengerPickedUp] = useState(false);
     const [userId, setUserId] = useState<string | null>(null);
     const isInitialized = useRef(false);
 
@@ -140,6 +141,8 @@ export const useBookingState = () => {
         setFromText,
         toText,
         setToText,
+        passengerPickedUp,
+        setPassengerPickedUp,
         resetBookingState,
     };
 };

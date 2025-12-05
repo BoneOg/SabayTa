@@ -158,6 +158,31 @@ router.post('/:id/cancel', async (req, res) => {
     }
 });
 
+// Mark passenger as picked up
+router.post('/:id/pickup', async (req, res) => {
+    try {
+        const booking = await Booking.findById(req.params.id);
+
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+
+        if (booking.status !== 'accepted') {
+            return res.status(400).json({ message: "Only accepted bookings can mark passenger as picked up" });
+        }
+
+        booking.passengerPickedUp = true;
+        booking.updatedAt = new Date();
+        await booking.save();
+
+        console.log(`✅ Passenger picked up for booking ${req.params.id}`);
+        res.status(200).json({ message: "Passenger picked up", booking });
+    } catch (error) {
+        console.error("Error marking passenger as picked up:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
 // Complete a booking
 router.post('/:id/complete', async (req, res) => {
     try {

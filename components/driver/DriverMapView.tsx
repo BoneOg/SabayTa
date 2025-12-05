@@ -10,9 +10,10 @@ interface DriverMapViewProps {
     };
     routeCoordinates: { latitude: number; longitude: number }[] | null;
     onTheWay?: boolean;
+    passengerPickedUp?: boolean;
 }
 
-export const DriverMapView = ({ driverLocation, routeCoordinates, onTheWay }: DriverMapViewProps) => {
+export const DriverMapView = ({ driverLocation, routeCoordinates, onTheWay, passengerPickedUp }: DriverMapViewProps) => {
     return (
         <MapView
             style={StyleSheet.absoluteFillObject}
@@ -31,7 +32,7 @@ export const DriverMapView = ({ driverLocation, routeCoordinates, onTheWay }: Dr
                 </View>
             </Marker>
 
-            {/* Draw route and pickup marker when on the way */}
+            {/* Draw route when on the way */}
             {onTheWay && routeCoordinates && routeCoordinates.length > 0 && (
                 <>
                     <Polyline
@@ -41,15 +42,37 @@ export const DriverMapView = ({ driverLocation, routeCoordinates, onTheWay }: Dr
                         lineCap="round"
                         lineJoin="round"
                     />
-                    {/* Pickup Location Marker (Red) */}
-                    <Marker
-                        coordinate={routeCoordinates[routeCoordinates.length - 1]}
-                        title="Pickup Location"
-                    >
-                        <View style={[styles.driverMarker, { backgroundColor: "red" }]}>
-                            <Ionicons name="location-sharp" size={24} color="#fff" />
-                        </View>
-                    </Marker>
+                    {passengerPickedUp ? (
+                        // Passenger picked up - show pickup (green) and destination (red)
+                        <>
+                            <Marker
+                                coordinate={routeCoordinates[0]}
+                                title="Pickup Location"
+                            >
+                                <View style={[styles.driverMarker, { backgroundColor: "green" }]}>
+                                    <Ionicons name="location-sharp" size={24} color="#fff" />
+                                </View>
+                            </Marker>
+                            <Marker
+                                coordinate={routeCoordinates[routeCoordinates.length - 1]}
+                                title="Destination"
+                            >
+                                <View style={[styles.driverMarker, { backgroundColor: "red" }]}>
+                                    <Ionicons name="location-sharp" size={24} color="#fff" />
+                                </View>
+                            </Marker>
+                        </>
+                    ) : (
+                        // Heading to pickup - show only pickup location (red)
+                        <Marker
+                            coordinate={routeCoordinates[routeCoordinates.length - 1]}
+                            title="Pickup Location"
+                        >
+                            <View style={[styles.driverMarker, { backgroundColor: "red" }]}>
+                                <Ionicons name="location-sharp" size={24} color="#fff" />
+                            </View>
+                        </Marker>
+                    )}
                 </>
             )}
 

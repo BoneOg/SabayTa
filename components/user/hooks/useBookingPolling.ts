@@ -28,6 +28,7 @@ interface UseBookingPollingProps {
         mapRef: React.RefObject<MapView>
     ) => void;
     mapRef: React.RefObject<MapView>;
+    setPassengerPickedUp: (pickedUp: boolean) => void;
     resetBookingState: () => Promise<void>;
 }
 
@@ -49,6 +50,7 @@ export const useBookingPolling = ({
     onRouteChange,
     fetchRoute,
     mapRef,
+    setPassengerPickedUp,
     resetBookingState,
 }: UseBookingPollingProps) => {
     // Poll for booking status updates - driver acceptance
@@ -159,6 +161,8 @@ export const useBookingPolling = ({
     useEffect(() => {
         if (!bookingId || !bookingAccepted) return;
 
+        let passengerPickedUpFlag = false; // Track if we've already processed pickup
+
         const pollDriverLocation = setInterval(async () => {
             try {
                 const response = await fetch(`${BASE_URL}/api/bookings/${bookingId}`);
@@ -166,8 +170,30 @@ export const useBookingPolling = ({
 
                 const data = await response.json();
 
-                // Update driver location and route
-                if (data.booking && data.booking.driverLocation) {
+                // Check if passenger was picked up
+                if (data.booking && data.booking.passengerPickedUp && !passengerPickedUpFlag) {
+                    console.log("✅ [USER] Passenger picked up detected! Updating route to pickup → dropoff");
+                    passengerPickedUpFlag = true;
+
+                    // Fetch route from pickup to dropoff
+                    if (fromLocation && data.booking.dropoffLocation) {
+                        const dropoffLocation = {
+                            lat: data.booking.dropoffLocation.lat,
+                            lon: data.booking.dropoffLocation.lon,
+                            name: data.booking.dropoffLocation.name || "Destination"
+                        };
+
+                        console.log("🗺️ [USER] Fetching route from pickup to dropoff");
+                        console.log("   Pickup:", fromLocation);
+                        console.log("   Dropoff:", dropoffLocation);
+
+                        fetchRoute(fromLocation, dropoffLocation, setRouteCoords, setTripDetails, mapRef);
+                        setPassengerPickedUp(true); // Update state for UI
+                    }
+                }
+
+                // Update driver location and route (only if passenger not picked up yet)
+                if (data.booking && data.booking.driverLocation && !passengerPickedUpFlag) {
                     const driverLoc = {
                         latitude: data.booking.driverLocation.latitude || data.booking.driverLocation.lat,
                         longitude: data.booking.driverLocation.longitude || data.booking.driverLocation.lon
@@ -205,7 +231,7 @@ export const useBookingPolling = ({
             } catch (error) {
                 console.error("Error polling driver location:", error);
             }
-        }, 11000); // Poll every 11 seconds
+        }, 3000); // Poll every 3 seconds (changed from 11 seconds for faster pickup detection)
 
         return () => clearInterval(pollDriverLocation);
     }, [bookingId, bookingAccepted, fromLocation]);

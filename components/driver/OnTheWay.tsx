@@ -17,8 +17,10 @@ interface OnTheWayProps {
     riderName: string;
     distance: string | null;
     duration: string | null;
+    passengerPickedUp?: boolean;
     onCancel: () => void;
     onPickedUp: () => void;
+    onCompleteTrip?: () => void;
     onChatPress: () => void;
 }
 
@@ -27,8 +29,10 @@ export default function OnTheWay({
     riderName,
     distance,
     duration,
+    passengerPickedUp = false,
     onCancel,
     onPickedUp,
+    onCompleteTrip,
     onChatPress,
 }: OnTheWayProps) {
     const [slideAnim] = useState(new Animated.Value(0));
@@ -49,7 +53,12 @@ export default function OnTheWay({
                     duration: 200,
                     useNativeDriver: false,
                 }).start(() => {
-                    onPickedUp();
+                    // Call appropriate handler based on state
+                    if (passengerPickedUp) {
+                        onCompleteTrip?.();
+                    } else {
+                        onPickedUp();
+                    }
                     slideAnim.setValue(0);
                 });
             } else {
@@ -76,8 +85,8 @@ export default function OnTheWay({
             </View>
 
             <View style={styles.container}>
-                <Text style={styles.title}>On the way</Text>
-                <Text style={styles.subtitle}>Picking up {riderName}</Text>
+                <Text style={styles.title}>{passengerPickedUp ? "Heading to destination" : "On the way"}</Text>
+                <Text style={styles.subtitle}>{passengerPickedUp ? `Dropping off ${riderName}` : `Picking up ${riderName}`}</Text>
 
                 <View style={styles.infoRow}>
                     <View style={styles.infoItem}>
@@ -92,7 +101,7 @@ export default function OnTheWay({
 
                 <View style={styles.sliderContainer}>
                     <View style={styles.sliderTrack}>
-                        <Text style={styles.sliderText}>Swipe to confirm pickup</Text>
+                        <Text style={styles.sliderText}>{passengerPickedUp ? "Swipe to confirm drop off" : "Swipe to confirm pickup"}</Text>
                         <Animated.View
                             style={[
                                 styles.sliderThumb,

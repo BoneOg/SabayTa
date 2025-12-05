@@ -71,6 +71,8 @@ export const BookingComponent = ({
         setFromText,
         toText,
         setToText,
+        passengerPickedUp,
+        setPassengerPickedUp,
         resetBookingState,
     } = useBookingState();
 
@@ -147,6 +149,7 @@ export const BookingComponent = ({
         onRouteChange,
         fetchRoute,
         mapRef,
+        setPassengerPickedUp,
         resetBookingState,
     });
 
@@ -233,6 +236,7 @@ export const BookingComponent = ({
             <BookingSearchBar
                 selectingLocation={selectingLocation}
                 bookingAccepted={bookingAccepted}
+                passengerPickedUp={passengerPickedUp}
                 fromLocation={fromLocation}
                 toLocation={toLocation}
                 onSearchPress={openModal}

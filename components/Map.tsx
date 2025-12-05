@@ -1,4 +1,4 @@
-import { Ionicons, FontAwesome } from '@expo/vector-icons';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
@@ -88,9 +88,18 @@ export const MapComponent = ({
                 </Marker>
             )}
 
-            {/* Pickup location marker when driver is on the way */}
+            {/* Pickup location marker (GREEN) when driver is on the way */}
             {fromLocation && showDriverRoute && (
                 <Marker coordinate={{ latitude: fromLocation.lat, longitude: fromLocation.lon }} title="Pickup Location">
+                    <View style={[styles.userMarker, { backgroundColor: "#34A853" }]}>
+                        <Ionicons name="location-sharp" size={24} color="#fff" />
+                    </View>
+                </Marker>
+            )}
+
+            {/* Drop-off location marker (RED) when driver is on the way */}
+            {toLocation && showDriverRoute && (
+                <Marker coordinate={{ latitude: toLocation.lat, longitude: toLocation.lon }} title="Drop-off Location">
                     <View style={[styles.userMarker, { backgroundColor: "#EA4335" }]}>
                         <Ionicons name="location-sharp" size={24} color="#fff" />
                     </View>

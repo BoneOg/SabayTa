@@ -80,7 +80,7 @@ export default function BookingDetailsScreen() {
 
             <View style={styles.footer}>
                 <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmRide}>
-                    <Text style={styles.confirmButtonText}>Confirm Ride</Text>
+                    <Text style={styles.confirmButtonText}>Book Ride</Text>
                 </TouchableOpacity>
             </View>
         </View>
