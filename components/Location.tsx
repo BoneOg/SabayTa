@@ -25,6 +25,8 @@ interface FavoriteLocation {
     latitude: number;
     longitude: number;
     placeId: string;
+    customLabel: string;
+    iconName: string;
 }
 
 interface LocationModalsProps {
@@ -102,7 +104,7 @@ export const LocationModals = ({
             const data = await response.json();
             if (response.ok) {
                 setFavorites(data.favorites || []);
-                const placeIds = new Set(data.favorites.map((fav: FavoriteLocation) => fav.placeId));
+                const placeIds = new Set<string>(data.favorites.map((fav: FavoriteLocation) => fav.placeId));
                 setFavoritedPlaces(placeIds);
             }
         } catch (error) {
@@ -280,10 +282,12 @@ export const LocationModals = ({
                                             onPress={() => selectFavorite(favorite)}
                                         >
                                             <View style={styles.searchResultIcon}>
-                                                <Ionicons name="location-outline" size={20} color="#414141" />
+                                                <Ionicons name={favorite.iconName as any || "location-outline"} size={20} color="#414141" />
                                             </View>
                                             <View style={styles.searchResultTextContainer}>
-                                                <Text style={styles.favoriteTitle}>{favorite.placeName}</Text>
+                                                <Text style={styles.favoriteTitle}>
+                                                    {favorite.customLabel || favorite.placeName}
+                                                </Text>
                                                 <Text style={styles.favoriteAddress} numberOfLines={1}>
                                                     {favorite.placeAddress}
                                                 </Text>
@@ -300,7 +304,7 @@ export const LocationModals = ({
                                                 }}
                                                 style={styles.favoriteButton}
                                             >
-                                                <Ionicons name="heart" size={22} color="#FF6B6B" />
+                                                <Ionicons name="heart" size={22} color="#534889" />
                                             </TouchableOpacity>
                                         </TouchableOpacity>
                                     ))}

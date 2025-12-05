@@ -41,7 +41,7 @@ export default function Layout() {
             </TouchableOpacity>
 
             {/* Favorites */}
-            <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/user/favorites")}>
+            <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/user/booking/favorites")}>
               <MaterialIcons
                 name="favorite"
                 size={22}

@@ -37,6 +37,8 @@ router.get("/", protect, async (req, res) => {
                 latitude: fav.latitude,
                 longitude: fav.longitude,
                 placeId: fav.placeId,
+                customLabel: fav.customLabel,
+                iconName: fav.iconName,
                 createdAt: fav.createdAt
             }))
         });
@@ -49,7 +51,7 @@ router.get("/", protect, async (req, res) => {
 /* ================== ADD FAVORITE ================== */
 router.post("/", protect, async (req, res) => {
     try {
-        const { placeName, placeAddress, latitude, longitude, placeId } = req.body;
+        const { placeName, placeAddress, latitude, longitude, placeId, customLabel, iconName } = req.body;
 
         if (!placeName || !placeAddress || !latitude || !longitude) {
             return res.status(400).json({ message: "All fields are required" });
@@ -71,7 +73,9 @@ router.post("/", protect, async (req, res) => {
             placeAddress,
             latitude,
             longitude,
-            placeId: placeId || placeAddress
+            placeId: placeId || placeAddress,
+            customLabel: customLabel || "",
+            iconName: iconName || "location-sharp"
         });
 
         res.status(201).json({
@@ -83,6 +87,8 @@ router.post("/", protect, async (req, res) => {
                 latitude: favorite.latitude,
                 longitude: favorite.longitude,
                 placeId: favorite.placeId,
+                customLabel: favorite.customLabel,
+                iconName: favorite.iconName,
                 createdAt: favorite.createdAt
             }
         });
@@ -93,6 +99,45 @@ router.post("/", protect, async (req, res) => {
             return res.status(400).json({ message: "Location already in favorites" });
         }
 
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+/* ================== UPDATE FAVORITE ================== */
+router.put("/:id", protect, async (req, res) => {
+    try {
+        const { customLabel, iconName } = req.body;
+
+        const favorite = await FavoriteLocation.findOne({
+            _id: req.params.id,
+            userId: req.user._id
+        });
+
+        if (!favorite) {
+            return res.status(404).json({ message: "Favorite not found" });
+        }
+
+        if (customLabel !== undefined) favorite.customLabel = customLabel;
+        if (iconName !== undefined) favorite.iconName = iconName;
+
+        await favorite.save();
+
+        res.json({
+            message: "Favorite updated",
+            favorite: {
+                _id: favorite._id,
+                placeName: favorite.placeName,
+                placeAddress: favorite.placeAddress,
+                latitude: favorite.latitude,
+                longitude: favorite.longitude,
+                placeId: favorite.placeId,
+                customLabel: favorite.customLabel,
+                iconName: favorite.iconName,
+                createdAt: favorite.createdAt
+            }
+        });
+    } catch (error) {
+        console.error("Update favorite error:", error);
         res.status(500).json({ message: "Server error" });
     }
 });
