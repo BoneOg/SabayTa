@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
-import { Animated, Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Dimensions, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface DriverArrivalProps {
     isSearching: boolean;
@@ -22,6 +22,7 @@ export const DriverArrival = ({
     onCancelPress,
 }: DriverArrivalProps) => {
     const [showArrival, setShowArrival] = useState(false);
+    const [showCancelModal, setShowCancelModal] = useState(false);
     const slideAnim = new Animated.Value(500);
 
     useEffect(() => {
@@ -51,6 +52,18 @@ export const DriverArrival = ({
             }).start();
         }
     }, [showArrival, visible]);
+
+    const handleCancelPress = () => {
+        setShowCancelModal(true);
+    };
+
+    const confirmCancel = () => {
+        setShowCancelModal(false);
+        // Delay the onCancelPress call to allow modal animation to complete
+        setTimeout(() => {
+            onCancelPress?.();
+        }, 300);
+    };
 
     if (!showArrival && !visible) return null;
 
@@ -108,7 +121,7 @@ export const DriverArrival = ({
                 <View style={styles.actionButtonsContainer}>
                     <TouchableOpacity
                         style={styles.cancelButton}
-                        onPress={onCancelPress}
+                        onPress={handleCancelPress}
                     >
                         <MaterialCommunityIcons name="close-circle-outline" size={20} color="#E53935" />
                         <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
@@ -131,6 +144,37 @@ export const DriverArrival = ({
                     </TouchableOpacity>
                 </View>
             </Animated.View>
+
+            {/* Cancel Confirmation Modal */}
+            <Modal
+                visible={showCancelModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowCancelModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Cancel Trip</Text>
+                        <Text style={styles.modalMessage}>Are you sure you want to cancel this trip?</Text>
+
+                        <View style={styles.modalButtonContainer}>
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.modalCancelButton]}
+                                onPress={() => setShowCancelModal(false)}
+                            >
+                                <Text style={styles.modalCancelButtonText}>Keep Trip</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.modalConfirmButton]}
+                                onPress={confirmCancel}
+                            >
+                                <Text style={styles.modalConfirmButtonText}>Cancel Trip</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </TouchableOpacity>
     );
 };
@@ -269,5 +313,60 @@ const styles = StyleSheet.create({
     },
     detailsButtonText: {
         color: '#622C9B',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        borderRadius: 15,
+        paddingHorizontal: 25,
+        paddingVertical: 30,
+        width: '80%',
+        alignItems: 'center',
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#000',
+        marginBottom: 10,
+    },
+    modalMessage: {
+        fontSize: 16,
+        color: '#666',
+        marginBottom: 25,
+        textAlign: 'center',
+    },
+    modalButtonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+        gap: 10,
+    },
+    modalButton: {
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    modalCancelButton: {
+        backgroundColor: '#F0F0F0',
+    },
+    modalCancelButtonText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333',
+    },
+    modalConfirmButton: {
+        backgroundColor: '#FF3B30',
+    },
+    modalConfirmButtonText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#fff',
     },
 });

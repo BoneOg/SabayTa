@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import {
     Animated,
     Dimensions,
+    Modal,
     PanResponder,
     StyleSheet,
     Text,
@@ -36,6 +37,7 @@ export default function OnTheWay({
     onChatPress,
 }: OnTheWayProps) {
     const [slideAnim] = useState(new Animated.Value(0));
+    const [showCancelModal, setShowCancelModal] = useState(false);
     const slideWidth = width - 120;
 
     const panResponder = PanResponder.create({
@@ -70,13 +72,25 @@ export default function OnTheWay({
         },
     });
 
+    const handleCancelPress = () => {
+        setShowCancelModal(true);
+    };
+
+    const confirmCancel = () => {
+        setShowCancelModal(false);
+        // Delay the onCancel call to allow modal animation to complete
+        setTimeout(() => {
+            onCancel();
+        }, 300);
+    };
+
     if (!visible) return null;
 
     return (
         <>
             {/* Floating Action Buttons */}
             <View style={styles.floatingButtons}>
-                <TouchableOpacity style={styles.cancelButtonFloating} onPress={onCancel}>
+                <TouchableOpacity style={styles.cancelButtonFloating} onPress={handleCancelPress}>
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.chatButtonFloating} onPress={onChatPress}>
@@ -116,6 +130,37 @@ export default function OnTheWay({
                     </View>
                 </View>
             </View>
+
+            {/* Cancel Confirmation Modal */}
+            <Modal
+                visible={showCancelModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowCancelModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Cancel Trip</Text>
+                        <Text style={styles.modalMessage}>Are you sure you want to cancel this trip?</Text>
+
+                        <View style={styles.modalButtonContainer}>
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.modalCancelButton]}
+                                onPress={() => setShowCancelModal(false)}
+                            >
+                                <Text style={styles.modalCancelButtonText}>Keep Trip</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.modalConfirmButton]}
+                                onPress={confirmCancel}
+                            >
+                                <Text style={styles.modalConfirmButtonText}>Cancel Trip</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </>
     );
 }
@@ -239,5 +284,64 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        borderRadius: 15,
+        paddingHorizontal: 25,
+        paddingVertical: 30,
+        width: '80%',
+        alignItems: 'center',
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#000',
+        fontFamily: 'Poppins_400Regular',
+        marginBottom: 10,
+    },
+    modalMessage: {
+        fontSize: 16,
+        color: '#666',
+        fontFamily: 'Poppins_400Regular',
+        marginBottom: 25,
+        textAlign: 'center',
+    },
+    modalButtonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+        gap: 10,
+    },
+    modalButton: {
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    modalCancelButton: {
+        backgroundColor: '#F0F0F0',
+    },
+    modalCancelButtonText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333',
+        fontFamily: 'Poppins_400Regular',
+    },
+    modalConfirmButton: {
+        backgroundColor: '#FF3B30',
+    },
+    modalConfirmButtonText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#fff',
+        fontFamily: 'Poppins_400Regular',
     },
 });

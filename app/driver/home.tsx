@@ -127,6 +127,48 @@ export default function DriverHome() {
     };
   }, [showOnTheWay, selectedUser]);
 
+  // Poll for booking cancellation from rider side
+  useEffect(() => {
+    let pollInterval: any;
+
+    if (showOnTheWay && selectedUser) {
+      const pollBookingStatus = async () => {
+        try {
+          const response = await fetch(`${BASE_URL}/api/bookings/${selectedUser.id}`);
+          if (!response.ok) return;
+
+          const data = await response.json();
+
+          // Check if booking was cancelled by rider
+          if (data.booking && data.booking.status === 'cancelled') {
+            console.log('❌ Rider cancelled the booking');
+            clearInterval(pollInterval);
+
+            setShowOnTheWay(false);
+            setSelectedUser(null);
+            clearRoute();
+            await AsyncStorage.removeItem('activeDriverBooking');
+
+            Alert.alert(
+              "Booking Cancelled",
+              "The rider has cancelled the booking.",
+              [{ text: "OK" }]
+            );
+          }
+        } catch (error) {
+          console.error("Error polling booking status:", error);
+        }
+      };
+
+      pollBookingStatus();
+      pollInterval = setInterval(pollBookingStatus, 3000); // Poll every 3 seconds
+    }
+
+    return () => {
+      if (pollInterval) clearInterval(pollInterval);
+    };
+  }, [showOnTheWay, selectedUser]);
+
   // Show modal on screen focus
   useFocusEffect(
     useCallback(() => {
@@ -205,6 +247,20 @@ export default function DriverHome() {
 
   const handleCancelOnTheWay = async () => {
     console.log("❌ Cancelled on the way");
+    
+    if (selectedUser) {
+      try {
+        // Notify backend that driver cancelled the booking
+        await fetch(`${BASE_URL}/api/bookings/${selectedUser.id}/cancel`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        console.log("📡 Notified backend: driver cancelled booking");
+      } catch (error) {
+        console.error("Failed to notify backend of cancellation:", error);
+      }
+    }
+    
     setShowOnTheWay(false);
     setSelectedUser(null);
     clearRoute();
