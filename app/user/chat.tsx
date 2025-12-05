@@ -12,7 +12,11 @@ interface Message {
     timestamp: Date;
 }
 
-export default function ChatScreen() {
+interface ChatScreenProps {
+    onClose?: () => void;
+}
+
+export default function ChatScreen({ onClose }: ChatScreenProps = {}) {
     const router = useRouter();
     const [message, setMessage] = useState('');
     const [isKeyboardVisible, setKeyboardVisible] = useState(false);
@@ -26,6 +30,14 @@ export default function ChatScreen() {
     ]);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const flatListRef = useRef<FlatList>(null);
+
+    const handleBack = () => {
+        if (onClose) {
+            onClose();
+        } else {
+            router.back();
+        }
+    };
 
     const emojis = ['😊', '👍', '❤️', '😂', '🙏', '👋', '🚗', '⏰'];
 
@@ -117,7 +129,7 @@ export default function ChatScreen() {
             keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                <TouchableOpacity onPress={handleBack} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color="#000" />
                 </TouchableOpacity>
                 <Image
@@ -185,8 +197,13 @@ export default function ChatScreen() {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
         backgroundColor: '#fff',
+        zIndex: 1000,
     },
     header: {
         flexDirection: 'row',

@@ -15,6 +15,7 @@ import { useLocationSearch } from '../../../components/LocationSearch';
 import { PinSelectionUI } from '../../../components/PinSelectionUI';
 import { useRouteCalculator } from '../../../components/RouteCalculator';
 import { SearchBar } from '../../../components/SearchBar';
+import ChatScreen from '../chat';
 
 interface NominatimResult {
     place_id: number;
@@ -75,6 +76,7 @@ export const BookingComponent = ({
     const [driverSearchVisible, setDriverSearchVisible] = useState(false);
     const [driverArrivalVisible, setDriverArrivalVisible] = useState(false);
     const [showDriverDetails, setShowDriverDetails] = useState(false);
+    const [showChat, setShowChat] = useState(false);
     const [bookingId, setBookingId] = useState<string | null>(null);
 
     // Search Modal State
@@ -90,7 +92,7 @@ export const BookingComponent = ({
         const pollInterval = setInterval(async () => {
             try {
                 const response = await fetch(`${BASE_URL}/api/bookings/${bookingId}`);
-                
+
                 if (!response.ok) {
                     console.warn("Booking status response not ok:", response.status);
                     return;
@@ -440,13 +442,13 @@ export const BookingComponent = ({
             />
 
             {/* DRIVER ARRIVAL */}
-            {driverArrivalVisible && (
+            {driverArrivalVisible && !showChat && (
                 <DriverArrival
                     isSearching={driverSearchVisible}
                     visible={driverArrivalVisible}
                     onClose={() => setDriverArrivalVisible(false)}
                     onMessagePress={() => {
-                        router.push('/user/chat');
+                        setShowChat(true);
                     }}
                     onDetailsPress={() => {
                         setShowDriverDetails(true);
@@ -457,6 +459,11 @@ export const BookingComponent = ({
             {/* DRIVER DETAILS OVERLAY */}
             {showDriverDetails && (
                 <DriverDetails onClose={() => setShowDriverDetails(false)} />
+            )}
+
+            {/* CHAT SCREEN */}
+            {showChat && (
+                <ChatScreen onClose={() => setShowChat(false)} />
             )}
         </>
     );
