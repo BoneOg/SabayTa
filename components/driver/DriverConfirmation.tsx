@@ -2,14 +2,13 @@ import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
     Dimensions,
-    Modal,
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
 } from "react-native";
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 
 interface User {
     id: string;
@@ -27,6 +26,8 @@ interface DriverConfirmationProps {
     selectedUser: User | null;
     onAccept: () => void;
     onCancel: () => void;
+    distance?: string | null;
+    duration?: string | null;
 }
 
 export default function DriverConfirmation({
@@ -34,223 +35,176 @@ export default function DriverConfirmation({
     selectedUser,
     onAccept,
     onCancel,
+    distance,
+    duration,
 }: DriverConfirmationProps) {
+    if (!visible || !selectedUser) return null;
+
     return (
-        <Modal
-            visible={visible}
-            transparent={true}
-            animationType="fade"
-            onRequestClose={onCancel}
-        >
-            <View style={styles.confirmOverlay}>
-                <View style={styles.confirmModal}>
-                    <View style={styles.confirmIconContainer}>
-                        <Ionicons name="checkmark-circle" size={60} color="#534889" />
-                    </View>
-
-                    <Text style={styles.confirmTitle}>Accept Booking?</Text>
-
-                    {selectedUser && (
-                        <View style={styles.confirmContent}>
-                            <Text style={styles.confirmText}>
-                                <Text style={styles.confirmLabel}>Rider: </Text>
-                                <Text style={styles.confirmValue}>{selectedUser.name}</Text>
-                            </Text>
-
-                            {/* Distance and Time Info */}
-                            <View style={styles.infoRow}>
-                                <View style={styles.infoItem}>
-                                    <Ionicons name="resize" size={16} color="#534889" />
-                                    <Text style={styles.infoText}>
-                                        {selectedUser.distance || "N/A"}
-                                    </Text>
-                                </View>
-                                <View style={styles.infoItem}>
-                                    <Ionicons name="time-outline" size={16} color="#534889" />
-                                    <Text style={styles.infoText}>
-                                        {selectedUser.estimatedTime || "N/A"}
-                                    </Text>
-                                </View>
-                            </View>
-
-                            <View style={styles.confirmLocationContainer}>
-                                <View style={styles.confirmLocationRow}>
-                                    <Ionicons name="location-sharp" size={16} color="green" />
-                                    <Text style={styles.confirmLocationLabel}>From:</Text>
-                                </View>
-                                <Text
-                                    style={styles.confirmLocationText}
-                                    numberOfLines={2}
-                                    ellipsizeMode="tail"
-                                >
-                                    {selectedUser.pickup}
-                                </Text>
-                            </View>
-
-                            <View style={styles.confirmLocationContainer}>
-                                <View style={styles.confirmLocationRow}>
-                                    <Ionicons name="location-sharp" size={16} color="red" />
-                                    <Text style={styles.confirmLocationLabel}>To:</Text>
-                                </View>
-                                <Text
-                                    style={styles.confirmLocationText}
-                                    numberOfLines={2}
-                                    ellipsizeMode="tail"
-                                >
-                                    {selectedUser.destination}
-                                </Text>
-                            </View>
-
-                            <Text style={styles.confirmSubText}>
-                                Do you want to accept this booking?
-                            </Text>
-                        </View>
-                    )}
-
-                    <View style={styles.confirmButtons}>
-                        <TouchableOpacity
-                            style={[styles.confirmButton, styles.cancelBtn]}
-                            onPress={onCancel}
-                        >
-                            <Text style={styles.cancelBtnText}>Cancel</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[styles.confirmButton, styles.acceptBtn]}
-                            onPress={onAccept}
-                        >
-                            <Text style={styles.acceptBtnText}>Accept</Text>
-                        </TouchableOpacity>
-                    </View>
+        <>
+            {/* Distance and Duration Info on Map */}
+            <View style={styles.mapInfoContainer}>
+                <View style={styles.mapInfoCard}>
+                    <Ionicons name="resize" size={16} color="#534889" />
+                    <Text style={styles.mapInfoText}>{distance || "N/A"}</Text>
+                </View>
+                <View style={styles.mapInfoCard}>
+                    <Ionicons name="time-outline" size={16} color="#534889" />
+                    <Text style={styles.mapInfoText}>{duration || "N/A"}</Text>
                 </View>
             </View>
-        </Modal>
+
+            {/* Bottom Sheet */}
+            <View style={styles.bottomSheet}>
+                <View style={styles.handle} />
+
+                <Text style={styles.title}>Accept this booking?</Text>
+
+                <Text style={styles.userName}>{selectedUser.name}</Text>
+
+                <View style={styles.locationRow}>
+                    <Ionicons name="location-sharp" size={14} color="green" />
+                    <Text style={styles.locationText} numberOfLines={1}>
+                        {selectedUser.pickup}
+                    </Text>
+                </View>
+                <View style={styles.locationRow}>
+                    <Ionicons name="location-sharp" size={14} color="red" />
+                    <Text style={styles.locationText} numberOfLines={1}>
+                        {selectedUser.destination}
+                    </Text>
+                </View>
+
+                <View style={styles.actionButtons}>
+                    <TouchableOpacity
+                        style={styles.cancelButton}
+                        onPress={onCancel}
+                    >
+                        <Text style={styles.cancelText}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.acceptButton}
+                        onPress={onAccept}
+                    >
+                        <Text style={styles.acceptText}>Confirm</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </>
     );
 }
 
+
 const styles = StyleSheet.create({
-    confirmOverlay: {
-        flex: 1,
-        backgroundColor: "rgba(0, 0, 0, 0.6)",
-        justifyContent: "flex-start",
-        paddingTop: 80,
-        paddingHorizontal: 20,
+    mapInfoContainer: {
+        position: 'absolute',
+        top: 100,
+        right: 15,
+        gap: 8,
+        zIndex: 10,
     },
-    confirmModal: {
-        backgroundColor: "#fff",
+    mapInfoCard: {
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 8,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 4,
+        minWidth: 60,
+    },
+    mapInfoText: {
+        fontFamily: 'Poppins_400Regular',
+        fontSize: 11,
+        color: '#333',
+        fontWeight: '600',
+        marginTop: 2,
+    },
+    bottomSheet: {
+        position: 'absolute',
+        bottom: 80,
+        left: 20,
+        right: 20,
+        backgroundColor: '#fff',
         borderRadius: 20,
-        padding: 25,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
+        paddingHorizontal: 20,
+        paddingVertical: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.25,
         shadowRadius: 8,
         elevation: 10,
     },
-    confirmIconContainer: {
-        alignItems: "center",
-        marginBottom: 15,
-    },
-    confirmTitle: {
-        fontSize: 22,
-        fontFamily: "Poppins_400Regular",
-        fontWeight: "600",
-        color: "#534889",
-        textAlign: "center",
-        marginBottom: 20,
-    },
-    confirmContent: {
-        marginBottom: 20,
-    },
-    confirmText: {
-        fontSize: 16,
-        fontFamily: "Poppins_400Regular",
+    handle: {
+        width: 40,
+        height: 4,
+        backgroundColor: '#ddd',
+        borderRadius: 2,
+        alignSelf: 'center',
         marginBottom: 10,
     },
-    confirmLabel: {
-        fontWeight: "600",
-        color: "#333",
-    },
-    confirmValue: {
-        color: "#534889",
-        fontWeight: "500",
-    },
-    infoRow: {
-        flexDirection: "row",
-        justifyContent: "space-around",
-        backgroundColor: "#f5f5f5",
-        padding: 10,
-        borderRadius: 10,
-        marginBottom: 15,
-    },
-    infoItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 5,
-    },
-    infoText: {
-        fontFamily: "Poppins_400Regular",
-        fontSize: 14,
-        color: "#333",
-        fontWeight: "500",
-    },
-    confirmLocationContainer: {
+    title: {
+        fontSize: 16,
+        fontFamily: 'Poppins_400Regular',
+        fontWeight: '600',
+        color: '#534889',
+        textAlign: 'center',
         marginBottom: 12,
     },
-    confirmLocationRow: {
-        flexDirection: "row",
-        alignItems: "center",
+    userName: {
+        fontSize: 18,
+        fontFamily: 'Poppins_400Regular',
+        fontWeight: '600',
+        color: '#534889',
+        marginBottom: 8,
+    },
+    locationRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
         marginBottom: 4,
+        gap: 6,
     },
-    confirmLocationLabel: {
-        fontSize: 14,
-        fontFamily: "Poppins_400Regular",
-        fontWeight: "600",
-        color: "#666",
-        marginLeft: 6,
+    locationText: {
+        fontSize: 13,
+        fontFamily: 'Poppins_400Regular',
+        color: '#666',
+        flex: 1,
     },
-    confirmLocationText: {
-        fontSize: 14,
-        fontFamily: "Poppins_400Regular",
-        color: "#333",
-        paddingLeft: 22,
-        lineHeight: 20,
-    },
-    confirmSubText: {
-        fontSize: 14,
-        fontFamily: "Poppins_400Regular",
-        color: "#666",
-        textAlign: "center",
-        marginTop: 10,
-    },
-    confirmButtons: {
-        flexDirection: "row",
-        justifyContent: "space-between",
+    actionButtons: {
+        flexDirection: 'row',
         gap: 10,
+        marginTop: 15,
     },
-    confirmButton: {
+    cancelButton: {
         flex: 1,
         paddingVertical: 12,
         borderRadius: 10,
-        alignItems: "center",
-    },
-    cancelBtn: {
-        backgroundColor: "#f0f0f0",
+        backgroundColor: '#f0f0f0',
+        justifyContent: 'center',
+        alignItems: 'center',
         borderWidth: 1,
-        borderColor: "#ddd",
+        borderColor: '#ddd',
     },
-    acceptBtn: {
-        backgroundColor: "#534889",
-    },
-    cancelBtnText: {
+    cancelText: {
         fontSize: 16,
-        fontFamily: "Poppins_400Regular",
-        color: "#666",
-        fontWeight: "500",
+        fontFamily: 'Poppins_400Regular',
+        fontWeight: '600',
+        color: '#666',
     },
-    acceptBtnText: {
+    acceptButton: {
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: 10,
+        backgroundColor: '#534889',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    acceptText: {
         fontSize: 16,
-        fontFamily: "Poppins_400Regular",
-        color: "#fff",
-        fontWeight: "600",
+        fontFamily: 'Poppins_400Regular',
+        fontWeight: '600',
+        color: '#fff',
     },
 });

@@ -21,6 +21,7 @@ export const DriverMapView = ({ driverLocation, routeCoordinates }: DriverMapVie
                 latitudeDelta: 0.05,
                 longitudeDelta: 0.05,
             }}
+            userInterfaceStyle="light"
         >
             {/* Driver marker */}
             <Marker coordinate={driverLocation} title="Your Location">

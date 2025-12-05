@@ -33,12 +33,12 @@ const styles = StyleSheet.create({
     },
     menuButton: {
         padding: 8,
-        backgroundColor: "#6A4C93AA",
+        backgroundColor: "#534889",
         borderRadius: 8,
     },
     notificationButton: {
         padding: 8,
-        backgroundColor: "#6A4C93AA",
+        backgroundColor: "#534889",
         borderRadius: 8,
     },
 });

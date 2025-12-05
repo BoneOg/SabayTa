@@ -5,6 +5,8 @@ export const useRouteCalculator = () => {
     const [routeCoordinates, setRouteCoordinates] = useState<
         { latitude: number; longitude: number }[] | null
     >(null);
+    const [distance, setDistance] = useState<string | null>(null);
+    const [duration, setDuration] = useState<string | null>(null);
 
     const fetchRoute = async (
         start: { latitude: number; longitude: number },
@@ -23,13 +25,22 @@ export const useRouteCalculator = () => {
             console.log("📍 OSRM API Response:", data);
 
             if (data.routes && data.routes.length > 0) {
-                const coordinates = data.routes[0].geometry.coordinates.map(
+                const route = data.routes[0];
+                const coordinates = route.geometry.coordinates.map(
                     (coord: number[]) => ({
                         latitude: coord[1],
                         longitude: coord[0],
                     })
                 );
+
+                const distanceKm = (route.distance / 1000).toFixed(2);
+                const durationMin = Math.round(route.duration / 60);
+
+                setDistance(`${distanceKm} km`);
+                setDuration(`${durationMin} min`);
+
                 console.log(`✅ Route fetched successfully! ${coordinates.length} points`);
+                console.log(`📏 Distance: ${distanceKm} km, Duration: ${durationMin} min`);
                 setRouteCoordinates(coordinates);
             } else {
                 console.log("❌ No routes found in response");
@@ -43,7 +54,9 @@ export const useRouteCalculator = () => {
 
     const clearRoute = () => {
         setRouteCoordinates(null);
+        setDistance(null);
+        setDuration(null);
     };
 
-    return { routeCoordinates, fetchRoute, clearRoute };
+    return { routeCoordinates, distance, duration, fetchRoute, clearRoute };
 };

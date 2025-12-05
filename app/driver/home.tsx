@@ -16,7 +16,7 @@ const { height } = Dimensions.get("window");
 export default function DriverHome() {
   // Custom Hooks
   const driverLocation = useDriverLocation();
-  const { routeCoordinates, fetchRoute, clearRoute } = useRouteCalculator();
+  const { routeCoordinates, distance, duration, fetchRoute, clearRoute } = useRouteCalculator();
   const { users, selectedUser, setSelectedUser, fetchBookings, acceptBooking } = useBookingManager();
 
   // UI State
@@ -139,6 +139,8 @@ const handleAcceptBooking = async () => {
       <DriverConfirmation
         visible={showConfirmModal}
         selectedUser={selectedUser}
+        distance={distance}
+        duration={duration}
         onAccept={handleAcceptBooking}
         onCancel={handleCancelBooking}
       />
