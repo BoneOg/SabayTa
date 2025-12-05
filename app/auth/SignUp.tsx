@@ -206,13 +206,6 @@ export default function SignUpPage() {
 
       <Button label={isLoading ? "Signing Up..." : "Sign Up"} onPress={handleSignUp} style={{ marginVertical: 10 }} disabled={isLoading} />
 
-      {/* Social login buttons */}
-      <View style={styles.socialContainer}>
-        <TouchableOpacity style={styles.socialButton}><FontAwesome name="google" size={20} color="#414141" /><Text style={styles.socialText}>Sign up with Gmail</Text></TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}><FontAwesome name="facebook" size={20} color="#414141" /><Text style={styles.socialText}>Sign up with Facebook</Text></TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}><FontAwesome name="apple" size={20} color="#414141" /><Text style={styles.socialText}>Sign up with Apple</Text></TouchableOpacity>
-      </View>
-
       <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 18 }}>
         <Text style={styles.footerText}>Already have an account? </Text>
         <Pressable onPress={() => router.push('/auth/Login')}><Text style={styles.signInLink}>Sign in</Text></Pressable>

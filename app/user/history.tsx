@@ -1,155 +1,129 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
+import { BASE_URL } from "../../config";
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-interface RideEntry {
-  id: string;
+interface RideCardProps {
+  name: string;
   date: string;
-  pickup: string;
-  dropoff: string;
-  role: 'Driver' | 'Passenger';
-  status?: 'Cancelled';
+  time: string;
+  from: string;
+  to: string;
+  status: 'cancelled' | 'completed';
 }
 
-const rideData: { [key: string]: RideEntry[] } = {
-  upcoming: [
-    { id: '1', date: 'Oct 5, 2025', pickup: 'Bulua', dropoff: 'Main Campus', role: 'Driver' },
-    { id: '2', date: 'Oct 5, 2025', pickup: 'Main Campus', dropoff: 'Carmen', role: 'Passenger' },
-    { id: '3', date: 'Oct 5, 2025', pickup: 'Carmen', dropoff: 'Campus', role: 'Passenger' },
-  ],
-  completed: [
-    { id: '4', date: 'Oct 7, 2025', pickup: 'Starbright Kauswagan', dropoff: 'Main Campus', role: 'Passenger' },
-    { id: '5', date: 'Oct 1, 2025', pickup: 'Kauswagan', dropoff: 'Downtown', role: 'Passenger' },
-    { id: '6', date: 'Sept 17, 2025', pickup: 'Bulua', dropoff: 'Main Campus', role: 'Driver' },
-    { id: '7', date: 'Sept 13, 2025', pickup: 'Carmen', dropoff: 'Main Campus', role: 'Driver' },
-    { id: '8', date: 'Sept 7, 2025', pickup: 'Cugman', dropoff: 'Main Campus', role: 'Passenger' },
-  ],
-  cancelled: [
-    { id: '9', date: 'Oct 5, 2025', pickup: 'Starbright Kauswagan', dropoff: 'Main Campus', role: 'Driver', status: 'Cancelled' },
-    { id: '10', date: 'Oct 2, 2025', pickup: 'Carmen', dropoff: 'Main Campus', role: 'Passenger', status: 'Cancelled' },
-  ],
+const HistoryCard: React.FC<RideCardProps> = ({ name, date, time, from, to, status }) => {
+  return (
+    <View style={styles.card}>
+      {/* Name and Status */}
+      <View style={styles.nameRow}>
+        <Text style={styles.name}>{name}</Text>
+        <View style={[styles.statusBadge, status === 'cancelled' ? styles.cancelledBadge : styles.completedBadge]}>
+          <Text style={styles.statusText}>{status === 'cancelled' ? 'Cancelled' : 'Completed'}</Text>
+        </View>
+      </View>
+
+      {/* Date and Time */}
+      <View style={styles.row}>
+        <Ionicons name="calendar-outline" size={16} color="#555" style={styles.icon} />
+        <Text style={styles.dateTime}>{date} at {time}</Text>
+      </View>
+
+      {/* Locations - Stacked Vertically */}
+      <View style={styles.locationContainer}>
+        <View style={styles.locationRow}>
+          <Ionicons name="location-outline" size={18} color="green" style={styles.locationIcon} />
+          <View style={styles.locationTextContainer}>
+            <Text style={styles.locationLabel}>From</Text>
+            <Text style={styles.locationText}>{from}</Text>
+          </View>
+        </View>
+
+        <View style={styles.locationRow}>
+          <Ionicons name="location-sharp" size={18} color="red" style={styles.locationIcon} />
+          <View style={styles.locationTextContainer}>
+            <Text style={styles.locationLabel}>To</Text>
+            <Text style={styles.locationText}>{to}</Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
 };
 
-export default function HistoryScreen() {
-  const router = useRouter();
+export default function UserHistory() {
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Active top tab state
-  const [activeTab, setActiveTab] = useState<'upcoming' | 'completed' | 'cancelled'>('upcoming');
+  useEffect(() => {
+    fetchHistory();
+  }, []);
 
-  // Animation for sliding indicator
-  const slideAnim = useRef(new Animated.Value(0)).current;
-  const [tabContainerWidth, setTabContainerWidth] = useState(0);
-  const tabs = ['upcoming', 'completed', 'cancelled'];
+  const fetchHistory = async () => {
+    try {
+      const userStr = await AsyncStorage.getItem('user');
+      if (!userStr) {
+        console.error('No user found in storage');
+        setLoading(false);
+        return;
+      }
 
-  const handleTabPress = (tab: 'upcoming' | 'completed' | 'cancelled') => {
-    const tabIndex = tabs.indexOf(tab);
-    const tabWidth = tabContainerWidth / tabs.length;
-    const newPosition = tabIndex * tabWidth;
+      const user = JSON.parse(userStr);
+      const response = await fetch(`${BASE_URL}/api/bookings/history/${user._id}`);
 
-    Animated.timing(slideAnim, {
-      toValue: newPosition,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
-
-    setActiveTab(tab);
+      if (response.ok) {
+        const data = await response.json();
+        setBookings(data);
+      } else {
+        console.error('Failed to fetch history');
+      }
+    } catch (error) {
+      console.error('Error fetching history:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Initialize position when container width is measured
-  useEffect(() => {
-    if (tabContainerWidth > 0) {
-      const tabIndex = tabs.indexOf(activeTab);
-      const tabWidth = tabContainerWidth / tabs.length;
-      slideAnim.setValue(tabIndex * tabWidth);
-    }
-  }, [tabContainerWidth]);
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  };
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>History</Text>
       </View>
 
-      {/* Top Tabs */}
-      <View style={styles.topTabsContainer}>
-        <View
-          style={styles.topTabs}
-          onLayout={(event) => {
-            const { width } = event.nativeEvent.layout;
-            setTabContainerWidth(width);
-          }}
-        >
-          {/* Animated sliding indicator */}
-          {tabContainerWidth > 0 && (
-            <Animated.View
-              style={[
-                styles.slidingIndicator,
-                {
-                  width: tabContainerWidth / tabs.length,
-                  transform: [{ translateX: slideAnim }],
-                },
-              ]}
-            />
-          )}
-
-          {tabs.map((tab) => (
-            <TouchableOpacity
-              key={tab}
-              style={styles.tabButton}
-              onPress={() => handleTabPress(tab as 'upcoming' | 'completed' | 'cancelled')}
-            >
-              <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </Text>
-            </TouchableOpacity>
-          ))}
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#534889" />
         </View>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {rideData[activeTab].length > 0 ? (
-          <View style={styles.ridesContainer}>
-            {rideData[activeTab].map((ride) => (
-              <View key={ride.id} style={styles.rideCard}>
-                <View style={styles.rideContent}>
-                  <View style={styles.rideInfo}>
-                    <View style={styles.infoRow}>
-                      <Ionicons name="calendar-outline" size={18} color="#414141" />
-                      <Text style={styles.rideInfoText}>{ride.date}</Text>
-                    </View>
-                    <View style={styles.infoRow}>
-                      <Ionicons name="location" size={18} color="#4CAF50" />
-                      <Text style={styles.rideInfoText}>{ride.pickup}</Text>
-                    </View>
-                    <View style={styles.infoRow}>
-                      <Ionicons name="location" size={18} color="#F44336" />
-                      <Text style={styles.rideInfoText}>{ride.dropoff}</Text>
-                    </View>
-                  </View>
-                  <View style={styles.rideMeta}>
-                    <Text style={styles.roleText}>{ride.role}</Text>
-                    {ride.status && (
-                      <Text style={styles.statusText}>{ride.status}</Text>
-                    )}
-                  </View>
-                </View>
-              </View>
-            ))}
-          </View>
-        ) : (
-          <View style={styles.centeredContent}>
-            <Text style={styles.infoText}>
-              {activeTab === 'upcoming' && 'Your upcoming rides will be shown here.'}
-              {activeTab === 'completed' && 'Your completed rides will be shown here.'}
-              {activeTab === 'cancelled' && 'Your cancelled rides will be shown here.'}
-            </Text>
-          </View>
-        )}
-      </ScrollView>
+      ) : bookings.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>No history</Text>
+        </View>
+      ) : (
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          {bookings.map((booking) => (
+            <HistoryCard
+              key={booking._id}
+              name={booking.userId?.name || 'Unknown User'}
+              date={formatDate(booking.updatedAt)}
+              time={formatTime(booking.updatedAt)}
+              from={booking.pickupLocation?.name || 'Unknown'}
+              to={booking.dropoffLocation?.name || 'Unknown'}
+              status={booking.status}
+            />
+          ))}
+        </ScrollView>
+      )}
     </View>
   );
 }
@@ -157,143 +131,119 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: Platform.OS === 'android' ? 20 : 20,
+    backgroundColor: "#fff",
+    paddingTop: 50, // Status bar spacing
   },
-
   header: {
-    height: 60,
-    justifyContent: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 20,
     alignItems: 'center',
-    position: 'relative',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
   },
-
   headerTitle: {
-    fontSize: 19,
-    color: '#000',
-    fontFamily: 'Poppins',
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#534889',
   },
-
-  topTabsContainer: {
-    paddingHorizontal: 20,
-    marginTop: 10,
-    marginBottom: 15,
-  },
-
-  topTabs: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(198,185,229,0.3)',
-    borderRadius: 12,
-    position: 'relative',
-  },
-
-  slidingIndicator: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    height: '100%',
-    backgroundColor: '#534889',
-    borderRadius: 8,
-    zIndex: 0,
-  },
-
-  tabButton: {
+  loadingContainer: {
     flex: 1,
-    paddingVertical: 15,
-    borderRadius: 8,
-    alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'transparent',
-    zIndex: 1,
+    alignItems: 'center',
   },
-
-  tabText: {
-    fontSize: 13,
-    fontFamily: 'Poppins',
-    color: '#414141',
-  },
-
-  activeTabText: {
-    color: '#fff',
-  },
-
-  scrollContainer: {
-    flexGrow: 1,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-
-  ridesContainer: {
-    gap: 12,
-  },
-
-  rideCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(198,185,229,0.5)',
-    padding: 15,
-  },
-
-  rideContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: 10, // add gap between info and meta
-  },
-
-  rideInfo: {
+  emptyContainer: {
     flex: 1,
-    gap: 8,
-    flexShrink: 1, // allow text to shrink instead of being cut
-  },
-
-  infoRow: {
-    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 6,
-    flexWrap: 'wrap', // wrap long text
+    paddingHorizontal: 40,
   },
-
-  rideInfoText: {
-    fontSize: 14,
-    color: '#414141',
-    fontFamily: 'Poppins',
-    flexShrink: 1, // prevent cutting
-  },
-
-  rideMeta: {
-    alignItems: 'flex-end',
-    gap: 4,
-    marginLeft: 8,
-    flexShrink: 0, // keep meta aligned
-  },
-  roleText: {
-    fontSize: 14,
-    color: '#414141',
-    fontFamily: 'Poppins',
-    fontWeight: '500',
-  },
-
-  statusText: {
-    fontSize: 14,
-    color: '#F44336',
-    fontFamily: 'Poppins',
-    fontWeight: '500',
-  },
-
-  centeredContent: {
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 40,
-  },
-
-  infoText: {
-    fontSize: 14,
+  emptyText: {
+    fontSize: 16,
     color: '#666',
     fontFamily: 'Poppins',
     textAlign: 'center',
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 100, // Space for bottom tab bar
+  },
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: "#6A4C93", // Purple border
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
+  name: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
+    flex: 1,
+    marginRight: 8,
+  },
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  cancelledBadge: {
+    backgroundColor: "#FF4747",
+  },
+  completedBadge: {
+    backgroundColor: "#41B341",
+  },
+  statusText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#fff",
+    textTransform: "capitalize",
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  icon: {
+    marginRight: 6,
+  },
+  dateTime: {
+    fontSize: 13,
+    color: "#666",
+  },
+  locationContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  locationRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    flex: 1,
+  },
+  locationIcon: {
+    marginRight: 8,
+    marginTop: 1,
+  },
+  locationTextContainer: {
+    flex: 1,
+  },
+  locationLabel: {
+    fontSize: 11,
+    color: "#888",
+    marginBottom: 1,
+  },
+  locationText: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#333",
   },
 });

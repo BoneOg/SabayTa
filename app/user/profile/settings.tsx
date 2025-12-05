@@ -1,8 +1,8 @@
-import BackButton from '@/components/ui/BackButton';
+import ProfileHeader from '@/components/ProfileHeader';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const options = ['Change Password', 'Privacy Policy', 'Contact Us', 'Delete Account'];
 
@@ -30,12 +30,9 @@ const SettingsScreen = () => {
 
   return (
     <View style={styles.container}>
+      <ProfileHeader onBack={() => router.back()} title="Settings" />
+
       <View style={styles.content}>
-        <View style={styles.header}>
-          <BackButton style={{ marginBottom: 0 }} />
-          <Text style={styles.title}>Settings</Text>
-          <View style={{ width: 40 }} />
-        </View>
 
         {options.map((label) => (
           <TouchableOpacity key={label} style={styles.option} onPress={() => handlePress(label)}>
@@ -52,21 +49,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    paddingTop: Platform.OS === 'android' ? 20 : 20,
   },
   content: {
     padding: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-
-  title: {
-    fontSize: 20,
-    fontFamily: 'Poppins-SemiBold',
-    color: '#1C1B1F',
   },
   option: {
     borderWidth: 1,

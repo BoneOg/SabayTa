@@ -105,14 +105,75 @@ router.post('/:id/cancel', async (req, res) => {
             return res.status(404).json({ message: "Booking not found" });
         }
 
-        if (booking.status !== 'pending') {
-            return res.status(400).json({ message: "Cannot cancel a booking that is not pending" });
-        }
+        booking.status = 'cancelled';
+        booking.updatedAt = new Date();
+        await booking.save();
 
-        await Booking.findByIdAndDelete(req.params.id);
-        res.status(200).json({ message: "Booking cancelled and removed" });
+        res.status(200).json({ message: "Booking cancelled", booking });
     } catch (error) {
         console.error("Error cancelling booking:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// Complete a booking
+router.post('/:id/complete', async (req, res) => {
+    try {
+        const booking = await Booking.findById(req.params.id);
+
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+
+        if (booking.status !== 'accepted') {
+            return res.status(400).json({ message: "Only accepted bookings can be completed" });
+        }
+
+        booking.status = 'completed';
+        booking.updatedAt = new Date();
+        await booking.save();
+
+        res.status(200).json({ message: "Booking completed", booking });
+    } catch (error) {
+        console.error("Error completing booking:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// Get user history (completed and cancelled bookings)
+router.get('/history/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const bookings = await Booking.find({
+            userId,
+            status: { $in: ['completed', 'cancelled'] }
+        })
+            .populate('userId', 'name phone gender')
+            .sort({ updatedAt: -1 });
+
+        res.status(200).json(bookings);
+    } catch (error) {
+        console.error("Error fetching user history:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// Get driver history (completed and cancelled bookings where they were the driver)
+router.get('/driver-history/:driverId', async (req, res) => {
+    try {
+        const { driverId } = req.params;
+
+        const bookings = await Booking.find({
+            driverId,
+            status: { $in: ['completed', 'cancelled'] }
+        })
+            .populate('userId', 'name phone gender')
+            .sort({ updatedAt: -1 });
+
+        res.status(200).json(bookings);
+    } catch (error) {
+        console.error("Error fetching driver history:", error);
         res.status(500).json({ message: "Server error" });
     }
 });

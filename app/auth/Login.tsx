@@ -107,13 +107,6 @@ export default function Login() {
 
         <Button label={isLoading ? "Signing In..." : "Sign in"} onPress={handleLogin} disabled={isLoading} />
 
-        {/* Social login */}
-        <View style={styles.socialContainer}>
-          <TouchableOpacity style={styles.socialButton}><FontAwesome name="google" size={20} color="#414141" /><Text style={styles.socialText}>Sign in with Gmail</Text></TouchableOpacity>
-          <TouchableOpacity style={styles.socialButton}><FontAwesome name="facebook" size={20} color="#414141" /><Text style={styles.socialText}>Sign in with Facebook</Text></TouchableOpacity>
-          <TouchableOpacity style={styles.socialButton}><FontAwesome name="apple" size={20} color="#414141" /><Text style={styles.socialText}>Sign in with Apple</Text></TouchableOpacity>
-        </View>
-
         <View style={styles.footerRow}>
           <Text style={styles.footerText}>Don't have an account? </Text>
           <Pressable onPress={() => router.push('/auth/SignUp')}><Text style={styles.signUpLink}>Sign up</Text></Pressable>

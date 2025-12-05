@@ -1,16 +1,16 @@
-import BackButton from '@/components/ui/BackButton';
+import ProfileHeader from '@/components/ProfileHeader';
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 const AboutUsScreen = () => {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
+      <ProfileHeader onBack={() => router.back()} title="About Us" />
+
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <BackButton style={{ marginBottom: 0 }} />
-          <Text style={styles.title}>About Us</Text>
-          <View style={{ width: 40 }} />
-        </View>
 
         <Text style={styles.bodyText}>
           SabayTa is a student-centered ride-sharing platform created by USTP students for the USTP
@@ -39,22 +39,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    paddingTop: Platform.OS === 'android' ? 20 : 20,
   },
   content: {
     padding: 20,
     paddingBottom: 40,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-
-  title: {
-    fontSize: 20,
-    fontFamily: 'Poppins-SemiBold',
-    color: '#1C1B1F',
   },
   bodyText: {
     fontSize: 15,

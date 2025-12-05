@@ -1,6 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
+import { BASE_URL } from "../../config";
 
 interface RideCardProps {
     name: string;
@@ -51,46 +53,77 @@ const HistoryCard: React.FC<RideCardProps> = ({ name, date, time, from, to, stat
 };
 
 export default function DriverHistory() {
+    const [bookings, setBookings] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchHistory();
+    }, []);
+
+    const fetchHistory = async () => {
+        try {
+            const userStr = await AsyncStorage.getItem('user');
+            if (!userStr) {
+                console.error('No user found in storage');
+                setLoading(false);
+                return;
+            }
+
+            const user = JSON.parse(userStr);
+            const response = await fetch(`${BASE_URL}/api/bookings/driver-history/${user._id}`);
+
+            if (response.ok) {
+                const data = await response.json();
+                setBookings(data);
+            } else {
+                console.error('Failed to fetch history');
+            }
+        } catch (error) {
+            console.error('Error fetching history:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    };
+
+    const formatTime = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>History</Text>
             </View>
 
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-                <HistoryCard
-                    name="Gracielle Mieh C. Layam"
-                    date="Oct 8, 2025"
-                    time="8:00 AM"
-                    from="Carmen Orora..."
-                    to="USTP"
-                    status="completed"
-                />
-                <HistoryCard
-                    name="Althea L. Navales"
-                    date="Oct 8, 2025"
-                    time="10:00 AM"
-                    from="Bulua Gaisano"
-                    to="USTP"
-                    status="cancelled"
-                />
-                <HistoryCard
-                    name="Rogin U. Lagrosas"
-                    date="Oct 8, 2025"
-                    time="11:00 AM"
-                    from="SNR Bulua"
-                    to="USTP"
-                    status="completed"
-                />
-                <HistoryCard
-                    name="Juan Dela Cruz"
-                    date="Oct 9, 2025"
-                    time="7:30 AM"
-                    from="Cogon Market"
-                    to="Limketkai Center"
-                    status="cancelled"
-                />
-            </ScrollView>
+            {loading ? (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#534889" />
+                </View>
+            ) : bookings.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                    <Text style={styles.emptyText}>No history</Text>
+                </View>
+            ) : (
+                <ScrollView contentContainerStyle={styles.scrollContent}>
+                    {bookings.map((booking) => (
+                        <HistoryCard
+                            key={booking._id}
+                            name={booking.userId?.name || 'Unknown User'}
+                            date={formatDate(booking.updatedAt)}
+                            time={formatTime(booking.updatedAt)}
+                            from={booking.pickupLocation?.name || 'Unknown'}
+                            to={booking.dropoffLocation?.name || 'Unknown'}
+                            status={booking.status}
+                        />
+                    ))}
+                </ScrollView>
+            )}
         </View>
     );
 }
@@ -110,6 +143,23 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
         color: '#534889',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 40,
+    },
+    emptyText: {
+        fontSize: 16,
+        color: '#666',
+        fontFamily: 'Poppins',
+        textAlign: 'center',
     },
     scrollContent: {
         paddingHorizontal: 20,

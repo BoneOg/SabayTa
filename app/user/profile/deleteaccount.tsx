@@ -1,8 +1,9 @@
-import BackButton from '@/components/ui/BackButton';
+import ProfileHeader from '@/components/ProfileHeader';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import {
   Alert,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -30,13 +31,9 @@ const DeleteAccount = () => {
 
   return (
     <View style={styles.container}>
+      <ProfileHeader onBack={() => router.back()} title="Delete Account" />
+
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Header */}
-        <View style={styles.header}>
-          <BackButton style={{ marginBottom: 0 }} />
-          <Text style={styles.title}>Delete Account</Text>
-          <View style={{ width: 40 }} />
-        </View>
 
         {/* Body Text */}
         <Text style={styles.bodyText}>
@@ -65,22 +62,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    paddingTop: Platform.OS === 'android' ? 20 : 20,
   },
   content: {
     padding: 20,
     paddingBottom: 40,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-
-  title: {
-    fontSize: 20,
-    fontFamily: 'Poppins-SemiBold',
-    color: '#1C1B1F',
   },
   bodyText: {
     fontSize: 16,

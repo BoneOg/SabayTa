@@ -1,9 +1,10 @@
-import BackButton from '@/components/ui/BackButton';
+import ProfileHeader from '@/components/ProfileHeader';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
   Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -43,12 +44,9 @@ const ComplaintsScreen = () => {
 
   return (
     <View style={styles.container}>
+      <ProfileHeader onBack={() => router.back()} title="Complaint" />
+
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <BackButton style={{ marginBottom: 0 }} />
-          <Text style={styles.title}>Complaint</Text>
-          <View style={{ width: 40 }} />
-        </View>
 
         <View style={styles.formCard}>
           <TouchableOpacity
@@ -127,22 +125,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    paddingTop: Platform.OS === 'android' ? 20 : 20,
   },
   content: {
     padding: 20,
     paddingBottom: 40,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-
-  title: {
-    fontSize: 20,
-    fontFamily: 'Poppins-SemiBold',
-    color: '#1C1B1F',
   },
   formCard: {
     backgroundColor: '#fff',

@@ -1,23 +1,16 @@
-import BackButton from '@/components/ui/BackButton';
+import ProfileHeader from '@/components/ProfileHeader';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 const PrivacyPolicy = () => {
   const router = useRouter();
 
   return (
     <View style={styles.container}>
+      <ProfileHeader onBack={() => router.back()} title="Privacy Policy" />
+
       <View style={styles.content}>
-
-        {/* Header */}
-        <View style={styles.header}>
-          <BackButton style={{ marginBottom: 0 }} />
-
-          <Text style={styles.title}>Privacy Policy</Text>
-
-          <View style={{ width: 40 }} />
-        </View>
 
         <ScrollView
           style={{ flex: 1 }}
@@ -39,23 +32,12 @@ const PrivacyPolicy = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    paddingTop: Platform.OS === 'android' ? 20 : 20,
+  },
   content: { flex: 1, padding: 20 },
-
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-
-
-
-  title: {
-    fontSize: 20,
-    fontFamily: 'Poppins-SemiBold',
-    color: '#1C1B1F',
-  },
 
   text: {
     fontFamily: 'Poppins',

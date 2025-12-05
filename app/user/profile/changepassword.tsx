@@ -1,8 +1,8 @@
-import BackButton from '@/components/ui/BackButton';
+import ProfileHeader from '@/components/ProfileHeader';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const ChangePassword = () => {
   const router = useRouter();
@@ -24,16 +24,9 @@ const ChangePassword = () => {
 
   return (
     <View style={styles.container}>
+      <ProfileHeader onBack={() => router.back()} title="Change Password" />
+
       <View style={styles.content}>
-
-        {/* Header */}
-        <View style={styles.header}>
-          <BackButton style={{ marginBottom: 0 }} />
-
-          <Text style={styles.title}>Change Password</Text>
-
-          <View style={{ width: 40 }} />
-        </View>
 
         {/* Inputs */}
         <View style={styles.form}>
@@ -113,23 +106,12 @@ const ChangePassword = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    paddingTop: Platform.OS === 'android' ? 20 : 20,
+  },
   content: { padding: 20 },
-
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-
-
-
-  title: {
-    fontSize: 20,
-    fontFamily: 'Poppins-SemiBold',
-    color: '#1C1B1F',
-  },
 
   form: {
     marginTop: 10,
