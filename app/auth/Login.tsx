@@ -23,6 +23,7 @@ export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -69,7 +70,27 @@ export default function Login() {
         <Text style={styles.title}>Sign in with your email or {'\n'} phone number</Text>
 
         <TextInput style={styles.input} placeholder="Email or Phone Number" placeholderTextColor="#D0D0D0" value={username} onChangeText={setUsername} />
-        <TextInput style={styles.input} placeholder="Enter Your Password" placeholderTextColor="#D0D0D0" secureTextEntry value={password} onChangeText={setPassword} />
+
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Enter Your Password"
+            placeholderTextColor="#D0D0D0"
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity
+            style={styles.eyeIcon}
+            onPress={() => setShowPassword(!showPassword)}
+          >
+            <FontAwesome
+              name={showPassword ? "eye" : "eye-slash"}
+              size={20}
+              color="#534889"
+            />
+          </TouchableOpacity>
+        </View>
 
         <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 12 }}>
           <Pressable onPress={() => router.push('/auth/ForgotPassword')}><Text style={styles.forgotText}>Forgot password?</Text></Pressable>
@@ -97,6 +118,9 @@ const styles = StyleSheet.create({
   container: { flexGrow: 1, padding: 24, paddingTop: Platform.OS === 'android' ? 50 : 20, backgroundColor: '#fff' },
   title: { fontFamily: 'Poppins', fontSize: 24, color: '#414141', marginVertical: 16, fontWeight: '600' },
   input: { fontFamily: 'Poppins', fontSize: 15, color: '#414141', borderWidth: 1, borderColor: '#D0D0D0', backgroundColor: '#fff', borderRadius: 6, paddingVertical: 12, paddingHorizontal: 14, marginVertical: 7 },
+  passwordContainer: { position: 'relative', marginVertical: 7 },
+  passwordInput: { fontFamily: 'Poppins', fontSize: 15, color: '#414141', borderWidth: 1, borderColor: '#D0D0D0', backgroundColor: '#fff', borderRadius: 6, paddingVertical: 12, paddingHorizontal: 14, paddingRight: 50 },
+  eyeIcon: { position: 'absolute', right: 14, top: 12 },
   forgotText: { color: '#E35A5A', fontFamily: 'Poppins', fontSize: 13, marginBottom: 24 },
   socialContainer: { marginVertical: 12 },
   socialButton: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#D0D0D0', borderRadius: 6, paddingVertical: 10, paddingHorizontal: 16, marginVertical: 6, backgroundColor: '#fff' },
