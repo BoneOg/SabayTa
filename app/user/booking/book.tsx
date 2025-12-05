@@ -7,8 +7,8 @@ import { BASE_URL } from '../../../config';
 
 // Custom Hooks & Components
 import { useHomeAnimations } from '../../../components/animations/HomeAnimations';
-import { DriverArrival } from '../../../components/DriverArrival';
-import { DriverDetails } from '../../../components/DriverDetails';
+import { DriverArrival } from '../../../components/driver/DriverArrival';
+import { DriverDetails } from '../../../components/driver/DriverDetails';
 import { DriverSearchLoading } from '../../../components/Loading';
 import { LocationModals } from '../../../components/Location';
 import { useLocationSearch } from '../../../components/LocationSearch';
