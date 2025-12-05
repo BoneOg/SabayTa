@@ -26,6 +26,9 @@ export default function SignUpPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showGenderDropdown, setShowGenderDropdown] = useState(false);
 
   const handleSignUp = async () => {
     if (!name || !email || !phone || !gender || !password || !confirmPassword) {
@@ -98,9 +101,95 @@ export default function SignUpPage() {
         <TextInput style={[styles.input, styles.mobileInput]} placeholder="Your mobile number" placeholderTextColor="#D0D0D0" keyboardType="phone-pad" value={phone} onChangeText={setPhone} />
       </View>
 
-      <TextInput style={styles.input} placeholder="Gender" placeholderTextColor="#D0D0D0" value={gender} onChangeText={setGender} />
-      <TextInput style={styles.input} placeholder="Password" placeholderTextColor="#D0D0D0" secureTextEntry value={password} onChangeText={setPassword} />
-      <TextInput style={styles.input} placeholder="Confirm Password" placeholderTextColor="#D0D0D0" secureTextEntry value={confirmPassword} onChangeText={setConfirmPassword} />
+      <View style={styles.genderContainer}>
+        <TouchableOpacity
+          style={styles.genderButton}
+          onPress={() => setShowGenderDropdown(!showGenderDropdown)}
+        >
+          <Text style={[styles.genderText, !gender && styles.placeholderText]}>
+            {gender || 'Gender'}
+          </Text>
+          <FontAwesome
+            name={showGenderDropdown ? "chevron-up" : "chevron-down"}
+            size={14}
+            color="#414141"
+          />
+        </TouchableOpacity>
+
+        {showGenderDropdown && (
+          <View style={styles.dropdownMenu}>
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              onPress={() => {
+                setGender('Male');
+                setShowGenderDropdown(false);
+              }}
+            >
+              <Text style={styles.dropdownItemText}>Male</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              onPress={() => {
+                setGender('Female');
+                setShowGenderDropdown(false);
+              }}
+            >
+              <Text style={styles.dropdownItemText}>Female</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.dropdownItem, styles.lastDropdownItem]}
+              onPress={() => {
+                setGender('Other');
+                setShowGenderDropdown(false);
+              }}
+            >
+              <Text style={styles.dropdownItemText}>Other</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+
+      <View style={styles.passwordContainer}>
+        <TextInput
+          style={styles.passwordInput}
+          placeholder="Password"
+          placeholderTextColor="#D0D0D0"
+          secureTextEntry={!showPassword}
+          value={password}
+          onChangeText={setPassword}
+        />
+        <TouchableOpacity
+          style={styles.eyeIcon}
+          onPress={() => setShowPassword(!showPassword)}
+        >
+          <FontAwesome
+            name={showPassword ? "eye" : "eye-slash"}
+            size={20}
+            color="#534889"
+          />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.passwordContainer}>
+        <TextInput
+          style={styles.passwordInput}
+          placeholder="Confirm Password"
+          placeholderTextColor="#D0D0D0"
+          secureTextEntry={!showConfirmPassword}
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+        />
+        <TouchableOpacity
+          style={styles.eyeIcon}
+          onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+        >
+          <FontAwesome
+            name={showConfirmPassword ? "eye" : "eye-slash"}
+            size={20}
+            color="#534889"
+          />
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.termsRow}>
         <Entypo name="check" size={16} color="#534889" />
@@ -129,6 +218,17 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 24, backgroundColor: '#fff', paddingTop: Platform.OS === 'android' ? 50 : 20 },
   title: { fontFamily: 'Poppins', fontSize: 24, color: '#414141', marginVertical: 16, fontWeight: '600' },
   input: { fontFamily: 'Poppins', fontSize: 15, color: '#414141', borderWidth: 1, borderColor: '#D0D0D0', backgroundColor: '#fff', borderRadius: 6, paddingVertical: 12, paddingHorizontal: 14, marginVertical: 7 },
+  passwordContainer: { position: 'relative', marginVertical: 7 },
+  passwordInput: { fontFamily: 'Poppins', fontSize: 15, color: '#414141', borderWidth: 1, borderColor: '#D0D0D0', backgroundColor: '#fff', borderRadius: 6, paddingVertical: 12, paddingHorizontal: 14, paddingRight: 50 },
+  eyeIcon: { position: 'absolute', right: 14, top: 12 },
+  genderContainer: { position: 'relative', marginVertical: 7, zIndex: 1000 },
+  genderButton: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderWidth: 1, borderColor: '#D0D0D0', backgroundColor: '#fff', borderRadius: 6, paddingVertical: 12, paddingHorizontal: 14 },
+  genderText: { fontFamily: 'Poppins', fontSize: 15, color: '#414141' },
+  placeholderText: { color: '#D0D0D0' },
+  dropdownMenu: { position: 'absolute', top: 50, left: 0, right: 0, backgroundColor: '#fff', borderWidth: 1, borderColor: '#D0D0D0', borderRadius: 6, zIndex: 1001, elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },
+  dropdownItem: { paddingVertical: 12, paddingHorizontal: 14, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
+  lastDropdownItem: { borderBottomWidth: 0 },
+  dropdownItemText: { fontFamily: 'Poppins', fontSize: 15, color: '#414141' },
   rowInput: { flexDirection: 'row', alignItems: 'center', marginVertical: 7 },
   countryCodeBox: { borderWidth: 1, borderColor: '#D0D0D0', borderRadius: 6, paddingVertical: 10, paddingHorizontal: 10, marginRight: 8, backgroundColor: '#fff' },
   countryCode: { fontFamily: 'Poppins', color: '#414141', fontSize: 15 },
