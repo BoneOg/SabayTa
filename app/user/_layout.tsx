@@ -20,6 +20,7 @@ export default function Layout() {
     "contactus",
     "deleteaccount",
     "editprofile",
+    "studentverification",
   ]);
   const shouldShowTabBar = !hiddenRoutes.has(currentRoute);
 

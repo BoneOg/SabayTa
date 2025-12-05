@@ -57,6 +57,12 @@ export default function ProfileScreen() {
       route: '/user/profile/editprofile',
     },
     {
+      icon: 'verified-user',
+      text: 'Student Verification',
+      library: MaterialIcons,
+      route: '/user/profile/studentverification',
+    },
+    {
       icon: 'exclamation-triangle',
       text: 'Complain',
       library: FontAwesome,
