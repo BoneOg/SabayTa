@@ -1,11 +1,11 @@
 import Button from '@/components/Button';
 import BackButton from '@/components/ui/BackButton';
+import CustomModal from '@/components/ui/CustomModal';
 import { Entypo, FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  Alert,
   Platform,
   Pressable,
   ScrollView,
@@ -29,18 +29,24 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showGenderDropdown, setShowGenderDropdown] = useState(false);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSignUp = async () => {
     if (!name || !email || !phone || !gender || !password || !confirmPassword) {
-      Alert.alert('Error', 'All fields are required.');
+      setErrorMessage('All fields are required.');
+      setErrorModalVisible(true);
       return;
     }
     if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters.');
+      setErrorMessage('Password must be at least 6 characters.');
+      setErrorModalVisible(true);
       return;
     }
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match.');
+      setErrorMessage('Passwords do not match.');
+      setErrorModalVisible(true);
       return;
     }
 
@@ -65,7 +71,8 @@ export default function SignUpPage() {
         data = JSON.parse(text);
       } catch {
         console.error("Signup response not JSON:", text);
-        Alert.alert("Error", "Server error. Please try again.");
+        setErrorMessage("Server error. Please try again.");
+        setErrorModalVisible(true);
         return;
       }
 
@@ -73,16 +80,17 @@ export default function SignUpPage() {
         await AsyncStorage.setItem('token', data.token);
         await AsyncStorage.setItem('user', JSON.stringify(data.user));
 
-        Alert.alert('Success', 'Account created successfully!');
-        router.push('/auth/CompleteProfile');
+        setSuccessModalVisible(true);
 
       } else {
-        Alert.alert('Error', data.message || 'Signup failed.');
+        setErrorMessage(data.message || 'Signup failed.');
+        setErrorModalVisible(true);
       }
 
     } catch (error) {
       console.error('Signup error:', error);
-      Alert.alert('Error', 'Network error. Please try again.');
+      setErrorMessage('Network error. Please try again.');
+      setErrorModalVisible(true);
     } finally {
       setIsLoading(false);
     }
@@ -210,6 +218,23 @@ export default function SignUpPage() {
         <Pressable onPress={() => router.push('/auth/Login')}><Text style={styles.signInLink}>Sign in</Text></Pressable>
       </View>
       <View style={{ height: 30 }} />
+
+      <CustomModal
+        visible={successModalVisible}
+        title="Success"
+        message="Account created successfully!"
+        onClose={() => {
+          setSuccessModalVisible(false);
+          router.push('/auth/CompleteProfile');
+        }}
+      />
+
+      <CustomModal
+        visible={errorModalVisible}
+        title="Error"
+        message={errorMessage}
+        onClose={() => setErrorModalVisible(false)}
+      />
     </ScrollView>
   );
 }

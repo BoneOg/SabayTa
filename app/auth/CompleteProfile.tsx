@@ -4,18 +4,18 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
   Image,
   Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 import Button from "@/components/Button";
 import BackButton from "@/components/ui/BackButton";
+import CustomModal from "@/components/ui/CustomModal";
 import { BASE_URL } from "../../config";
 
 // 1. Define the type for the Profile state
@@ -44,6 +44,11 @@ export default function CompleteProfile() {
   const [image, setImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Modal states
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   /* ---------------------- LOAD USER DATA ---------------------- */
   useEffect(() => {
     const loadUserData = async () => {
@@ -64,7 +69,8 @@ export default function CompleteProfile() {
         if (user.profileImage) setImage(user.profileImage);
       } catch (err) {
         console.log("Error loading user:", err);
-        Alert.alert("Error", "Unable to load profile information.");
+        setErrorMessage("Unable to load profile information.");
+        setErrorModalVisible(true);
       }
     };
 
@@ -75,10 +81,8 @@ export default function CompleteProfile() {
   const requestImagePermissions = async () => {
     const result = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!result.granted) {
-      Alert.alert(
-        "Permission required",
-        "Permission to access photos is required to upload a profile picture."
-      );
+      setErrorMessage("Permission to access photos is required to upload a profile picture.");
+      setErrorModalVisible(true);
       return false;
     }
     return true;
@@ -109,7 +113,8 @@ export default function CompleteProfile() {
       }
     } catch (err) {
       console.log("Image picker error DETAILS:", err);
-      Alert.alert("Error", "Could not pick image.");
+      setErrorMessage("Could not pick image.");
+      setErrorModalVisible(true);
     }
   };
 
@@ -136,7 +141,8 @@ export default function CompleteProfile() {
       !profile.city ||
       !profile.district
     ) {
-      Alert.alert("Error", "Please fill out all fields.");
+      setErrorMessage("Please fill out all fields.");
+      setErrorModalVisible(true);
       return;
     }
 
@@ -145,7 +151,8 @@ export default function CompleteProfile() {
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
-        Alert.alert("Error", "You are not logged in.");
+        setErrorMessage("You are not logged in.");
+        setErrorModalVisible(true);
         setIsLoading(false);
         return;
       }
@@ -198,8 +205,6 @@ export default function CompleteProfile() {
       }
 
       if (response.ok) {
-        Alert.alert("Success", json?.message || "Profile updated!");
-
         if (json?.profile) {
           const stored = await AsyncStorage.getItem("user");
           const parsed = stored ? JSON.parse(stored) : {};
@@ -213,13 +218,15 @@ export default function CompleteProfile() {
           await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
         }
 
-        router.push("/auth/Login");
+        setSuccessModalVisible(true);
       } else {
-        Alert.alert("Error", json?.message || "Unable to update profile.");
+        setErrorMessage(json?.message || "Unable to update profile.");
+        setErrorModalVisible(true);
       }
     } catch (err) {
       console.log("Save profile error:", err);
-      Alert.alert("Error", "Network or server error.");
+      setErrorMessage("Network or server error.");
+      setErrorModalVisible(true);
     } finally {
       setIsLoading(false);
     }
@@ -317,6 +324,23 @@ export default function CompleteProfile() {
           disabled={isLoading}
         />
       </View>
+
+      <CustomModal
+        visible={successModalVisible}
+        title="Success"
+        message="Profile updated successfully!"
+        onClose={() => {
+          setSuccessModalVisible(false);
+          router.push("/auth/Login");
+        }}
+      />
+
+      <CustomModal
+        visible={errorModalVisible}
+        title="Error"
+        message={errorMessage}
+        onClose={() => setErrorModalVisible(false)}
+      />
     </View>
   );
 }

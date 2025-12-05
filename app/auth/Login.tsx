@@ -1,11 +1,11 @@
 import Button from '@/components/Button';
 import BackButton from '@/components/ui/BackButton';
+import CustomModal from '@/components/ui/CustomModal';
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -24,10 +24,13 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleLogin = async () => {
     if (!username || !password) {
-      Alert.alert('Error', 'Please enter your credentials');
+      setErrorMessage('Please enter your credentials');
+      setErrorModalVisible(true);
       return;
     }
 
@@ -43,7 +46,11 @@ export default function Login() {
       const text = await response.text();
       let data;
       try { data = JSON.parse(text); }
-      catch { Alert.alert('Error', 'Server error. Please try again.'); return; }
+      catch {
+        setErrorMessage('Server error. Please try again.');
+        setErrorModalVisible(true);
+        return;
+      }
 
       if (response.ok) {
         await AsyncStorage.setItem('token', data.token);
@@ -51,12 +58,14 @@ export default function Login() {
 
         router.push(data.user.role === 'admin' ? '/admin' : '/user/home');
       } else {
-        Alert.alert('Error', data.message || 'Login failed');
+        setErrorMessage(data.message || 'Login failed');
+        setErrorModalVisible(true);
       }
 
     } catch (error) {
       console.error('Login error:', error);
-      Alert.alert('Error', 'Network error. Please try again.');
+      setErrorMessage('Network error. Please try again.');
+      setErrorModalVisible(true);
     } finally {
       setIsLoading(false);
     }
@@ -109,6 +118,13 @@ export default function Login() {
           <Text style={styles.footerText}>Don't have an account? </Text>
           <Pressable onPress={() => router.push('/auth/SignUp')}><Text style={styles.signUpLink}>Sign up</Text></Pressable>
         </View>
+
+        <CustomModal
+          visible={errorModalVisible}
+          title="Login Failed"
+          message={errorMessage}
+          onClose={() => setErrorModalVisible(false)}
+        />
       </ScrollView>
     </KeyboardAvoidingView>
   );

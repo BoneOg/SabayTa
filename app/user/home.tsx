@@ -1,12 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView from 'react-native-maps';
 
 // Custom Hooks & Components
-import { useLocationTracker } from '../../components/LocationTracker';
+import { CDO_COORDS, useLocationTracker } from '../../components/LocationTracker';
 import { MapComponent } from '../../components/Map';
+import CustomModal from '../../components/ui/CustomModal';
 import { BookingComponent } from './booking/book';
 
 interface SelectedLocation {
@@ -19,7 +20,7 @@ export default function HomeScreen() {
   const router = useRouter();
 
   // Custom Hooks
-  const { region } = useLocationTracker();
+  const { region, setRegion, requestPermissions, permissionStatus } = useLocationTracker();
 
   // Refs
   const mapRef = useRef<MapView>(null) as React.RefObject<MapView>;
@@ -30,6 +31,16 @@ export default function HomeScreen() {
   const [fromLocation, setFromLocation] = useState<SelectedLocation | null>(null);
   const [toLocation, setToLocation] = useState<SelectedLocation | null>(null);
   const [routeCoords, setRouteCoords] = useState<{ latitude: number; longitude: number }[]>([]);
+  const [permissionModalVisible, setPermissionModalVisible] = useState(false);
+
+  // Show permission modal when permission is not asked
+  useEffect(() => {
+    console.log('Permission status:', permissionStatus);
+    if (permissionStatus === 'not-asked') {
+      console.log('Showing permission modal');
+      setPermissionModalVisible(true);
+    }
+  }, [permissionStatus]);
 
   // ====================================================================
   // CALLBACKS FROM BOOKING COMPONENT
@@ -55,10 +66,22 @@ export default function HomeScreen() {
     }
   };
 
+  // Handle permission modal actions
+  const handleAllowPermission = async () => {
+    setPermissionModalVisible(false);
+    await requestPermissions();
+  };
+
+  const handleDenyPermission = () => {
+    setPermissionModalVisible(false);
+    // Keep using default CDO coordinates
+    setRegion(CDO_COORDS);
+  };
+
   if (!region) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text>Fetching location...</Text>
+        <Text style={{ fontFamily: 'Poppins' }}>Loading map...</Text>
       </View>
     );
   }
@@ -106,6 +129,18 @@ export default function HomeScreen() {
         >
           <Ionicons name="locate" size={24} color="#534889" />
         </TouchableOpacity>
+
+        {/* LOCATION PERMISSION MODAL */}
+        <CustomModal
+          visible={permissionModalVisible}
+          title="Enable Location Access"
+          message="SabayTa needs access to your location to connect you with nearby drivers and track your rides in real-time. Please allow location access to ensure a seamless and safe experience."
+          variant="twoButtons"
+          buttonText="Allow"
+          secondaryButtonText="Deny"
+          onClose={handleAllowPermission}
+          onSecondaryPress={handleDenyPermission}
+        />
       </View>
     </View>
   );
@@ -114,31 +149,31 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff'
   },
   notificationButton: {
     position: 'absolute',
+    top: 50,
     right: 20,
-    top: 30,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(198,185,229,0.5)',
-    alignItems: 'center',
-    justifyContent: 'center'
+    backgroundColor: 'white',
+    borderRadius: 50,
+    padding: 12,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   locationButton: {
     position: 'absolute',
-    bottom: 150,
-    right: 12,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#F8F6FC',
-    borderWidth: 1.5,
-    borderColor: '#D0D0D0',
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 2
+    bottom: 100,
+    right: 20,
+    backgroundColor: 'white',
+    borderRadius: 50,
+    padding: 12,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
 });
