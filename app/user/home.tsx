@@ -41,6 +41,9 @@ export default function HomeScreen() {
       setPermissionModalVisible(true);
     }
   }, [permissionStatus]);
+  const [driverLocation, setDriverLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [showDriverRoute, setShowDriverRoute] = useState(false);
+  const [isBookingAccepted, setIsBookingAccepted] = useState(false);
 
   // ====================================================================
   // CALLBACKS FROM BOOKING COMPONENT
@@ -101,6 +104,8 @@ export default function HomeScreen() {
           toLocation={toLocation}
           routeCoords={routeCoords}
           selectingLocation={selectingLocation}
+          driverLocation={driverLocation}
+          showDriverRoute={showDriverRoute}
         />
 
         {/* BOOKING COMPONENT - Contains all booking logic */}
@@ -113,6 +118,9 @@ export default function HomeScreen() {
           setDraggedRegion={setDraggedRegion}
           onLocationChange={handleLocationChange}
           onRouteChange={handleRouteChange}
+          onDriverLocationChange={setDriverLocation}
+          onDriverRouteChange={setShowDriverRoute}
+          onBookingAccepted={setIsBookingAccepted}
         />
 
         {/* BUTTONS */}
@@ -124,7 +132,16 @@ export default function HomeScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.locationButton, selectingLocation && { bottom: 200 }]}
+          style={[
+            styles.locationButton,
+            {
+              bottom: isBookingAccepted
+                ? 220  // Driver on the way bar (approx 180 + margin)
+                : selectingLocation
+                  ? 200 // Pin selection mode
+                  : 160 // Search bar (80 + 55 + margin)
+            }
+          ]}
           onPress={centerOnLocation}
         >
           <Ionicons name="locate" size={24} color="#534889" />

@@ -1,34 +1,19 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Dimensions, TextInput } from 'react-native';
+import React, { useEffect } from 'react';
 import MapView from 'react-native-maps';
-import { BASE_URL } from '../../../config';
 
 // Custom Hooks & Components
 import { useHomeAnimations } from '../../../components/animations/HomeAnimations';
-import { DriverArrival } from '../../../components/driver/DriverArrival';
-import { DriverDetails } from '../../../components/driver/DriverDetails';
-import { DriverSearchLoading } from '../../../components/Loading';
-import { LocationModals } from '../../../components/Location';
-import { useLocationSearch } from '../../../components/LocationSearch';
 import { PinSelectionUI } from '../../../components/PinSelectionUI';
 import { useRouteCalculator } from '../../../components/RouteCalculator';
-import { SearchBar } from '../../../components/SearchBar';
-import ChatScreen from '../chat';
-
-interface NominatimResult {
-    place_id: number;
-    lat: string;
-    lon: string;
-    display_name: string;
-}
-
-interface SelectedLocation {
-    lat: number;
-    lon: number;
-    name: string;
-}
+import { BookingModals } from '../../../components/user/BookingModals';
+import { BookingSearchBar } from '../../../components/user/BookingSearchBar';
+import { DriverComponents } from '../../../components/user/DriverComponents';
+import { useBookingActions } from '../../../components/user/hooks/useBookingActions';
+import { useBookingPolling } from '../../../components/user/hooks/useBookingPolling';
+import { useBookingState } from '../../../components/user/hooks/useBookingState';
+import { useLocationSelection } from '../../../components/user/hooks/useLocationSelection';
+import { useModalAnimations } from '../../../components/user/hooks/useModalAnimations';
 
 interface BookingComponentProps {
     region: any;
@@ -37,8 +22,11 @@ interface BookingComponentProps {
     setSelectingLocation: (value: 'from' | 'to' | null) => void;
     draggedRegion: any;
     setDraggedRegion: (region: any) => void;
-    onLocationChange?: (from: SelectedLocation | null, to: SelectedLocation | null) => void;
+    onLocationChange?: (from: any, to: any) => void;
     onRouteChange?: (coords: { latitude: number; longitude: number }[]) => void;
+    onDriverLocationChange?: (location: { latitude: number; longitude: number } | null) => void;
+    onDriverRouteChange?: (show: boolean) => void;
+    onBookingAccepted?: (accepted: boolean) => void;
 }
 
 export const BookingComponent = ({
@@ -49,77 +37,127 @@ export const BookingComponent = ({
     draggedRegion,
     setDraggedRegion,
     onLocationChange,
-    onRouteChange
+    onRouteChange,
+    onDriverLocationChange,
+    onDriverRouteChange,
+    onBookingAccepted
 }: BookingComponentProps) => {
     const router = useRouter();
     const params = useLocalSearchParams();
 
     // Custom Hooks
     const { slideAnim, pinSelectionAnim } = useHomeAnimations();
-    const { debouncedFetchSuggestions, getAddressFromCoords } = useLocationSearch();
     const { fetchRoute } = useRouteCalculator();
 
-    // Refs
-    const searchInputRef = useRef<TextInput>(null);
+    // Booking State Hook
+    const {
+        bookingId,
+        setBookingId,
+        bookingAccepted,
+        setBookingAccepted,
+        driverSearchVisible,
+        setDriverSearchVisible,
+        driverArrivalVisible,
+        setDriverArrivalVisible,
+        showDriverDetails,
+        setShowDriverDetails,
+        showChat,
+        setShowChat,
+        fromLocation,
+        setFromLocation,
+        toLocation,
+        setToLocation,
+        fromText,
+        setFromText,
+        toText,
+        setToText,
+        resetBookingState,
+    } = useBookingState();
 
-    // State
-    const [modalVisible, setModalVisible] = useState(false);
-    const [fromText, setFromText] = useState('');
-    const [toText, setToText] = useState('');
-    const [fromLocation, setFromLocation] = useState<SelectedLocation | null>(null);
-    const [toLocation, setToLocation] = useState<SelectedLocation | null>(null);
-    const [isModalFull, setIsModalFull] = useState(false);
-    const [routeCoords, setRouteCoords] = useState<{ latitude: number; longitude: number }[]>([]);
-    const [tripDetails, setTripDetails] = useState<{ distance: string; duration: string } | null>(null);
+    // Route State
+    const [routeCoords, setRouteCoords] = React.useState<{ latitude: number; longitude: number }[]>([]);
+    const [tripDetails, setTripDetails] = React.useState<{ distance: string; duration: string } | null>(null);
 
-    // Driver Search State
-    const [driverSearchVisible, setDriverSearchVisible] = useState(false);
-    const [driverArrivalVisible, setDriverArrivalVisible] = useState(false);
-    const [showDriverDetails, setShowDriverDetails] = useState(false);
-    const [showChat, setShowChat] = useState(false);
-    const [bookingId, setBookingId] = useState<string | null>(null);
+    // Modal State
+    const [modalVisible, setModalVisible] = React.useState(false);
 
-    // Search Modal State
-    const [searchModalVisible, setSearchModalVisible] = useState(false);
-    const [activeSearchField, setActiveSearchField] = useState<'from' | 'to' | null>(null);
-    const [searchText, setSearchText] = useState('');
-    const [searchSuggestions, setSearchSuggestions] = useState<NominatimResult[]>([]);
+    // Location Selection Hook
+    const {
+        searchInputRef,
+        searchModalVisible,
+        setSearchModalVisible,
+        activeSearchField,
+        searchText,
+        searchSuggestions,
+        openSearchModal,
+        handleSearchTextChange,
+        clearSearchText,
+        selectLocationFromSearch,
+        useCurrentLocation,
+        openDropPin,
+        cancelDropPin,
+        confirmPinLocation,
+    } = useLocationSelection(
+        region,
+        setFromLocation,
+        setToLocation,
+        setFromText,
+        setToText,
+        setSelectingLocation,
+        setModalVisible,
+        pinSelectionAnim
+    );
 
-    // Poll for booking status updates - driver acceptance
+    // Modal Animations Hook
+    const { isModalFull } = useModalAnimations(
+        modalVisible,
+        fromLocation,
+        toLocation,
+        slideAnim
+    );
+
+    // Booking Actions Hook
+    const { handleCreateBooking, handleCancelBooking } = useBookingActions(
+        bookingId,
+        setBookingId,
+        setDriverSearchVisible,
+        setDriverArrivalVisible,
+        setBookingAccepted,
+        resetBookingState,
+        onDriverRouteChange,
+        onDriverLocationChange
+    );
+
+    // Booking Polling Hook
+    useBookingPolling({
+        bookingId,
+        driverSearchVisible,
+        bookingAccepted,
+        fromLocation,
+        params,
+        setDriverSearchVisible,
+        setDriverArrivalVisible,
+        setBookingAccepted,
+        setFromLocation,
+        setToLocation,
+        setRouteCoords,
+        setTripDetails,
+        onDriverLocationChange,
+        onDriverRouteChange,
+        onRouteChange,
+        fetchRoute,
+        mapRef,
+        resetBookingState,
+    });
+
+
+
+    // Notify parent of booking acceptance
     useEffect(() => {
-        if (!bookingId || !driverSearchVisible) return;
-
-        const pollInterval = setInterval(async () => {
-            try {
-                const response = await fetch(`${BASE_URL}/api/bookings/${bookingId}`);
-
-                if (!response.ok) {
-                    console.warn("Booking status response not ok:", response.status);
-                    return;
-                }
-
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    console.warn("Response is not JSON:", contentType);
-                    return;
-                }
-
-                const data = await response.json();
-                console.log("📱 Booking status:", data);
-
-                if (data.booking && data.booking.status === 'accepted') {
-                    console.log('✅ Driver accepted booking!');
-                    setDriverSearchVisible(false);
-                    setDriverArrivalVisible(true);
-                    clearInterval(pollInterval);
-                }
-            } catch (error) {
-                console.error("Error polling booking status:", error);
-            }
-        }, 1000); // Poll every second
-
-        return () => clearInterval(pollInterval);
-    }, [bookingId, driverSearchVisible]);
+        if (onBookingAccepted) {
+            onBookingAccepted(bookingAccepted);
+        }
+    }, [bookingAccepted]);
 
     // Notify parent of location changes
     useEffect(() => {
@@ -130,237 +168,36 @@ export const BookingComponent = ({
 
     // Notify parent of route changes
     useEffect(() => {
+        console.log("🗺️ Route coords changed, length:", routeCoords.length);
+        if (routeCoords.length > 0) {
+            console.log("   Start:", routeCoords[0]);
+            console.log("   End:", routeCoords[routeCoords.length - 1]);
+        }
         if (onRouteChange) {
             onRouteChange(routeCoords);
         }
     }, [routeCoords]);
 
-    // ====================================================================
-    // DRIVER SEARCH & BOOKING LOGIC
-    // ====================================================================
+    // Driver Search & Booking Logic
     useEffect(() => {
         if (params.action === 'search_driver') {
             setDriverSearchVisible(true);
-            handleCreateBooking();
+            handleCreateBooking(params);
         }
     }, [params.action]);
 
-    const handleCreateBooking = async () => {
-        try {
-            const userStr = await AsyncStorage.getItem('user');
-            if (!userStr) {
-                Alert.alert("Error", "User not found. Please login again.");
-                setDriverSearchVisible(false);
-                return;
-            }
-            const user = JSON.parse(userStr);
-
-            const bookingData = {
-                userId: user._id,
-                pickupLocation: {
-                    lat: parseFloat(params.fromLat as string),
-                    lon: parseFloat(params.fromLon as string),
-                    name: params.fromName as string
-                },
-                dropoffLocation: {
-                    lat: parseFloat(params.toLat as string),
-                    lon: parseFloat(params.toLon as string),
-                    name: params.toName as string
-                },
-                distance: params.distance,
-                estimatedTime: params.time
-            };
-
-            const response = await fetch(`${BASE_URL}/api/bookings/create`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(bookingData)
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                setBookingId(data.booking._id);
-            } else {
-                Alert.alert("Error", data.message || "Failed to create booking");
-                setDriverSearchVisible(false);
-            }
-        } catch (error) {
-            console.error("Booking error:", error);
-            Alert.alert("Error", "Network error. Please try again.");
-            setDriverSearchVisible(false);
-        }
-    };
-
-    const handleCancelBooking = async () => {
-        if (!bookingId) {
-            setDriverSearchVisible(false);
-            router.setParams({ action: '' });
-            return;
-        }
-
-        try {
-            const response = await fetch(`${BASE_URL}/api/bookings/${bookingId}/cancel`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-            if (response.ok) {
-                setDriverSearchVisible(false);
-                setBookingId(null);
-                Alert.alert("Cancelled", "Your booking has been cancelled.");
-                router.setParams({ action: '' });
-            } else {
-                Alert.alert("Error", "Failed to cancel booking.");
-            }
-        } catch (error) {
-            console.error("Error cancelling booking:", error);
-            Alert.alert("Error", "Network error.");
-        }
-    };
-
-    // ====================================================================
-    // LOCATION SEARCH HANDLERS
-    // ====================================================================
-    const openSearchModal = (type: 'from' | 'to') => {
-        setActiveSearchField(type);
-        setSearchText(type === 'from' ? fromText : toText);
-        setSearchSuggestions([]);
-        setSearchModalVisible(true);
-    };
-
-    const handleSearchTextChange = (text: string) => {
-        setSearchText(text);
-        debouncedFetchSuggestions(text, setSearchSuggestions);
-    };
-
-    const clearSearchText = () => {
-        setSearchText('');
-        setSearchSuggestions([]);
-        searchInputRef.current?.focus();
-    };
-
-    const selectLocationFromSearch = (item: NominatimResult) => {
-        const selected = {
-            lat: parseFloat(item.lat),
-            lon: parseFloat(item.lon),
-            name: item.display_name,
-        };
-
-        if (activeSearchField === 'from') {
-            setFromLocation(selected);
-            setFromText(item.display_name);
-        } else {
-            setToLocation(selected);
-            setToText(item.display_name);
-        }
-
-        setSearchModalVisible(false);
-        setActiveSearchField(null);
-    };
-
-    const useCurrentLocation = async () => {
-        if (!region) return;
-        const address = await getAddressFromCoords(region.latitude, region.longitude);
-        const selected = { lat: region.latitude, lon: region.longitude, name: address };
-
-        if (activeSearchField === 'from') {
-            setFromLocation(selected);
-            setFromText(address);
-        } else {
-            setToLocation(selected);
-            setToText(address);
-        }
-        setSearchModalVisible(false);
-        setActiveSearchField(null);
-    };
-
-    const openDropPin = () => {
-        if (!activeSearchField) return;
-        setSearchModalVisible(false);
-        setModalVisible(false);
-        setSelectingLocation(activeSearchField);
-
-        // Animate pin selection UI to slide up
-        Animated.spring(pinSelectionAnim, {
-            toValue: 0,
-            useNativeDriver: true,
-            tension: 65,
-            friction: 11
-        }).start();
-    };
-
-    const cancelDropPin = () => {
-        // Animate pin selection UI out
-        Animated.timing(pinSelectionAnim, {
-            toValue: 1000,
-            duration: 300,
-            useNativeDriver: true
-        }).start(() => {
-            setSelectingLocation(null);
-            setModalVisible(true);
-            setSearchModalVisible(true);
-        });
-    };
-
-    const confirmPinLocation = async () => {
-        if (!selectingLocation || !draggedRegion) return;
-
-        const address = await getAddressFromCoords(draggedRegion.latitude, draggedRegion.longitude);
-        const selected = { lat: draggedRegion.latitude, lon: draggedRegion.longitude, name: address };
-
-        if (selectingLocation === 'from') {
-            setFromLocation(selected);
-            setFromText(address);
-        } else {
-            setToLocation(selected);
-            setToText(address);
-        }
-
-        // Animate pin selection UI out
-        Animated.timing(pinSelectionAnim, {
-            toValue: 1000,
-            duration: 300,
-            useNativeDriver: true
-        }).start(() => {
-            setSelectingLocation(null);
-            setModalVisible(true);
-        });
-    };
-
-    // ====================================================================
-    // ROUTE & NAVIGATION
-    // ====================================================================
+    // Route Calculation
     useEffect(() => {
-        if (fromLocation && toLocation) {
+        if (fromLocation && toLocation && !bookingAccepted && !driverArrivalVisible) {
             fetchRoute(fromLocation, toLocation, setRouteCoords, setTripDetails, mapRef);
         }
-    }, [fromLocation, toLocation, fetchRoute]);
+    }, [fromLocation, toLocation, fetchRoute, bookingAccepted, driverArrivalVisible]);
 
-    // Animate modal when it opens/closes or when content changes
-    useEffect(() => {
-        const { height } = Dimensions.get('window');
-        if (modalVisible) {
-            // Expand modal more when both locations are selected (to show Confirm button)
-            const targetPosition = fromLocation && toLocation
-                ? height * 0.50  // Show more of the modal (55% visible)
-                : height * 0.58; // Show less (42% visible)
+    // Modal Controls
+    const openModal = () => setModalVisible(true);
+    const closeModal = () => setModalVisible(false);
 
-            Animated.spring(slideAnim, {
-                toValue: targetPosition,
-                useNativeDriver: false,
-                tension: 65,
-                friction: 11
-            }).start();
-        } else {
-            Animated.timing(slideAnim, {
-                toValue: height, // Slide completely off screen
-                duration: 300,
-                useNativeDriver: false
-            }).start();
-        }
-    }, [modalVisible, fromLocation, toLocation]);
-
+    // Confirm Location Handler
     const handleConfirmLocation = () => {
         if (fromLocation && toLocation) {
             closeModal();
@@ -382,15 +219,6 @@ export const BookingComponent = ({
         }
     };
 
-    // ====================================================================
-    // MODAL CONTROLS
-    // ====================================================================
-    const openModal = () => setModalVisible(true);
-    const closeModal = () => setModalVisible(false);
-
-    // ====================================================================
-    // RENDER
-    // ====================================================================
     return (
         <>
             {/* PIN SELECTION UI */}
@@ -398,20 +226,21 @@ export const BookingComponent = ({
                 selectingLocation={selectingLocation}
                 pinSelectionAnim={pinSelectionAnim}
                 onCancel={cancelDropPin}
-                onConfirm={confirmPinLocation}
+                onConfirm={() => confirmPinLocation(draggedRegion)}
             />
 
-            {/* SEARCH BAR */}
-            {!selectingLocation && (
-                <SearchBar
-                    fromLocation={fromLocation}
-                    toLocation={toLocation}
-                    onPress={openModal}
-                />
-            )}
+            {/* SEARCH BAR OR DRIVER ON THE WAY BAR */}
+            <BookingSearchBar
+                selectingLocation={selectingLocation}
+                bookingAccepted={bookingAccepted}
+                fromLocation={fromLocation}
+                toLocation={toLocation}
+                onSearchPress={openModal}
+                onDriverBarPress={() => setDriverArrivalVisible(true)}
+            />
 
             {/* MODALS */}
-            <LocationModals
+            <BookingModals
                 modalVisible={modalVisible}
                 closeModal={closeModal}
                 slideAnim={slideAnim}
@@ -421,7 +250,7 @@ export const BookingComponent = ({
                 fromLocation={fromLocation}
                 toLocation={toLocation}
                 handleConfirmLocation={handleConfirmLocation}
-                openSearchModal={openSearchModal}
+                openSearchModal={(type) => openSearchModal(type, fromText, toText)}
                 searchModalVisible={searchModalVisible}
                 setSearchModalVisible={setSearchModalVisible}
                 activeSearchField={activeSearchField}
@@ -435,36 +264,19 @@ export const BookingComponent = ({
                 searchInputRef={searchInputRef}
             />
 
-            {/* DRIVER SEARCH LOADING */}
-            <DriverSearchLoading
-                visible={driverSearchVisible}
-                onCancel={handleCancelBooking}
+            {/* DRIVER COMPONENTS */}
+            <DriverComponents
+                driverSearchVisible={driverSearchVisible}
+                driverArrivalVisible={driverArrivalVisible}
+                showDriverDetails={showDriverDetails}
+                showChat={showChat}
+                onCancelBooking={handleCancelBooking}
+                onCloseDriverArrival={() => setDriverArrivalVisible(false)}
+                onMessagePress={() => setShowChat(true)}
+                onDetailsPress={() => setShowDriverDetails(true)}
+                onCloseDriverDetails={() => setShowDriverDetails(false)}
+                onCloseChat={() => setShowChat(false)}
             />
-
-            {/* DRIVER ARRIVAL */}
-            {driverArrivalVisible && !showChat && (
-                <DriverArrival
-                    isSearching={driverSearchVisible}
-                    visible={driverArrivalVisible}
-                    onClose={() => setDriverArrivalVisible(false)}
-                    onMessagePress={() => {
-                        setShowChat(true);
-                    }}
-                    onDetailsPress={() => {
-                        setShowDriverDetails(true);
-                    }}
-                />
-            )}
-
-            {/* DRIVER DETAILS OVERLAY */}
-            {showDriverDetails && (
-                <DriverDetails onClose={() => setShowDriverDetails(false)} />
-            )}
-
-            {/* CHAT SCREEN */}
-            {showChat && (
-                <ChatScreen onClose={() => setShowChat(false)} />
-            )}
         </>
     );
 };

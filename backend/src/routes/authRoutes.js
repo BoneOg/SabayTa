@@ -60,15 +60,24 @@ router.post("/register", async (req, res) => {
 // ---------------- LOGIN ----------------
 router.post("/login", async (req, res) => {
     try {
-        const { emailOrPhone, password } = req.body;
+        let { emailOrPhone, password } = req.body;
 
         if (!emailOrPhone || !password) {
             return res.status(400).json({ message: "Email/Phone and password are required" });
         }
 
-        // Find user by email or phone
+        // Clean input
+        emailOrPhone = emailOrPhone.trim();
+
+        // Helper to escape regex special characters for safe searching
+        const escapeRegex = (text) => text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+
+        // Find user by email (case-insensitive) or phone
         const user = await User.findOne({
-            $or: [{ email: emailOrPhone }, { phone: emailOrPhone }]
+            $or: [
+                { email: { $regex: new RegExp(`^${escapeRegex(emailOrPhone)}$`, 'i') } },
+                { phone: emailOrPhone }
+            ]
         });
 
         if (!user) {
