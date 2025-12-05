@@ -2,6 +2,7 @@ import { v2 as cloudinary } from "cloudinary";
 import express from "express";
 import jwt from "jsonwebtoken";
 import multer from "multer";
+import DriverProfile from "../models/DriverProfile.js";
 import User from "../models/User.js";
 import UserProfile from "../models/UserProfile.js";
 
@@ -87,15 +88,28 @@ router.get("/all", protect, adminProtect, async (req, res) => {
         userProfile = { street: "", city: "", district: "", profileImage: "" };
       }
 
+      let driverProfile = null;
+      if (user.role === 'driver') {
+        driverProfile = await DriverProfile.findOne({ userId: user._id });
+      }
+
       return {
+        id: user._id,
         name: user.name,
         email: user.email,
         phone: user.phone,
         gender: user.gender,
+        role: user.role,
+        status: user.status || 'Active',
         street: userProfile.street,
         city: userProfile.city,
         district: userProfile.district,
-        profileImage: userProfile.profileImage
+        profileImage: userProfile.profileImage,
+        vehicleInfo: driverProfile ? `${driverProfile.vehicleType || ''} ${driverProfile.vehiclePlateNumber || ''}`.trim() : undefined,
+        license: driverProfile ? driverProfile.licenseNumber : undefined,
+        schoolId: 'Not uploaded', // Placeholder
+        cor: 'Not uploaded', // Placeholder
+        orCr: 'Not uploaded' // Placeholder
       };
     }));
 
