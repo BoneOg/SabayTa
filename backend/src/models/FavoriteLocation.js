@@ -25,6 +25,14 @@ const favoriteLocationSchema = new mongoose.Schema({
     placeId: {
         type: String,
         default: ""
+    },
+    customLabel: {
+        type: String,
+        default: ""
+    },
+    iconName: {
+        type: String,
+        default: "location-sharp"
     }
 }, { timestamps: true });
 
