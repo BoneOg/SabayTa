@@ -1,13 +1,25 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DrawerContentScrollView, DrawerItem, DrawerItemList } from '@react-navigation/drawer';
 import { useRouter } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 function CustomDrawerContent(props: any) {
     const router = useRouter();
+
+    const handleLogout = async () => {
+        try {
+            await AsyncStorage.removeItem('token');
+            await AsyncStorage.removeItem('user');
+            router.replace('/auth/Welcome');
+        } catch (error) {
+            console.error('Logout error:', error);
+            Alert.alert('Error', 'Failed to logout. Please try again.');
+        }
+    };
 
     return (
         <DrawerContentScrollView {...props} contentContainerStyle={styles.drawerContent}>
@@ -21,12 +33,12 @@ function CustomDrawerContent(props: any) {
             <View style={styles.separator} />
 
             <DrawerItem
-                label="Switch to User View"
-                icon={({ color, size }) => <MaterialIcons name="person" size={size} color={color} />}
-                onPress={() => router.replace('/user/profile')}
-                labelStyle={styles.drawerLabel}
-                activeTintColor="#534889"
-                inactiveTintColor="#333"
+                label="Logout"
+                icon={({ color, size }) => <MaterialIcons name="logout" size={size} color={color} />}
+                onPress={handleLogout}
+                labelStyle={styles.logoutLabel}
+                activeTintColor="#F44336"
+                inactiveTintColor="#F44336"
             />
         </DrawerContentScrollView>
     );
@@ -76,6 +88,22 @@ export default function AdminLayout() {
                         drawerLabel: 'Users',
                         title: 'Manage Users',
                         drawerIcon: ({ color, size }) => <MaterialIcons name="people" size={size} color={color} />,
+                    }}
+                />
+                <Drawer.Screen
+                    name="student-verification"
+                    options={{
+                        drawerLabel: 'Student Verification',
+                        title: 'Student Verification',
+                        drawerIcon: ({ color, size }) => <MaterialIcons name="badge" size={size} color={color} />,
+                    }}
+                />
+                <Drawer.Screen
+                    name="driver-applications"
+                    options={{
+                        drawerLabel: 'Driver Applications',
+                        title: 'Driver Applications',
+                        drawerIcon: ({ color, size }) => <MaterialIcons name="assignment" size={size} color={color} />,
                     }}
                 />
                 <Drawer.Screen
@@ -130,5 +158,11 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins',
         fontWeight: 'bold',
         fontSize: 15,
+    },
+    logoutLabel: {
+        fontFamily: 'Poppins',
+        fontWeight: 'bold',
+        fontSize: 15,
+        color: '#F44336',
     },
 });
