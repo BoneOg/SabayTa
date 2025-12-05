@@ -96,6 +96,41 @@ router.post('/:id/accept', async (req, res) => {
     }
 });
 
+// Update driver location (called periodically by driver app)
+router.post('/:id/location', async (req, res) => {
+    try {
+        const { latitude, longitude } = req.body;
+        const bookingId = req.params.id;
+
+        if (!latitude || !longitude) {
+            return res.status(400).json({ message: "Latitude and longitude are required" });
+        }
+
+        // We use findOneAndUpdate for efficiency, verifying status allows updates
+        const updatedBooking = await Booking.findOneAndUpdate(
+            { _id: bookingId, status: 'accepted' },
+            {
+                $set: {
+                    'driverLocation.latitude': latitude,
+                    'driverLocation.longitude': longitude,
+                    updatedAt: new Date()
+                }
+            },
+            { new: true } // Return updated document
+        );
+
+        if (!updatedBooking) {
+            // It's possible the booking was cancelled or completed, or ID is wrong
+            return res.status(404).json({ message: "Active booking not found" });
+        }
+
+        res.status(200).json({ message: "Location updated", location: updatedBooking.driverLocation });
+    } catch (error) {
+        console.error("Error updating driver location:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
 // Cancel a booking
 router.post('/:id/cancel', async (req, res) => {
     try {
@@ -105,11 +140,18 @@ router.post('/:id/cancel', async (req, res) => {
             return res.status(404).json({ message: "Booking not found" });
         }
 
+        // Allow cancelling both pending and accepted bookings
+        if (booking.status !== 'pending' && booking.status !== 'accepted') {
+            return res.status(400).json({ message: "Cannot cancel a booking that is already completed or cancelled" });
+        }
+
+        // Set status to cancelled instead of deleting
         booking.status = 'cancelled';
-        booking.updatedAt = new Date();
+        booking.cancelledAt = new Date();
         await booking.save();
 
-        res.status(200).json({ message: "Booking cancelled", booking });
+        console.log(`✅ Booking ${req.params.id} cancelled successfully`);
+        res.status(200).json({ message: "Booking cancelled successfully", booking });
     } catch (error) {
         console.error("Error cancelling booking:", error);
         res.status(500).json({ message: "Server error" });

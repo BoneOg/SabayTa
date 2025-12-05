@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Alert } from "react-native";
-import { BASE_URL } from "../../config";
+import { BASE_URL } from "../../../config";
 
 export interface User {
     id: string;
@@ -13,6 +13,7 @@ export interface User {
     estimatedTime: string;
     pickupCoords?: { latitude: number; longitude: number };
     destinationCoords?: { latitude: number; longitude: number };
+    riderLocation?: { latitude: number; longitude: number };
 }
 
 export const useBookingManager = () => {
@@ -41,7 +42,11 @@ export const useBookingManager = () => {
                     destinationCoords: {
                         latitude: booking.dropoffLocation.lat,
                         longitude: booking.dropoffLocation.lon
-                    }
+                    },
+                    riderLocation: booking.userId?.currentLocation ? {
+                        latitude: booking.userId.currentLocation.lat,
+                        longitude: booking.userId.currentLocation.lon
+                    } : undefined
                 }));
                 setUsers(mappedUsers);
             }

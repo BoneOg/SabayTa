@@ -9,6 +9,7 @@ interface DriverArrivalProps {
     onDetailsPress?: () => void;
     onArrivalShow?: () => void;
     onClose?: () => void;
+    onCancelPress?: () => void;
 }
 
 export const DriverArrival = ({
@@ -18,6 +19,7 @@ export const DriverArrival = ({
     onDetailsPress,
     onArrivalShow,
     onClose,
+    onCancelPress,
 }: DriverArrivalProps) => {
     const [showArrival, setShowArrival] = useState(false);
     const slideAnim = new Animated.Value(500);
@@ -104,6 +106,14 @@ export const DriverArrival = ({
 
                 {/* Action Buttons */}
                 <View style={styles.actionButtonsContainer}>
+                    <TouchableOpacity
+                        style={styles.cancelButton}
+                        onPress={onCancelPress}
+                    >
+                        <MaterialCommunityIcons name="close-circle-outline" size={20} color="#E53935" />
+                        <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
+                    </TouchableOpacity>
+
                     <TouchableOpacity
                         style={styles.detailsButton}
                         onPress={onDetailsPress}
@@ -214,6 +224,21 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         gap: 12,
         justifyContent: 'space-between',
+    },
+    cancelButton: {
+        flex: 1,
+        backgroundColor: '#fff',
+        paddingVertical: 15,
+        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: '#E53935',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 8,
+    },
+    cancelButtonText: {
+        color: '#E53935',
     },
     detailsButton: {
         flex: 1,
