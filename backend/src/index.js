@@ -6,6 +6,7 @@ import bookingRoutes from './routes/bookingRoutes.js';
 import driverProfileRoutes from './routes/driverProfileRoutes.js';
 import favoriteRoutes from './routes/favoriteRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
+import studentVerificationRoutes from './routes/studentVerificationRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -16,6 +17,7 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/driver/profile', driverProfileRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/favorites', favoriteRoutes);
+app.use('/api/student-verification', studentVerificationRoutes);
 
 connectDB()
     .then(() => {

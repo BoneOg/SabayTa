@@ -99,6 +99,13 @@ export default function AdminLayout() {
                     }}
                 />
                 <Drawer.Screen
+                    name="verification-details"
+                    options={{
+                        drawerItemStyle: { display: 'none' },
+                        headerShown: false,
+                    }}
+                />
+                <Drawer.Screen
                     name="driver-applications"
                     options={{
                         drawerLabel: 'Driver Applications',

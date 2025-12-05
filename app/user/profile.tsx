@@ -12,11 +12,13 @@ export default function ProfileScreen() {
   const [phone, setPhone] = useState('');
   const [profileImage, setProfileImage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isVerified, setIsVerified] = useState(false);
 
   const [selectedRole, setSelectedRole] = useState<'rider' | 'driver'>('rider');
 
   useEffect(() => {
     fetchProfile();
+    checkVerificationStatus();
   }, []);
 
   const fetchProfile = async () => {
@@ -49,6 +51,28 @@ export default function ProfileScreen() {
     }
   };
 
+
+
+  const checkVerificationStatus = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`${BASE_URL}/api/student-verification/status`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const requestData = data.request || data.verification;
+        if (requestData && requestData.verificationStatus === 'verified') {
+          setIsVerified(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking verification:', error);
+    }
+  };
   const menuItems = [
     {
       icon: 'edit',
@@ -90,7 +114,7 @@ export default function ProfileScreen() {
       icon: 'car-repair',
       text: 'Apply as Driver',
       library: MaterialIcons,
-      route: '/driver/apply_as_driver',
+      route: '/user/profile/apply_as_driver',
       color: '#534889',
     },
     {
@@ -187,7 +211,7 @@ export default function ProfileScreen() {
 
         {/* Menu Items */}
         <View style={styles.menuContainer}>
-          {menuItems.map((item, idx) => {
+          {menuItems.filter(item => item.text === 'Apply as Driver' ? isVerified : true).map((item, idx) => {
             const IconComponent = item.library;
 
             return (

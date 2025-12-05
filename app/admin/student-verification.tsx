@@ -1,5 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
@@ -15,6 +16,7 @@ import {
     View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { WebView } from 'react-native-webview';
 import { BASE_URL } from '../../config';
 
 interface StudentVerificationRequest {
@@ -26,8 +28,6 @@ interface StudentVerificationRequest {
         phone: string;
         profilePicture?: string;
     };
-    studentId: string;
-    school: string;
     course: string;
     yearLevel: string;
     documents: {
@@ -39,17 +39,20 @@ interface StudentVerificationRequest {
 }
 
 export default function StudentVerification() {
+    const router = useRouter();
     const [requests, setRequests] = useState<StudentVerificationRequest[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [selectedRequest, setSelectedRequest] = useState<StudentVerificationRequest | null>(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [filter, setFilter] = useState<'all' | 'pending' | 'verified' | 'rejected'>('pending');
+    const [documentViewerVisible, setDocumentViewerVisible] = useState(false);
+    const [viewingDocument, setViewingDocument] = useState<{ url: string; title: string } | null>(null);
 
     const fetchRequests = async () => {
         try {
             const token = await AsyncStorage.getItem('token');
-            const response = await fetch(`${BASE_URL}/api/admin/student-verification`, {
+            const response = await fetch(`${BASE_URL}/api/student-verification/admin/all`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -80,7 +83,7 @@ export default function StudentVerification() {
     const handleStatusUpdate = async (requestId: string, status: 'verified' | 'rejected') => {
         try {
             const token = await AsyncStorage.getItem('token');
-            const response = await fetch(`${BASE_URL}/api/admin/student-verification/${requestId}`, {
+            const response = await fetch(`${BASE_URL}/api/student-verification/admin/${requestId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -119,10 +122,7 @@ export default function StudentVerification() {
     const renderRequest = ({ item }: { item: StudentVerificationRequest }) => (
         <TouchableOpacity
             style={styles.requestCard}
-            onPress={() => {
-                setSelectedRequest(item);
-                setModalVisible(true);
-            }}
+            onPress={() => router.push(`/admin/verification-details?id=${item._id}`)}
         >
             <View style={styles.cardHeader}>
                 <Image
@@ -140,20 +140,12 @@ export default function StudentVerification() {
 
             <View style={styles.cardBody}>
                 <View style={styles.infoRow}>
-                    <MaterialIcons name="school" size={18} color="#534889" />
-                    <Text style={styles.infoText}>{item.school}</Text>
-                </View>
-                <View style={styles.infoRow}>
                     <MaterialIcons name="book" size={18} color="#534889" />
                     <Text style={styles.infoText}>{item.course}</Text>
                 </View>
                 <View style={styles.infoRow}>
                     <MaterialIcons name="grade" size={18} color="#534889" />
-                    <Text style={styles.infoText}>Year {item.yearLevel}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                    <MaterialIcons name="badge" size={18} color="#534889" />
-                    <Text style={styles.infoText}>ID: {item.studentId}</Text>
+                    <Text style={styles.infoText}>{item.yearLevel}</Text>
                 </View>
             </View>
 
@@ -237,19 +229,45 @@ export default function StudentVerification() {
 
                                     <View style={styles.modalSection}>
                                         <Text style={styles.sectionTitle}>Academic Information</Text>
-                                        <Text style={styles.detailText}>School: {selectedRequest.school}</Text>
                                         <Text style={styles.detailText}>Course: {selectedRequest.course}</Text>
                                         <Text style={styles.detailText}>Year Level: {selectedRequest.yearLevel}</Text>
-                                        <Text style={styles.detailText}>Student ID: {selectedRequest.studentId}</Text>
                                     </View>
 
                                     <View style={styles.modalSection}>
                                         <Text style={styles.sectionTitle}>Submitted Documents</Text>
                                         {selectedRequest.documents.schoolId && (
-                                            <Text style={styles.documentText}>✓ School ID</Text>
+                                            <TouchableOpacity
+                                                style={styles.documentLink}
+                                                onPress={() => {
+                                                    console.log('Viewing Student ID:', selectedRequest.documents.schoolId);
+                                                    setViewingDocument({
+                                                        url: selectedRequest.documents.schoolId!,
+                                                        title: 'Student ID'
+                                                    });
+                                                    setDocumentViewerVisible(true);
+                                                    console.log('Document viewer should be visible');
+                                                }}
+                                            >
+                                                <MaterialIcons name="description" size={20} color="#534889" />
+                                                <Text style={styles.documentLinkText}>View Student ID</Text>
+                                                <MaterialIcons name="visibility" size={16} color="#534889" />
+                                            </TouchableOpacity>
                                         )}
                                         {selectedRequest.documents.enrollmentProof && (
-                                            <Text style={styles.documentText}>✓ Enrollment Proof</Text>
+                                            <TouchableOpacity
+                                                style={styles.documentLink}
+                                                onPress={() => {
+                                                    setViewingDocument({
+                                                        url: selectedRequest.documents.enrollmentProof!,
+                                                        title: 'Enrollment Proof (COR)'
+                                                    });
+                                                    setDocumentViewerVisible(true);
+                                                }}
+                                            >
+                                                <MaterialIcons name="description" size={20} color="#534889" />
+                                                <Text style={styles.documentLinkText}>View Enrollment Proof (COR)</Text>
+                                                <MaterialIcons name="visibility" size={16} color="#534889" />
+                                            </TouchableOpacity>
                                         )}
                                         {!selectedRequest.documents.schoolId && !selectedRequest.documents.enrollmentProof && (
                                             <Text style={styles.noDocumentText}>No documents uploaded</Text>
@@ -284,6 +302,51 @@ export default function StudentVerification() {
                                 </>
                             )}
                         </ScrollView>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Document Viewer Modal */}
+            <Modal
+                visible={documentViewerVisible}
+                animationType="slide"
+                presentationStyle="fullScreen"
+                onRequestClose={() => setDocumentViewerVisible(false)}
+            >
+                <View style={{ flex: 1, backgroundColor: 'red' }}>
+                    <View style={styles.documentViewerHeader}>
+                        <Text style={styles.documentViewerTitle}>{viewingDocument?.title || 'Document'}</Text>
+                        <TouchableOpacity onPress={() => {
+                            console.log('Closing document viewer');
+                            setDocumentViewerVisible(false);
+                        }}>
+                            <MaterialIcons name="close" size={28} color="#fff" />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.documentViewerContent}>
+                        {viewingDocument?.url ? (
+                            viewingDocument.url.toLowerCase().endsWith('.pdf') ? (
+                                <WebView
+                                    source={{ uri: `https://docs.google.com/viewer?url=${encodeURIComponent(viewingDocument.url)}&embedded=true` }}
+                                    style={{ flex: 1, width: '100%', backgroundColor: '#fff' }}
+                                    startInLoadingState={true}
+                                    renderLoading={() => (
+                                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
+                                            <ActivityIndicator size="large" color="#fff" />
+                                            <Text style={{ color: '#fff', marginTop: 10, fontFamily: 'Poppins' }}>Loading PDF...</Text>
+                                        </View>
+                                    )}
+                                />
+                            ) : (
+                                <Image
+                                    source={{ uri: viewingDocument.url }}
+                                    style={styles.documentImage}
+                                    resizeMode="contain"
+                                />
+                            )
+                        ) : (
+                            <Text style={{ color: '#fff', fontFamily: 'Poppins' }}>No document to display</Text>
+                        )}
                     </View>
                 </View>
             </Modal>
@@ -473,6 +536,22 @@ const styles = StyleSheet.create({
         color: '#4CAF50',
         marginVertical: 4,
     },
+    documentLink: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F5F5F5',
+        padding: 12,
+        borderRadius: 8,
+        marginVertical: 6,
+        gap: 8,
+    },
+    documentLinkText: {
+        flex: 1,
+        fontFamily: 'Poppins',
+        fontSize: 14,
+        color: '#534889',
+        fontWeight: '500',
+    },
     noDocumentText: {
         fontFamily: 'Poppins',
         fontSize: 14,
@@ -500,6 +579,59 @@ const styles = StyleSheet.create({
         backgroundColor: '#F44336',
     },
     actionButtonText: {
+        fontFamily: 'Poppins',
+        fontSize: 15,
+        fontWeight: '600',
+        color: '#fff',
+    },
+    documentViewerOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.95)',
+    },
+    documentViewerHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 20,
+        paddingTop: 50,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    },
+    documentViewerTitle: {
+        fontFamily: 'Poppins',
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#fff',
+    },
+    documentViewerContent: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    documentImage: {
+        width: '100%',
+        height: '100%',
+    },
+    pdfContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    pdfText: {
+        fontFamily: 'Poppins',
+        fontSize: 18,
+        color: '#fff',
+        marginTop: 20,
+        marginBottom: 30,
+    },
+    openExternalButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#534889',
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        borderRadius: 8,
+        gap: 8,
+    },
+    openExternalText: {
         fontFamily: 'Poppins',
         fontSize: 15,
         fontWeight: '600',
