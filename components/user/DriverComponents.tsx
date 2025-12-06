@@ -24,6 +24,8 @@ interface DriverComponentsProps {
     plateNumber?: string;
     color?: string;
     profileImage?: string;
+    distance?: string | null;
+    duration?: string | null;
 }
 
 export const DriverComponents: React.FC<DriverComponentsProps> = ({
@@ -45,7 +47,9 @@ export const DriverComponents: React.FC<DriverComponentsProps> = ({
     vehicleType,
     plateNumber,
     color,
-    profileImage
+    profileImage,
+    distance,
+    duration
 }) => {
     return (
         <>
@@ -68,6 +72,8 @@ export const DriverComponents: React.FC<DriverComponentsProps> = ({
                     rating={rating}
                     totalRatings={totalRatings}
                     profileImage={profileImage}
+                    arrivalDistance={distance}
+                    arrivalTime={duration}
                 />
             )}
 

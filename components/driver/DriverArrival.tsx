@@ -118,8 +118,23 @@ export const DriverArrival = ({
     // The `MODAL_OFFSET` style in the stylesheet handles the final resting position.
     if (!visible && (slideAnim as any).__getValue() > MODAL_HEIGHT) return null;
 
+    const handleOverlayPress = () => {
+        // Slide down animation before closing
+        Animated.timing(slideAnim, {
+            toValue: height,
+            duration: 300,
+            useNativeDriver: true,
+        }).start(() => {
+            onClose?.();
+        });
+    };
+
     return (
-        <View style={styles.driverArrivalOverlay}>
+        <TouchableOpacity
+            style={styles.driverArrivalOverlay}
+            activeOpacity={1}
+            onPress={handleOverlayPress}
+        >
             <Animated.View
                 style={[
                     styles.driverArrivalContent,
@@ -128,6 +143,7 @@ export const DriverArrival = ({
                 ]}
                 // Prevent tapping the content from closing the overlay
                 onStartShouldSetResponder={() => true}
+                onTouchEnd={(e) => e.stopPropagation()}
             >
                 {/* 1. Driver Info Section (Top part of the card) */}
                 <View style={styles.driverInfoContainer}>
@@ -141,8 +157,21 @@ export const DriverArrival = ({
                             {/* Title matched to OnTheWay style */}
                             <Text style={styles.subtitle}>{driverName}</Text>
                             <View style={styles.ratingContainer}>
-                                <MaterialCommunityIcons name="star" size={14} color="#FFC107" />
-                                <Text style={styles.ratingText}>{rating.toFixed(1)} ({totalRatings} reviews)</Text>
+                                <View style={styles.starsRow}>
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <MaterialCommunityIcons
+                                            key={star}
+                                            name={star <= Math.round(rating) ? "star" : "star-outline"}
+                                            size={14}
+                                            color="#FFD700"
+                                            style={{ marginHorizontal: 1 }}
+                                        />
+                                    ))}
+                                </View>
+                                <Text style={styles.ratingText}>
+                                    {rating > 0 ? rating.toFixed(1) : "New"}
+                                </Text>
+                                <Text style={styles.ratingCount}>({totalRatings} ratings)</Text>
                             </View>
                         </View>
                     </View>
@@ -220,7 +249,7 @@ export const DriverArrival = ({
                     </View>
                 </View>
             </Modal>
-        </View>
+        </TouchableOpacity>
     );
 };
 
@@ -274,9 +303,18 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 5,
     },
+    starsRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
     ratingText: {
         fontSize: 12,
         color: '#666',
+        fontWeight: '600',
+    },
+    ratingCount: {
+        fontSize: 11,
+        color: '#888',
     },
     // --- Info Row Styling Matching OnTheWay ---
     infoRow: {

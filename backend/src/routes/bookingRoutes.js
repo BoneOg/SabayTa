@@ -1,5 +1,6 @@
 import express from 'express';
 import Booking from '../models/Booking.js';
+import Rating from '../models/Rating.js';
 import { createNotification } from './notificationRoutes.js';
 
 const router = express.Router();
@@ -63,6 +64,23 @@ router.get('/:id', async (req, res) => {
 
         if (!booking) {
             return res.status(404).json({ message: "Booking not found" });
+        }
+
+        // Calculate driver ratings if driver is assigned
+        if (booking.driverId && booking.driverId._id) {
+            const ratings = await Rating.find({ driverId: booking.driverId._id });
+            let averageRating = 0;
+            if (ratings.length > 0) {
+                const sum = ratings.reduce((acc, curr) => acc + curr.rating, 0);
+                averageRating = parseFloat((sum / ratings.length).toFixed(1));
+            }
+
+            // Add rating data to the driver object
+            booking.driverId = {
+                ...booking.driverId.toObject(),
+                averageRating: averageRating,
+                totalRatings: ratings.length
+            };
         }
 
         res.status(200).json({ booking });

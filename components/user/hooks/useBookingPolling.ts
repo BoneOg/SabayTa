@@ -31,6 +31,8 @@ interface UseBookingPollingProps {
     setPassengerPickedUp: (pickedUp: boolean) => void;
     setBookingCompleted?: (completed: boolean) => void;
     setDriverName?: (name: string) => void;
+    setDriverRating?: (rating: number) => void;
+    setDriverTotalRatings?: (totalRatings: number) => void;
     resetBookingState: () => Promise<void>;
 }
 
@@ -55,6 +57,8 @@ export const useBookingPolling = ({
     setPassengerPickedUp,
     setBookingCompleted,
     setDriverName,
+    setDriverRating,
+    setDriverTotalRatings,
     resetBookingState,
 }: UseBookingPollingProps) => {
     // Poll for booking status updates - driver acceptance
@@ -110,6 +114,16 @@ export const useBookingPolling = ({
                     if (data.booking.driverId && data.booking.driverId.name) {
                         console.log("👤 Driver Name:", data.booking.driverId.name);
                         if (setDriverName) setDriverName(data.booking.driverId.name);
+
+                        // Set driver rating data
+                        if (setDriverRating && data.booking.driverId.averageRating !== undefined) {
+                            setDriverRating(data.booking.driverId.averageRating);
+                            console.log("⭐ Driver Rating:", data.booking.driverId.averageRating);
+                        }
+                        if (setDriverTotalRatings && data.booking.driverId.totalRatings !== undefined) {
+                            setDriverTotalRatings(data.booking.driverId.totalRatings);
+                            console.log("📊 Total Ratings:", data.booking.driverId.totalRatings);
+                        }
                     }
 
                     // Start tracking driver location and show route

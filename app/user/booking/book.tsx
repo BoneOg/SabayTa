@@ -85,6 +85,8 @@ export const BookingComponent = ({
     // Modal State
     const [modalVisible, setModalVisible] = React.useState(false);
     const [driverName, setDriverName] = React.useState("Your Driver");
+    const [driverRating, setDriverRating] = React.useState(0);
+    const [driverTotalRatings, setDriverTotalRatings] = React.useState(0);
 
     // Ride Popup States
     const [showPickupPopup, setShowPickupPopup] = React.useState(false);
@@ -176,6 +178,8 @@ export const BookingComponent = ({
         setPassengerPickedUp,
         setBookingCompleted: handleBookingCompleted,
         setDriverName,
+        setDriverRating,
+        setDriverTotalRatings,
         resetBookingState,
     });
 
@@ -388,6 +392,10 @@ export const BookingComponent = ({
                 onCloseDriverDetails={() => setShowDriverDetails(false)}
                 onCloseChat={() => setShowChat(false)}
                 driverName={driverName}
+                rating={driverRating}
+                totalRatings={driverTotalRatings}
+                distance={tripDetails?.distance || null}
+                duration={tripDetails?.duration || null}
             />
         </>
     );
