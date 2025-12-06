@@ -184,24 +184,59 @@ router.patch('/admin/:id', protect, async (req, res) => {
             { new: true }
         ).populate('userId', 'name email phone profilePicture');
 
-        if (!application) {
-            return res.status(404).json({ message: 'Application not found' });
-        }
 
-        // If approved, update user role to 'driver'
+        // If approved, update user role to 'driver' and migrate profile
         if (applicationStatus === 'approved') {
             await User.findByIdAndUpdate(application.userId._id, { role: 'driver' });
+
+            // Migrate profile from UserProfile to DriverProfile
+            const UserProfile = (await import('../models/UserProfile.js')).default;
+            const DriverProfile = (await import('../models/DriverProfile.js')).default;
+
+            // Get existing user profile
+            const userProfile = await UserProfile.findOne({ userId: application.userId._id });
+
+            const driverProfileData = {
+                userId: application.userId._id,
+                profileImage: userProfile?.profileImage || '',
+                street: userProfile?.street || '',
+                barangay: userProfile?.barangay || '',
+                city: userProfile?.city || '',
+                province: userProfile?.province || '',
+                postalCode: userProfile?.postalCode || '',
+                vehiclePlateNumber: application.plateNumber || '',
+                vehicleType: application.motorcycleModel || '',
+                licenseNumber: ''
+            };
+
+            // Use findOneAndUpdate with upsert to create or update driver profile
+            await DriverProfile.findOneAndUpdate(
+                { userId: application.userId._id },
+                driverProfileData,
+                { upsert: true, new: true }
+            );
+
+            // Delete the user profile if it exists
+            if (userProfile) {
+                await UserProfile.findByIdAndDelete(userProfile._id);
+            }
         }
 
         res.status(200).json({
             message: `Application ${applicationStatus} successfully`,
             application,
-            roleChanged: applicationStatus === 'approved'
+            roleChanged: applicationStatus === 'approved',
+            profileMigrated: applicationStatus === 'approved'
         });
 
     } catch (error) {
         console.error('Error updating application:', error);
-        res.status(500).json({ message: 'Failed to update application' });
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        res.status(500).json({
+            message: 'Failed to update application',
+            error: error.message
+        });
     }
 });
 

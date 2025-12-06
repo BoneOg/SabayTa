@@ -29,6 +29,12 @@ export default function ProfileScreen() {
       if (userStr) {
         const user = JSON.parse(userStr);
         setUserRole(user.role || 'user');
+        // Set selectedRole based on actual user role
+        if (user.role === 'driver') {
+          setSelectedRole('driver');
+        } else {
+          setSelectedRole('rider');
+        }
       }
     } catch (error) {
       console.error('Error checking user role:', error);
@@ -190,7 +196,10 @@ export default function ProfileScreen() {
                   styles.toggleButton,
                   selectedRole === 'rider' ? styles.activeToggle : {},
                 ]}
-                onPress={() => setSelectedRole('rider')}
+                onPress={() => {
+                  setSelectedRole('rider');
+                  router.push("/user/home");
+                }}
               >
                 <Text
                   style={[
@@ -209,7 +218,7 @@ export default function ProfileScreen() {
                 ]}
                 onPress={() => {
                   setSelectedRole('driver');
-                  router.push("/driver/profile");
+                  router.push("/driver/home");
                 }}
               >
                 <Text

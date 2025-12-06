@@ -56,7 +56,14 @@ export default function Login() {
         await AsyncStorage.setItem('token', data.token);
         await AsyncStorage.setItem('user', JSON.stringify(data.user));
 
-        router.push(data.user.role === 'admin' ? '/admin' : '/user/home');
+        // Route based on user role
+        if (data.user.role === 'admin') {
+          router.replace('/admin');
+        } else if (data.user.role === 'driver') {
+          router.replace('/driver/home');
+        } else {
+          router.replace('/user/home');
+        }
       } else {
         setErrorMessage(data.message || 'Login failed');
         setErrorModalVisible(true);

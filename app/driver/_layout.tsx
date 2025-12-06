@@ -17,8 +17,10 @@ export default function DriverLayout() {
     const checkDriverRole = async () => {
         try {
             const userStr = await AsyncStorage.getItem('user');
+
             if (userStr) {
                 const user = JSON.parse(userStr);
+
                 if (user.role === 'driver') {
                     setIsDriver(true);
                 } else {

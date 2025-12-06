@@ -9,6 +9,8 @@ import { ActivityIndicator, Alert, Image, Platform, ScrollView, StyleSheet, Text
 export default function DriverProfileScreen() {
     const router = useRouter();
     const [name, setName] = useState('John Doe');
+    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
     const [profileImage, setProfileImage] = useState('');
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
@@ -38,6 +40,8 @@ export default function DriverProfileScreen() {
 
             if (response.ok && data.profile) {
                 setName(data.profile.name || 'John Doe');
+                setEmail(data.profile.email || '');
+                setPhone(data.profile.phone || '');
                 setProfileImage(data.profile.profileImage || '');
             }
         } catch (error) {
@@ -171,6 +175,10 @@ export default function DriverProfileScreen() {
                             <Text style={styles.name} numberOfLines={1}>
                                 {name}
                             </Text>
+
+                            {/* Email and Phone Subtext */}
+                            <Text style={styles.subText}>{email}</Text>
+                            <Text style={styles.subText}>{phone}</Text>
                         </>
                     )}
 
@@ -183,7 +191,7 @@ export default function DriverProfileScreen() {
                             ]}
                             onPress={() => {
                                 setSelectedRole('rider');
-                                router.push("/user/profile"); // Navigate back to user profile
+                                router.push("/user/home"); // Navigate to user home
                             }}
                         >
                             <Text
@@ -320,7 +328,14 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#000',
         fontFamily: 'Poppins',
-        marginBottom: 10,
+        marginBottom: 5,
+    },
+
+    subText: {
+        fontSize: 14,
+        color: '#666',
+        fontFamily: 'Poppins',
+        marginBottom: 3,
     },
 
     /* ROLE TOGGLE BUTTONS */
