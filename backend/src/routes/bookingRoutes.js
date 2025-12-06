@@ -1,5 +1,6 @@
 import express from 'express';
 import Booking from '../models/Booking.js';
+import { createNotification } from './notificationRoutes.js';
 
 const router = express.Router();
 
@@ -22,6 +23,16 @@ router.post('/create', async (req, res) => {
         });
 
         await newBooking.save();
+
+        // Create notification for user
+        await createNotification(
+            userId,
+            'booking_created',
+            'Booking Created',
+            `Your ride from ${pickupLocation.name} to ${dropoffLocation.name} has been booked. Searching for drivers...`,
+            newBooking._id
+        );
+
         res.status(201).json({ message: "Booking created successfully", booking: newBooking });
     } catch (error) {
         console.error("Error creating booking:", error);
@@ -89,6 +100,24 @@ router.post('/:id/accept', async (req, res) => {
         const updatedBooking = await booking.save();
         console.log("✅ Booking accepted successfully:", { id: updatedBooking._id, status: updatedBooking.status });
 
+        // Create notification for user
+        await createNotification(
+            booking.userId,
+            'booking_accepted',
+            'Driver Found!',
+            `A driver has accepted your booking. They're on their way to pick you up!`,
+            booking._id
+        );
+
+        // Create notification for driver
+        await createNotification(
+            driverId,
+            'booking_accepted',
+            'Booking Confirmed',
+            `You have successfully accepted a booking. Navigate to the pickup location.`,
+            booking._id
+        );
+
         res.status(200).json({ message: "Booking accepted", booking: updatedBooking });
     } catch (error) {
         console.error("❌ Error accepting booking:", error.message);
@@ -134,6 +163,7 @@ router.post('/:id/location', async (req, res) => {
 // Cancel a booking
 router.post('/:id/cancel', async (req, res) => {
     try {
+        const { cancelledBy } = req.body; // 'user' or 'driver'
         const booking = await Booking.findById(req.params.id);
 
         if (!booking) {
@@ -145,10 +175,53 @@ router.post('/:id/cancel', async (req, res) => {
             return res.status(400).json({ message: "Cannot cancel a booking that is already completed or cancelled" });
         }
 
+        const wasAccepted = booking.status === 'accepted';
+
         // Set status to cancelled instead of deleting
         booking.status = 'cancelled';
         booking.cancelledAt = new Date();
         await booking.save();
+
+        // Create notifications based on who cancelled
+        if (cancelledBy === 'user') {
+            // Notify user
+            await createNotification(
+                booking.userId,
+                'booking_cancelled_by_user',
+                'Booking Cancelled',
+                'You have cancelled your ride booking.',
+                booking._id
+            );
+
+            // Notify driver if booking was accepted
+            if (wasAccepted && booking.driverId) {
+                await createNotification(
+                    booking.driverId,
+                    'booking_cancelled_by_user',
+                    'Booking Cancelled',
+                    'The customer has cancelled the ride.',
+                    booking._id
+                );
+            }
+        } else if (cancelledBy === 'driver') {
+            // Notify driver
+            await createNotification(
+                booking.driverId,
+                'booking_cancelled_by_driver',
+                'Booking Cancelled',
+                'You have cancelled this ride booking.',
+                booking._id
+            );
+
+            // Notify user
+            await createNotification(
+                booking.userId,
+                'booking_cancelled_by_driver',
+                'Booking Cancelled',
+                'Your driver has cancelled the ride. We\'re searching for another driver.',
+                booking._id
+            );
+        }
 
         console.log(`✅ Booking ${req.params.id} cancelled successfully`);
         res.status(200).json({ message: "Booking cancelled successfully", booking });
@@ -199,6 +272,24 @@ router.post('/:id/complete', async (req, res) => {
         booking.status = 'completed';
         booking.updatedAt = new Date();
         await booking.save();
+
+        // Create notification for user
+        await createNotification(
+            booking.userId,
+            'booking_completed',
+            'Ride Completed',
+            'Your ride has been completed successfully. Thank you for using SabayTa!',
+            booking._id
+        );
+
+        // Create notification for driver
+        await createNotification(
+            booking.driverId,
+            'booking_completed',
+            'Ride Completed',
+            'You have successfully completed the ride. Great job!',
+            booking._id
+        );
 
         res.status(200).json({ message: "Booking completed", booking });
     } catch (error) {

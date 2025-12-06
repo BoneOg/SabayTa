@@ -1,6 +1,6 @@
 import { Poppins_400Regular, useFonts } from "@expo-google-fonts/poppins";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, Animated, Dimensions, StyleSheet, View } from "react-native";
 import DriverConfirmation from "../../components/driver/DriverConfirmation";
@@ -18,6 +18,8 @@ import DriverChatScreen from "./chat";
 const { height } = Dimensions.get("window");
 
 export default function DriverHome() {
+  const router = useRouter();
+
   // Custom Hooks
   const driverLocation = useDriverLocation();
   const driverLocationRef = useRef(driverLocation);
@@ -254,6 +256,7 @@ export default function DriverHome() {
         await fetch(`${BASE_URL}/api/bookings/${selectedUser.id}/cancel`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cancelledBy: 'driver' }),
         });
         console.log("📡 Notified backend: driver cancelled booking");
       } catch (error) {
@@ -330,7 +333,7 @@ export default function DriverHome() {
       />
 
       {/* Header */}
-      <DriverHeader />
+      <DriverHeader onNotificationPress={() => router.push('/driver/notification' as any)} />
 
       {/* Fetch User Modal */}
       <FetchUserModal
