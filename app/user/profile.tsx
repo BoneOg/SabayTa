@@ -3,7 +3,17 @@ import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -16,6 +26,9 @@ export default function ProfileScreen() {
   const [userRole, setUserRole] = useState<string>('user');
 
   const [selectedRole, setSelectedRole] = useState<'rider' | 'driver'>('rider');
+
+  // 🔥 NEW STATE FOR LOGOUT MODAL
+  const [logoutVisible, setLogoutVisible] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -52,7 +65,7 @@ export default function ProfileScreen() {
 
       const response = await fetch(`${BASE_URL}/api/profile`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -71,21 +84,25 @@ export default function ProfileScreen() {
     }
   };
 
-
-
   const checkVerificationStatus = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch(`${BASE_URL}/api/student-verification/status`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await fetch(
+        `${BASE_URL}/api/student-verification/status`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
         const requestData = data.request || data.verification;
-        if (requestData && requestData.verificationStatus === 'verified') {
+        if (
+          requestData &&
+          requestData.verificationStatus === 'verified'
+        ) {
           setIsVerified(true);
         }
       }
@@ -93,6 +110,7 @@ export default function ProfileScreen() {
       console.error('Error checking verification:', error);
     }
   };
+
   const menuItems = [
     {
       icon: 'edit',
@@ -147,13 +165,30 @@ export default function ProfileScreen() {
     },
   ];
 
+  // 🔥 UPDATED HANDLEPRESS FOR LOGOUT CONFIRMATION
   const handlePress = (route?: string, replace?: boolean) => {
-    if (!route) return; // Prevent undefined
+    if (!route) return;
+
+    if (route === '/auth/Welcome') {
+      setLogoutVisible(true);
+      return;
+    }
 
     if (replace) {
       router.replace(route as any);
     } else {
       router.push(route as any);
+    }
+  };
+
+  // 🔥 LOGOUT FUNCTION
+  const confirmLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('token');
+      router.replace('/auth/Welcome');
+    } catch (error) {
+      console.error('Logout error:', error);
+      Alert.alert('Error', 'Unable to logout');
     }
   };
 
@@ -168,12 +203,20 @@ export default function ProfileScreen() {
         {/* Profile Info */}
         <View style={styles.profileSection}>
           {loading ? (
-            <ActivityIndicator size="large" color="#534889" style={{ marginVertical: 20 }} />
+            <ActivityIndicator
+              size="large"
+              color="#534889"
+              style={{ marginVertical: 20 }}
+            />
           ) : (
             <>
               <View style={styles.profileImageContainer}>
                 <Image
-                  source={profileImage ? { uri: profileImage } : require('@/assets/images/cat5.jpg')}
+                  source={
+                    profileImage
+                      ? { uri: profileImage }
+                      : require('@/assets/images/cat5.jpg')
+                  }
                   style={styles.profileImage}
                 />
               </View>
@@ -182,13 +225,12 @@ export default function ProfileScreen() {
                 {name}
               </Text>
 
-              {/* Email and Phone Subtext */}
               <Text style={styles.subText}>{email}</Text>
               <Text style={styles.subText}>{phone}</Text>
             </>
           )}
 
-          {/* Role Toggle Buttons - Only show for drivers */}
+          {/* Role Toggle Buttons */}
           {userRole === 'driver' && (
             <View style={styles.toggleContainer}>
               <TouchableOpacity
@@ -204,7 +246,9 @@ export default function ProfileScreen() {
                 <Text
                   style={[
                     styles.toggleText,
-                    selectedRole === 'rider' ? styles.activeToggleText : {},
+                    selectedRole === 'rider'
+                      ? styles.activeToggleText
+                      : {},
                   ]}
                 >
                   Rider
@@ -224,7 +268,9 @@ export default function ProfileScreen() {
                 <Text
                   style={[
                     styles.toggleText,
-                    selectedRole === 'driver' ? styles.activeToggleText : {},
+                    selectedRole === 'driver'
+                      ? styles.activeToggleText
+                      : {},
                   ]}
                 >
                   Driver
@@ -236,43 +282,83 @@ export default function ProfileScreen() {
 
         {/* Menu Items */}
         <View style={styles.menuContainer}>
-          {menuItems.filter(item => item.text === 'Apply as Driver' ? isVerified : true).map((item, idx) => {
-            const IconComponent = item.library;
+          {menuItems
+            .filter(item =>
+              item.text === 'Apply as Driver' ? isVerified : true
+            )
+            .map((item, idx) => {
+              const IconComponent = item.library;
 
-            return (
-              <TouchableOpacity
-                key={idx}
-                style={styles.menuItem}
-                onPress={() => handlePress(item.route, item.replace)}
-              >
-                <View
-                  style={[
-                    styles.iconContainer,
-                    item.color ? { backgroundColor: item.color + '10' } : {},
-                  ]}
+              return (
+                <TouchableOpacity
+                  key={idx}
+                  style={styles.menuItem}
+                  onPress={() =>
+                    handlePress(item.route, item.replace)
+                  }
                 >
-                  <IconComponent
-                    name={item.icon as any}
-                    size={22}
-                    color={item.color || '#414141'}
+                  <View
+                    style={[
+                      styles.iconContainer,
+                      item.color
+                        ? { backgroundColor: item.color + '10' }
+                        : {},
+                    ]}
+                  >
+                    <IconComponent
+                      name={item.icon as any}
+                      size={22}
+                      color={item.color || '#414141'}
+                    />
+                  </View>
+
+                  <Text
+                    style={[
+                      styles.menuText,
+                      item.color ? { color: item.color } : {},
+                    ]}
+                  >
+                    {item.text}
+                  </Text>
+
+                  <MaterialIcons
+                    name="chevron-right"
+                    size={24}
+                    color="#D0D0D0"
                   />
-                </View>
-
-                <Text
-                  style={[
-                    styles.menuText,
-                    item.color ? { color: item.color } : {},
-                  ]}
-                >
-                  {item.text}
-                </Text>
-
-                <MaterialIcons name="chevron-right" size={24} color="#D0D0D0" />
-              </TouchableOpacity>
-            );
-          })}
+                </TouchableOpacity>
+              );
+            })}
         </View>
       </ScrollView>
+
+      {/* 🔥 LOGOUT CONFIRMATION MODAL */}
+      {logoutVisible && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Confirm Logout</Text>
+            <Text style={styles.modalMessage}>
+              Are you sure you want to logout?
+            </Text>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalBtn, styles.cancelBtn]}
+                onPress={() => setLogoutVisible(false)}
+              >
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalBtn, styles.logoutBtn]}
+                onPress={confirmLogout}
+              >
+                <Text style={styles.logoutText}>Logout</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -337,7 +423,6 @@ const styles = StyleSheet.create({
     marginBottom: 3,
   },
 
-  /* ROLE TOGGLE BUTTONS */
   toggleContainer: {
     flexDirection: 'row',
     marginTop: 15,
@@ -367,7 +452,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 
-  /* MENU */
   menuContainer: {
     paddingHorizontal: 20,
     marginTop: 10,
@@ -396,5 +480,75 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     fontFamily: 'Poppins',
+  },
+
+  /* 🔥 MODAL STYLES */
+  modalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 99,
+  },
+
+  modalContainer: {
+    width: '80%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 15,
+    alignItems: 'center',
+  },
+
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    fontFamily: 'Poppins',
+    marginBottom: 10,
+  },
+
+  modalMessage: {
+    fontSize: 15,
+    color: '#444',
+    fontFamily: 'Poppins',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+
+  modalButtons: {
+    flexDirection: 'row',
+    width: '100%',
+  },
+
+  modalBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderRadius: 10,
+  },
+
+  cancelBtn: {
+    backgroundColor: '#E5E5E5',
+    marginRight: 10,
+  },
+
+  logoutBtn: {
+    backgroundColor: '#FF3B30',
+    marginLeft: 10,
+  },
+
+  cancelText: {
+    color: '#333',
+    fontFamily: 'Poppins',
+    fontSize: 15,
+  },
+
+  logoutText: {
+    color: '#fff',
+    fontFamily: 'Poppins',
+    fontSize: 15,
   },
 });

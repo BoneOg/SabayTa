@@ -4,7 +4,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { Href, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+    ActivityIndicator,
+    Alert,
+    Image,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 
 export default function DriverProfileScreen() {
     const router = useRouter();
@@ -16,6 +26,7 @@ export default function DriverProfileScreen() {
     const [uploading, setUploading] = useState(false);
 
     const [selectedRole, setSelectedRole] = useState<'rider' | 'driver'>('driver');
+    const [logoutVisible, setLogoutVisible] = useState(false);
 
     useEffect(() => {
         fetchProfile();
@@ -32,7 +43,7 @@ export default function DriverProfileScreen() {
 
             const response = await fetch(`${BASE_URL}/api/driver/profile`, {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`,
                 },
             });
 
@@ -55,7 +66,10 @@ export default function DriverProfileScreen() {
         try {
             const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
             if (status !== 'granted') {
-                Alert.alert('Permission Denied', 'We need camera roll permissions to update your photo');
+                Alert.alert(
+                    'Permission Denied',
+                    'We need camera roll permissions to update your photo'
+                );
                 return;
             }
 
@@ -87,7 +101,7 @@ export default function DriverProfileScreen() {
                 const response = await fetch(`${BASE_URL}/api/driver/profile/photo`, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        Authorization: `Bearer ${token}`,
                     },
                     body: formData,
                 });
@@ -114,7 +128,7 @@ export default function DriverProfileScreen() {
             icon: 'edit',
             text: 'Edit Profile',
             library: MaterialIcons,
-            route: '/driver/profile/editprofile', // Assuming driver specific edit
+            route: '/driver/profile/editprofile',
         },
         {
             icon: 'settings',
@@ -133,10 +147,23 @@ export default function DriverProfileScreen() {
     ];
 
     const handlePress = (route?: string, replace?: boolean) => {
+        if (route === '/auth/Welcome') {
+            setLogoutVisible(true);
+            return;
+        }
+
         if (route) {
-            // Cast route to Href<string> or any to satisfy the type checker if needed, 
-            // but string usually works with router.push if it matches a valid route.
             replace ? router.replace(route as Href) : router.push(route as Href);
+        }
+    };
+
+    const confirmLogout = async () => {
+        try {
+            await AsyncStorage.removeItem('token');
+            router.replace('/auth/Welcome');
+        } catch (error) {
+            console.error('Logout error:', error);
+            Alert.alert('Error', 'Unable to logout');
         }
     };
 
@@ -156,7 +183,11 @@ export default function DriverProfileScreen() {
                         <>
                             <View style={styles.profileImageContainer}>
                                 <Image
-                                    source={profileImage ? { uri: profileImage } : require('@/assets/images/cat5.jpg')}
+                                    source={
+                                        profileImage
+                                            ? { uri: profileImage }
+                                            : require('@/assets/images/cat5.jpg')
+                                    }
                                     style={styles.profileImage}
                                 />
                                 <TouchableOpacity
@@ -182,7 +213,7 @@ export default function DriverProfileScreen() {
                         </>
                     )}
 
-                    {/* Role Toggle Buttons */}
+                    {/* Role Toggle */}
                     <View style={styles.toggleContainer}>
                         <TouchableOpacity
                             style={[
@@ -262,6 +293,34 @@ export default function DriverProfileScreen() {
                     })}
                 </View>
             </ScrollView>
+
+            {/* Logout Confirmation Modal */}
+            {logoutVisible && (
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+                        <Text style={styles.modalTitle}>Confirm Logout</Text>
+                        <Text style={styles.modalMessage}>
+                            Are you sure you want to logout?
+                        </Text>
+
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity
+                                style={[styles.modalBtn, styles.cancelBtn]}
+                                onPress={() => setLogoutVisible(false)}
+                            >
+                                <Text style={styles.cancelText}>Cancel</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.modalBtn, styles.logoutBtn]}
+                                onPress={confirmLogout}
+                            >
+                                <Text style={styles.logoutText}>Logout</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            )}
         </View>
     );
 }
@@ -338,7 +397,6 @@ const styles = StyleSheet.create({
         marginBottom: 3,
     },
 
-    /* ROLE TOGGLE BUTTONS */
     toggleContainer: {
         flexDirection: 'row',
         marginTop: 5,
@@ -368,7 +426,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
 
-    /* MENU */
     menuContainer: {
         paddingHorizontal: 20,
         marginTop: 10,
@@ -396,6 +453,76 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 16,
         color: '#333',
+        fontFamily: 'Poppins',
+    },
+
+    modalOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 999,
+    },
+
+    modalContainer: {
+        width: '80%',
+        backgroundColor: '#fff',
+        padding: 20,
+        borderRadius: 15,
+        alignItems: 'center',
+    },
+
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 10,
+        fontFamily: 'Poppins',
+    },
+
+    modalMessage: {
+        fontSize: 15,
+        color: '#444',
+        textAlign: 'center',
+        marginBottom: 20,
+        fontFamily: 'Poppins',
+    },
+
+    modalButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+    },
+
+    modalBtn: {
+        flex: 1,
+        paddingVertical: 12,
+        alignItems: 'center',
+        borderRadius: 10,
+    },
+
+    cancelBtn: {
+        backgroundColor: '#E5E5E5',
+        marginRight: 10,
+    },
+
+    logoutBtn: {
+        backgroundColor: '#FF3B30',
+        marginLeft: 10,
+    },
+
+    cancelText: {
+        color: '#333',
+        fontSize: 15,
+        fontFamily: 'Poppins',
+    },
+
+    logoutText: {
+        color: '#fff',
+        fontSize: 15,
         fontFamily: 'Poppins',
     },
 });
