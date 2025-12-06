@@ -225,13 +225,21 @@ export default function ProfileScreen() {
                 {name}
               </Text>
 
+              {/* Verified Badge */}
+              {isVerified && (
+                <View style={styles.verifiedBadge}>
+                  <MaterialIcons name="verified" size={16} color="#534889" />
+                  <Text style={styles.verifiedText}>Verified Student</Text>
+                </View>
+              )}
+
               <Text style={styles.subText}>{email}</Text>
               <Text style={styles.subText}>{phone}</Text>
             </>
           )}
 
           {/* Role Toggle Buttons */}
-          {userRole === 'driver' && (
+          {(userRole === 'driver' || isVerified) && (
             <View style={styles.toggleContainer}>
               <TouchableOpacity
                 style={[
@@ -421,6 +429,24 @@ const styles = StyleSheet.create({
     color: '#666',
     fontFamily: 'Poppins',
     marginBottom: 3,
+  },
+
+  verifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f1e8ff',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginBottom: 8,
+    gap: 5,
+  },
+
+  verifiedText: {
+    fontSize: 13,
+    color: '#534889',
+    fontWeight: '600',
+    fontFamily: 'Poppins',
   },
 
   toggleContainer: {

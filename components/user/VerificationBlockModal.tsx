@@ -32,11 +32,11 @@ export const VerificationBlockModal: React.FC<VerificationBlockModalProps> = ({
             case 'pending':
                 return {
                     icon: 'hourglass-empty',
-                    iconColor: '#2196F3',
+                    iconColor: '#534889',
                     title: 'Verification Pending',
                     message: 'Your student verification is currently being reviewed. This usually takes 24-48 hours. You\'ll be notified once approved.',
                     buttonText: 'Check Status',
-                    buttonColor: '#2196F3'
+                    buttonColor: '#534889'
                 };
             case 'rejected':
                 return {

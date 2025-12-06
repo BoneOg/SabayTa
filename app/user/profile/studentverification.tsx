@@ -146,18 +146,18 @@ export default function StudentVerification() {
                 <ScrollView style={styles.content}>
                     <View style={[styles.infoCard, {
                         backgroundColor: existingRequest.verificationStatus === 'pending' ? '#E8E0F5' :
-                            existingRequest.verificationStatus === 'verified' ? '#D4E8D4' : '#F5E0E8'
+                            existingRequest.verificationStatus === 'verified' ? '#f1e8ff' : '#F5E0E8'
                     }]}>
                         <MaterialIcons
                             name={existingRequest.verificationStatus === 'pending' ? 'schedule' :
                                 existingRequest.verificationStatus === 'verified' ? 'verified' : 'cancel'}
                             size={48}
                             color={existingRequest.verificationStatus === 'pending' ? '#534889' :
-                                existingRequest.verificationStatus === 'verified' ? '#4CAF50' : '#E91E63'}
+                                existingRequest.verificationStatus === 'verified' ? '#534889' : '#E91E63'}
                         />
                         <Text style={[styles.infoTitle, {
                             color: existingRequest.verificationStatus === 'pending' ? '#534889' :
-                                existingRequest.verificationStatus === 'verified' ? '#4CAF50' : '#E91E63'
+                                existingRequest.verificationStatus === 'verified' ? '#534889' : '#E91E63'
                         }]}>
                             {existingRequest.verificationStatus === 'pending' ? 'Verification Pending' :
                                 existingRequest.verificationStatus === 'verified' ? 'Account Verified!' : 'Verification Rejected'}
