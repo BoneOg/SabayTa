@@ -22,6 +22,8 @@ export default function DriverProfileScreen() {
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [profileImage, setProfileImage] = useState('');
+    const [rating, setRating] = useState(0);
+    const [totalRatings, setTotalRatings] = useState(0);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
 
@@ -54,6 +56,8 @@ export default function DriverProfileScreen() {
                 setEmail(data.profile.email || '');
                 setPhone(data.profile.phone || '');
                 setProfileImage(data.profile.profileImage || '');
+                setRating(data.profile.averageRating || 0);
+                setTotalRatings(data.profile.totalRatings || 0);
             }
         } catch (error) {
             console.error('Error fetching profile:', error);
@@ -210,6 +214,25 @@ export default function DriverProfileScreen() {
                             {/* Email and Phone Subtext */}
                             <Text style={styles.subText}>{email}</Text>
                             <Text style={styles.subText}>{phone}</Text>
+
+                            {/* Rating Display */}
+                            <View style={styles.ratingContainer}>
+                                <View style={styles.starsRow}>
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <MaterialIcons
+                                            key={star}
+                                            name={star <= Math.round(rating) ? "star" : "star-border"}
+                                            size={20}
+                                            color="#FFD700"
+                                            style={{ marginHorizontal: 1 }}
+                                        />
+                                    ))}
+                                </View>
+                                <Text style={styles.ratingText}>
+                                    {rating > 0 ? rating.toFixed(1) : "New"}
+                                </Text>
+                                <Text style={styles.ratingCount}>({totalRatings} ratings)</Text>
+                            </View>
                         </>
                     )}
 
@@ -395,6 +418,32 @@ const styles = StyleSheet.create({
         color: '#666',
         fontFamily: 'Poppins',
         marginBottom: 3,
+    },
+
+    ratingContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 5,
+        gap: 5,
+        backgroundColor: '#fff',
+    },
+
+    starsRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+
+    ratingText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333',
+        fontFamily: 'Poppins',
+    },
+
+    ratingCount: {
+        fontSize: 14,
+        color: '#888',
+        fontFamily: 'Poppins',
     },
 
     toggleContainer: {

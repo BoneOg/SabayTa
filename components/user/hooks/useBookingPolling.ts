@@ -29,6 +29,8 @@ interface UseBookingPollingProps {
     ) => void;
     mapRef: React.RefObject<MapView>;
     setPassengerPickedUp: (pickedUp: boolean) => void;
+    setBookingCompleted?: (completed: boolean) => void;
+    setDriverName?: (name: string) => void;
     resetBookingState: () => Promise<void>;
 }
 
@@ -51,6 +53,8 @@ export const useBookingPolling = ({
     fetchRoute,
     mapRef,
     setPassengerPickedUp,
+    setBookingCompleted,
+    setDriverName,
     resetBookingState,
 }: UseBookingPollingProps) => {
     // Poll for booking status updates - driver acceptance
@@ -101,6 +105,11 @@ export const useBookingPolling = ({
                             lon: toLon,
                             name: params.toName as string
                         });
+                    }
+
+                    if (data.booking.driverId && data.booking.driverId.name) {
+                        console.log("👤 Driver Name:", data.booking.driverId.name);
+                        if (setDriverName) setDriverName(data.booking.driverId.name);
                     }
 
                     // Start tracking driver location and show route
@@ -228,10 +237,24 @@ export const useBookingPolling = ({
                     return;
                 }
 
+                // Check if booking is completed
+                if (data.booking && data.booking.status === 'completed') {
+                    console.log('✅ Trip completed!');
+                    clearInterval(pollDriverLocation);
+
+                    if (setBookingCompleted) {
+                        setBookingCompleted(true);
+                    }
+
+                    // Do NOT reset booking state immediately here, 
+                    // we want to show the "Arrived at destination" popup first.
+                    // The reset will happen after rating or closing the final popup.
+                }
+
             } catch (error) {
                 console.error("Error polling driver location:", error);
             }
-        }, 3000); // Poll every 3 seconds (changed from 11 seconds for faster pickup detection)
+        }, 3000); // Poll every 3 seconds
 
         return () => clearInterval(pollDriverLocation);
     }, [bookingId, bookingAccepted, fromLocation]);

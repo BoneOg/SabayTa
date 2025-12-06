@@ -15,6 +15,15 @@ interface DriverComponentsProps {
     onDetailsPress: () => void;
     onCloseDriverDetails: () => void;
     onCloseChat: () => void;
+    driverName?: string;
+    rating?: number;
+    totalRatings?: number;
+    phone?: string;
+    email?: string;
+    vehicleType?: string;
+    plateNumber?: string;
+    color?: string;
+    profileImage?: string;
 }
 
 export const DriverComponents: React.FC<DriverComponentsProps> = ({
@@ -28,6 +37,15 @@ export const DriverComponents: React.FC<DriverComponentsProps> = ({
     onDetailsPress,
     onCloseDriverDetails,
     onCloseChat,
+    driverName,
+    rating,
+    totalRatings,
+    phone,
+    email,
+    vehicleType,
+    plateNumber,
+    color,
+    profileImage
 }) => {
     return (
         <>
@@ -46,12 +64,27 @@ export const DriverComponents: React.FC<DriverComponentsProps> = ({
                     onCancelPress={onCancelBooking}
                     onMessagePress={onMessagePress}
                     onDetailsPress={onDetailsPress}
+                    driverName={driverName}
+                    rating={rating}
+                    totalRatings={totalRatings}
+                    profileImage={profileImage}
                 />
             )}
 
             {/* DRIVER DETAILS OVERLAY */}
             {showDriverDetails && (
-                <DriverDetails onClose={onCloseDriverDetails} />
+                <DriverDetails
+                    onClose={onCloseDriverDetails}
+                    driverName={driverName}
+                    rating={rating}
+                    totalRatings={totalRatings}
+                    phone={phone}
+                    email={email}
+                    vehicleType={vehicleType}
+                    plateNumber={plateNumber}
+                    color={color}
+                    profileImage={profileImage}
+                />
             )}
 
             {/* CHAT SCREEN */}

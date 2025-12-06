@@ -5,9 +5,29 @@ import { Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View }
 
 interface DriverDetailsProps {
     onClose?: () => void;
+    driverName?: string;
+    rating?: number;
+    totalRatings?: number;
+    phone?: string;
+    email?: string;
+    vehicleType?: string;
+    plateNumber?: string;
+    color?: string;
+    profileImage?: string;
 }
 
-export const DriverDetails = ({ onClose }: DriverDetailsProps) => {
+export const DriverDetails = ({
+    onClose,
+    driverName = "Your Driver",
+    rating = 5.0,
+    totalRatings = 0,
+    phone = "N/A",
+    email = "N/A",
+    vehicleType = "Motorcycle",
+    plateNumber = "N/A",
+    color = "N/A",
+    profileImage
+}: DriverDetailsProps) => {
     const router = useRouter();
 
     const handleBack = () => {
@@ -33,13 +53,13 @@ export const DriverDetails = ({ onClose }: DriverDetailsProps) => {
                 {/* Driver Profile Section */}
                 <View style={styles.profileSection}>
                     <Image
-                        source={{ uri: 'https://i.pravatar.cc/150?img=12' }}
+                        source={{ uri: profileImage || 'https://i.pravatar.cc/150?img=12' }}
                         style={styles.driverImage}
                     />
-                    <Text style={styles.driverName}>Sergio Ramirez</Text>
+                    <Text style={styles.driverName}>{driverName}</Text>
                     <View style={styles.ratingContainer}>
                         <MaterialCommunityIcons name="star" size={16} color="#FFC107" />
-                        <Text style={styles.ratingText}>4.9 (245 reviews)</Text>
+                        <Text style={styles.ratingText}>{rating.toFixed(1)} ({totalRatings} reviews)</Text>
                     </View>
                 </View>
 
@@ -58,15 +78,15 @@ export const DriverDetails = ({ onClose }: DriverDetailsProps) => {
                         <View style={styles.vehicleInfoContainer}>
                             <View style={styles.vehicleInfoRow}>
                                 <Text style={styles.vehicleLabel}>Vehicle Type:</Text>
-                                <Text style={styles.vehicleValue}>Yamaha NMAX 155</Text>
+                                <Text style={styles.vehicleValue}>{vehicleType}</Text>
                             </View>
                             <View style={styles.vehicleInfoRow}>
                                 <Text style={styles.vehicleLabel}>Color:</Text>
-                                <Text style={styles.vehicleValue}>Blue</Text>
+                                <Text style={styles.vehicleValue}>{color}</Text>
                             </View>
                             <View style={styles.vehicleInfoRow}>
                                 <Text style={styles.vehicleLabel}>Plate Number:</Text>
-                                <Text style={styles.vehicleValue}>ABC-1234</Text>
+                                <Text style={styles.vehicleValue}>{plateNumber}</Text>
                             </View>
                         </View>
                     </View>
@@ -86,7 +106,7 @@ export const DriverDetails = ({ onClose }: DriverDetailsProps) => {
                         </View>
                         <View style={styles.contactInfo}>
                             <Text style={styles.contactLabel}>Email</Text>
-                            <Text style={styles.contactValue}>sergio.ramirez@email.com</Text>
+                            <Text style={styles.contactValue}>{email}</Text>
                         </View>
                         <MaterialCommunityIcons name="chevron-right" size={20} color="#999" />
                     </TouchableOpacity>
@@ -98,7 +118,7 @@ export const DriverDetails = ({ onClose }: DriverDetailsProps) => {
                         </View>
                         <View style={styles.contactInfo}>
                             <Text style={styles.contactLabel}>Phone</Text>
-                            <Text style={styles.contactValue}>+63 917 123 4567</Text>
+                            <Text style={styles.contactValue}>{phone}</Text>
                         </View>
                         <MaterialCommunityIcons name="chevron-right" size={20} color="#999" />
                     </TouchableOpacity>

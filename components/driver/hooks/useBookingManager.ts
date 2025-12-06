@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState } from "react";
 import { Alert } from "react-native";
 import { BASE_URL } from "../../../config";
@@ -63,11 +64,25 @@ export const useBookingManager = () => {
             console.log("📤 Booking ID:", userId);
             console.log("📤 Driver Location:", driverLocation);
 
+            // Get current driver's ID from storage
+            const userStr = await AsyncStorage.getItem('user');
+            if (!userStr) {
+                Alert.alert("Error", "Driver session not found");
+                return false;
+            }
+            const user = JSON.parse(userStr);
+            const driverId = user._id || user.id;
+
+            if (!driverId) {
+                Alert.alert("Error", "Invalid driver session");
+                return false;
+            }
+
             const response = await fetch(`${BASE_URL}/api/bookings/${userId}/accept`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    driverId: 'driver-001',
+                    driverId: driverId,
                     driverLocation: driverLocation,
                     acceptedAt: new Date().toISOString()
                 })

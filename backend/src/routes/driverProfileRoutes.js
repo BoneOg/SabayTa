@@ -3,6 +3,7 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import multer from "multer";
 import DriverProfile from "../models/DriverProfile.js";
+import Rating from "../models/Rating.js";
 import User from "../models/User.js";
 
 const router = express.Router();
@@ -48,6 +49,14 @@ router.get("/", protect, async (req, res) => {
             driverProfile = await DriverProfile.create({ userId: user._id });
         }
 
+        // Calculate average rating
+        const ratings = await Rating.find({ driverId: user._id });
+        let averageRating = 0;
+        if (ratings.length > 0) {
+            const sum = ratings.reduce((acc, curr) => acc + curr.rating, 0);
+            averageRating = (sum / ratings.length).toFixed(1);
+        }
+
         res.json({
             profile: {
                 name: user.name,
@@ -62,7 +71,9 @@ router.get("/", protect, async (req, res) => {
                 profileImage: driverProfile.profileImage,
                 licenseNumber: driverProfile.licenseNumber,
                 vehicleType: driverProfile.vehicleType,
-                vehiclePlateNumber: driverProfile.vehiclePlateNumber
+                vehiclePlateNumber: driverProfile.vehiclePlateNumber,
+                averageRating: parseFloat(averageRating),
+                totalRatings: ratings.length
             },
             role: user.role,
         });

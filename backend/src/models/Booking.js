@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const bookingSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    driverId: { type: String },
+    driverId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     pickupLocation: {
         lat: { type: Number, required: true },
         lon: { type: Number, required: true },

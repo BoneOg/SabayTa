@@ -8,6 +8,7 @@ import driverApplicationRoutes from './routes/driverApplicationRoutes.js';
 import driverProfileRoutes from './routes/driverProfileRoutes.js';
 import favoriteRoutes from './routes/favoriteRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
+import ratingRoutes from './routes/ratingRoutes.js';
 import studentVerificationRoutes from './routes/studentVerificationRoutes.js';
 
 const app = express();
@@ -22,6 +23,7 @@ app.use('/api/favorites', favoriteRoutes);
 app.use('/api/student-verification', studentVerificationRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/driver-application', driverApplicationRoutes);
+app.use('/api/ratings', ratingRoutes);
 
 connectDB()
     .then(() => {

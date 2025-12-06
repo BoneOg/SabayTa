@@ -7,13 +7,13 @@ const { height } = Dimensions.get("window"); // Get screen height for animation
 // Helper function to simulate distance/time calculation
 const calculateRandomArrival = () => {
     // Generates a time between 2 and 7 minutes
-    const randomTime = Math.floor(Math.random() * 6) + 2; 
+    const randomTime = Math.floor(Math.random() * 6) + 2;
     // Generates a distance between 0.3 and 1.5 km
-    const randomDistance = (Math.random() * 1.2 + 0.3).toFixed(1); 
+    const randomDistance = (Math.random() * 1.2 + 0.3).toFixed(1);
 
     const arrivalTime = `${randomTime} mins`;
     const arrivalDistance = `${randomDistance} km away`;
-    
+
     return { arrivalTime, arrivalDistance };
 };
 
@@ -26,8 +26,12 @@ interface DriverArrivalProps {
     onClose?: () => void;
     onCancelPress?: () => void;
     // Dynamic props (now nullable/optional, allowing the local state to take over)
-    arrivalTime?: string | null; 
+    arrivalTime?: string | null;
     arrivalDistance?: string | null;
+    driverName?: string;
+    rating?: number;
+    totalRatings?: number;
+    profileImage?: string;
 }
 
 export const DriverArrival = ({
@@ -37,17 +41,21 @@ export const DriverArrival = ({
     onClose,
     onCancelPress,
     // Alias the incoming props to use for internal state initialization
-    arrivalTime: propArrivalTime, 
-    arrivalDistance: propArrivalDistance, 
+    arrivalTime: propArrivalTime,
+    arrivalDistance: propArrivalDistance,
+    driverName = "Your Driver",
+    rating = 5.0,
+    totalRatings = 0,
+    profileImage,
 }: DriverArrivalProps) => {
     const [showCancelModal, setShowCancelModal] = useState(false);
-    
+
     // Internal state to hold the time and distance
     const [localArrivalTime, setLocalArrivalTime] = useState(propArrivalTime || 'Calculating...');
     const [localArrivalDistance, setLocalArrivalDistance] = useState(propArrivalDistance || 'Calculating...');
-    
+
     // Initial slide down value adjusted for better positioning (Off-screen)
-    const slideAnim = new Animated.Value(height); 
+    const slideAnim = new Animated.Value(height);
     const MODAL_HEIGHT = 200; // Estimated height for the new content layout
 
     // Effect for sliding animation and for calculating distance/time
@@ -88,14 +96,14 @@ export const DriverArrival = ({
 
     const handleDetailsPress = () => {
         // Close the modal first
-        onClose?.(); 
+        onClose?.();
         // Then execute the original details action
         onDetailsPress?.();
     };
 
     const handleMessagePress = () => {
         // Close the modal first
-        onClose?.(); 
+        onClose?.();
         onMessagePress?.();
     }
 
@@ -108,7 +116,7 @@ export const DriverArrival = ({
 
     // Use absolute positioning with translateY to animate the content from below the screen
     // The `MODAL_OFFSET` style in the stylesheet handles the final resting position.
-    if (!visible && slideAnim.__getValue() > MODAL_HEIGHT) return null;
+    if (!visible && (slideAnim as any).__getValue() > MODAL_HEIGHT) return null;
 
     return (
         <View style={styles.driverArrivalOverlay}>
@@ -116,10 +124,10 @@ export const DriverArrival = ({
                 style={[
                     styles.driverArrivalContent,
                     // The translateY animation pushes the view up from the bottom
-                    { transform: [{ translateY: slideAnim }] }, 
+                    { transform: [{ translateY: slideAnim }] },
                 ]}
                 // Prevent tapping the content from closing the overlay
-                onStartShouldSetResponder={() => true} 
+                onStartShouldSetResponder={() => true}
             >
                 {/* 1. Driver Info Section (Top part of the card) */}
                 <View style={styles.driverInfoContainer}>
@@ -131,10 +139,10 @@ export const DriverArrival = ({
                         />
                         <View style={styles.driverNameSection}>
                             {/* Title matched to OnTheWay style */}
-                            <Text style={styles.subtitle}>Sergio Ramirez</Text>
+                            <Text style={styles.subtitle}>{driverName}</Text>
                             <View style={styles.ratingContainer}>
                                 <MaterialCommunityIcons name="star" size={14} color="#FFC107" />
-                                <Text style={styles.ratingText}>4.9 (245 reviews)</Text>
+                                <Text style={styles.ratingText}>{rating.toFixed(1)} ({totalRatings} reviews)</Text>
                             </View>
                         </View>
                     </View>
@@ -145,7 +153,7 @@ export const DriverArrival = ({
                     <View style={styles.infoItem}>
                         <MaterialCommunityIcons name="map-marker-distance" size={16} color="#534889" />
                         {/* Use local state for rendering */}
-                        <Text style={styles.infoText}>{localArrivalDistance}</Text> 
+                        <Text style={styles.infoText}>{localArrivalDistance}</Text>
                     </View>
                     <View style={styles.infoItem}>
                         <MaterialCommunityIcons name="clock-time-three-outline" size={16} color="#534889" />
@@ -226,7 +234,7 @@ const styles = StyleSheet.create({
     driverArrivalContent: {
         // POSITIONING MATCHES ONTHEWAY COMPONENT
         position: 'absolute',
-        bottom: 80, 
+        bottom: 80,
         left: 20,
         right: 20,
         backgroundColor: '#fff',
@@ -290,7 +298,7 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     // --- End Info Row Styling ---
-    
+
     // --- Action Button Styling Matching OnTheWay ---
     actionButtonsContainer: {
         flexDirection: 'row',
@@ -302,7 +310,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         paddingVertical: 12, // Adjusted padding
         borderRadius: 10,
-        borderWidth: 1, 
+        borderWidth: 1,
         borderColor: '#E53935',
         flexDirection: 'row',
         justifyContent: 'center',
@@ -317,7 +325,7 @@ const styles = StyleSheet.create({
     detailsButton: {
         flex: 1,
         backgroundColor: '#fff',
-        paddingVertical: 12, 
+        paddingVertical: 12,
         borderRadius: 10,
         borderWidth: 1,
         borderColor: '#622C9B',
@@ -329,7 +337,7 @@ const styles = StyleSheet.create({
     messageButton: {
         flex: 1,
         backgroundColor: '#534889', // Matched OnTheWay chat button color
-        paddingVertical: 12, 
+        paddingVertical: 12,
         borderRadius: 10,
         flexDirection: 'row',
         justifyContent: 'center',

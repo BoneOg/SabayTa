@@ -247,7 +247,7 @@ export default function DriverHome() {
 
   const handleCancelOnTheWay = async () => {
     console.log("❌ Cancelled on the way");
-    
+
     if (selectedUser) {
       try {
         // Notify backend that driver cancelled the booking
@@ -260,7 +260,7 @@ export default function DriverHome() {
         console.error("Failed to notify backend of cancellation:", error);
       }
     }
-    
+
     setShowOnTheWay(false);
     setSelectedUser(null);
     clearRoute();
@@ -291,6 +291,19 @@ export default function DriverHome() {
 
   const handleCompleteTrip = async () => {
     console.log("✅ Trip completed - passenger dropped off");
+
+    if (selectedUser) {
+      try {
+        await fetch(`${BASE_URL}/api/bookings/${selectedUser.id}/complete`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        console.log("📡 Notified backend: booking completed");
+      } catch (error) {
+        console.error("Failed to notify backend:", error);
+      }
+    }
+
     setShowOnTheWay(false);
     setPassengerPickedUp(false);
     setSelectedUser(null);

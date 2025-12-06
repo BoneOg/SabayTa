@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 import MapView from 'react-native-maps';
+import { BASE_URL } from '../../../config.js';
 
 // Custom Hooks & Components
 import { useHomeAnimations } from '../../../components/animations/HomeAnimations';
@@ -14,6 +15,7 @@ import { useBookingPolling } from '../../../components/user/hooks/useBookingPoll
 import { useBookingState } from '../../../components/user/hooks/useBookingState';
 import { useLocationSelection } from '../../../components/user/hooks/useLocationSelection';
 import { useModalAnimations } from '../../../components/user/hooks/useModalAnimations';
+import { RidePopups } from '../../../components/user/RidePopups';
 
 interface BookingComponentProps {
     region: any;
@@ -82,6 +84,28 @@ export const BookingComponent = ({
 
     // Modal State
     const [modalVisible, setModalVisible] = React.useState(false);
+    const [driverName, setDriverName] = React.useState("Your Driver");
+
+    // Ride Popup States
+    const [showPickupPopup, setShowPickupPopup] = React.useState(false);
+    const [showDropoffPopup, setShowDropoffPopup] = React.useState(false);
+    const [showRatePopup, setShowRatePopup] = React.useState(false);
+    const [showThankYouPopup, setShowThankYouPopup] = React.useState(false);
+
+    // Watch for passenger picked up
+    React.useEffect(() => {
+        if (passengerPickedUp) {
+            setShowPickupPopup(true);
+        }
+    }, [passengerPickedUp]);
+
+    // Handle Booking Completed
+    const handleBookingCompleted = (completed: boolean) => {
+        if (completed) {
+            setShowDropoffPopup(true);
+            setDriverArrivalVisible(false); // Hide driver bar
+        }
+    };
 
     // Location Selection Hook
     const {
@@ -150,6 +174,8 @@ export const BookingComponent = ({
         fetchRoute,
         mapRef,
         setPassengerPickedUp,
+        setBookingCompleted: handleBookingCompleted,
+        setDriverName,
         resetBookingState,
     });
 
@@ -222,6 +248,61 @@ export const BookingComponent = ({
         }
     };
 
+    // Popup Handlers
+    const handlePickupDone = () => {
+        setShowPickupPopup(false);
+    };
+
+    const handleDropoffDone = () => {
+        setShowDropoffPopup(false);
+        setShowRatePopup(true);
+    };
+
+    const handleSubmitRating = async (rating: number, review: string) => {
+        console.log("⭐ Rating Submitted:", rating, review);
+
+        if (!bookingId) {
+            console.error("No booking ID available for rating");
+            // Still show thank you for UX slightly differently or handle error
+            setShowRatePopup(false);
+            setShowThankYouPopup(true);
+            return;
+        }
+
+        try {
+            const response = await fetch(`${BASE_URL}/api/ratings/submit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    bookingId,
+                    rating,
+                    review
+                })
+            });
+
+            if (response.ok) {
+                console.log("✅ Rating submitted successfully to backend");
+            } else {
+                const errData = await response.json();
+                console.error("❌ Failed to submit rating:", errData);
+            }
+        } catch (error) {
+            console.error("❌ Network error submitting rating:", error);
+        }
+
+        setShowRatePopup(false);
+        setShowThankYouPopup(true);
+    };
+
+    const handleThankYouDone = async () => {
+        setShowThankYouPopup(false);
+        await resetBookingState();
+        // Reset local popups just in case
+        setShowPickupPopup(false);
+        setShowDropoffPopup(false);
+        setShowRatePopup(false);
+    };
+
     return (
         <>
             {/* PIN SELECTION UI */}
@@ -268,6 +349,32 @@ export const BookingComponent = ({
                 searchInputRef={searchInputRef}
             />
 
+            {/* RIDE STATUS POPUPS */}
+            <RidePopups
+                visible={showPickupPopup}
+                type="pickup"
+                onClose={handlePickupDone}
+            />
+
+            <RidePopups
+                visible={showDropoffPopup}
+                type="dropoff"
+                onClose={handleDropoffDone}
+            />
+
+            <RidePopups
+                visible={showRatePopup}
+                type="rate"
+                driverName={driverName}
+                onSubmitRating={handleSubmitRating}
+            />
+
+            <RidePopups
+                visible={showThankYouPopup}
+                type="thankyou"
+                onClose={handleThankYouDone}
+            />
+
             {/* DRIVER COMPONENTS */}
             <DriverComponents
                 driverSearchVisible={driverSearchVisible}
@@ -280,6 +387,7 @@ export const BookingComponent = ({
                 onDetailsPress={() => setShowDriverDetails(true)}
                 onCloseDriverDetails={() => setShowDriverDetails(false)}
                 onCloseChat={() => setShowChat(false)}
+                driverName={driverName}
             />
         </>
     );
