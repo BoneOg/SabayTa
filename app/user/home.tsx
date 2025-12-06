@@ -1,13 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView from 'react-native-maps';
+import { BASE_URL } from '../../config';
 
 // Custom Hooks & Components
 import { CDO_COORDS, useLocationTracker } from '../../components/LocationTracker';
 import { MapComponent } from '../../components/Map';
 import CustomModal from '../../components/ui/CustomModal';
+import { VerificationBlockModal } from '../../components/user/VerificationBlockModal';
 import { BookingComponent } from './booking/book';
 
 interface SelectedLocation {
@@ -44,6 +47,53 @@ export default function HomeScreen() {
   const [driverLocation, setDriverLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [showDriverRoute, setShowDriverRoute] = useState(false);
   const [isBookingAccepted, setIsBookingAccepted] = useState(false);
+
+  // Verification State
+  const [verificationStatus, setVerificationStatus] = useState<'none' | 'pending' | 'verified' | 'rejected'>('verified');
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [isCheckingVerification, setIsCheckingVerification] = useState(true);
+
+  // Check student verification status on mount
+  useEffect(() => {
+    checkVerificationStatus();
+  }, []);
+
+  const checkVerificationStatus = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        setIsCheckingVerification(false);
+        return;
+      }
+
+      const response = await fetch(`${BASE_URL}/api/student-verification/status`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Verification status:', data);
+
+        if (data.hasVerification) {
+          setVerificationStatus(data.verificationStatus);
+          // Show modal if not verified
+          if (data.verificationStatus !== 'verified') {
+            setShowVerificationModal(true);
+          }
+        } else {
+          // No verification submitted yet
+          setVerificationStatus('none');
+          setShowVerificationModal(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking verification:', error);
+    } finally {
+      setIsCheckingVerification(false);
+    }
+  };
 
   // ====================================================================
   // CALLBACKS FROM BOOKING COMPONENT
@@ -157,6 +207,12 @@ export default function HomeScreen() {
           secondaryButtonText="Deny"
           onClose={handleAllowPermission}
           onSecondaryPress={handleDenyPermission}
+        />
+
+        {/* STUDENT VERIFICATION BLOCK MODAL */}
+        <VerificationBlockModal
+          visible={showVerificationModal && !isCheckingVerification}
+          verificationStatus={verificationStatus}
         />
       </View>
     </View>

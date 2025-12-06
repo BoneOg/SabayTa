@@ -109,37 +109,19 @@ router.post('/submit', protect, upload.fields([
 // Get user's verification status
 router.get('/status', protect, async (req, res) => {
     try {
-        const verification = await StudentVerification.findOne({ userId: req.user._id });
-
-        if (!verification) {
-            return res.status(200).json({ verificationStatus: null });
-        }
-
-        res.status(200).json({
-            verificationStatus: verification.verificationStatus,
-            verification
-        });
-
-    } catch (error) {
-        console.error('Error fetching verification status:', error);
-        res.status(500).json({ message: 'Failed to fetch verification status' });
-    }
-});
-
-// Get user's verification status
-router.get('/status', protect, async (req, res) => {
-    try {
         const verification = await StudentVerification.findOne({ userId: req.user._id })
             .sort({ createdAt: -1 });
 
         if (verification) {
             res.status(200).json({
-                hasRequest: true,
-                request: verification
+                hasVerification: true,
+                verificationStatus: verification.verificationStatus,
+                verification
             });
         } else {
             res.status(200).json({
-                hasRequest: false
+                hasVerification: false,
+                verificationStatus: null
             });
         }
     } catch (error) {
