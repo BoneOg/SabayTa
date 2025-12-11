@@ -47,7 +47,8 @@ export default function Login() {
       let data;
       try { data = JSON.parse(text); }
       catch {
-        setErrorMessage('Server error. Please try again.');
+        console.error("Login response not JSON:", text);
+        setErrorMessage(`Server error (${response.status}). Response not JSON.`);
         setErrorModalVisible(true);
         return;
       }

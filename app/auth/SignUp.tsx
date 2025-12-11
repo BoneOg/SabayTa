@@ -71,7 +71,8 @@ export default function SignUpPage() {
         data = JSON.parse(text);
       } catch {
         console.error("Signup response not JSON:", text);
-        setErrorMessage("Server error. Please try again.");
+        console.error("Signup response not JSON:", text);
+        setErrorMessage(`Server error (${response.status}). Response not JSON.`);
         setErrorModalVisible(true);
         return;
       }
