@@ -33,6 +33,7 @@ interface UseBookingPollingProps {
     setDriverName?: (name: string) => void;
     setDriverRating?: (rating: number) => void;
     setDriverTotalRatings?: (totalRatings: number) => void;
+    setDriverProfileImage?: (image: string) => void;
     resetBookingState: () => Promise<void>;
 }
 
@@ -59,6 +60,7 @@ export const useBookingPolling = ({
     setDriverName,
     setDriverRating,
     setDriverTotalRatings,
+    setDriverProfileImage,
     resetBookingState,
 }: UseBookingPollingProps) => {
     // Poll for booking status updates - driver acceptance
@@ -137,6 +139,10 @@ export const useBookingPolling = ({
                         if (setDriverTotalRatings && data.booking.driverId.totalRatings !== undefined) {
                             setDriverTotalRatings(data.booking.driverId.totalRatings);
                             console.log("📊 Total Ratings:", data.booking.driverId.totalRatings);
+                        }
+                        if (setDriverProfileImage && data.booking.driverId.profileImage) {
+                            setDriverProfileImage(data.booking.driverId.profileImage);
+                            console.log("🖼️ Driver Image:", data.booking.driverId.profileImage);
                         }
                     }
 

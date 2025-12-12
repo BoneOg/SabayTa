@@ -1,10 +1,13 @@
+import { BASE_URL } from '@/config';
 import { FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface DriverDetailsProps {
     onClose?: () => void;
+    // Optional props can still be passed to override fetched data
     driverName?: string;
     rating?: number;
     totalRatings?: number;
@@ -18,17 +21,55 @@ interface DriverDetailsProps {
 
 export const DriverDetails = ({
     onClose,
-    driverName = "Your Driver",
-    rating = 5.0,
-    totalRatings = 0,
-    phone = "N/A",
-    email = "N/A",
-    vehicleType = "Motorcycle",
-    plateNumber = "N/A",
-    color = "N/A",
-    profileImage
+    driverName: propDriverName,
+    rating: propRating,
+    totalRatings: propTotalRatings,
+    phone: propPhone,
+    email: propEmail,
+    vehicleType: propVehicleType,
+    plateNumber: propPlateNumber,
+    color: propColor,
+    profileImage: propProfileImage
 }: DriverDetailsProps) => {
     const router = useRouter();
+
+    // State for fetched details
+    const [fetchedProfile, setFetchedProfile] = useState<any>(null);
+
+    useEffect(() => {
+        // Fetch profile to populate missing data
+        const fetchProfile = async () => {
+            try {
+                const token = await AsyncStorage.getItem('token');
+                if (!token) return;
+
+                const response = await fetch(`${BASE_URL}/api/driver/profile`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.profile) {
+                        setFetchedProfile(data.profile);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch driver details:", error);
+            }
+        };
+        fetchProfile();
+    }, []);
+
+    // Derived values: Props > Fetched > Default
+    const name = propDriverName ?? fetchedProfile?.name ?? "Your Driver";
+    const rating = propRating ?? fetchedProfile?.averageRating ?? 5.0;
+    const totalRatings = propTotalRatings ?? fetchedProfile?.totalRatings ?? 0;
+    const phone = propPhone ?? fetchedProfile?.phone ?? "N/A";
+    const email = propEmail ?? fetchedProfile?.email ?? "N/A";
+    const vehicleType = propVehicleType ?? fetchedProfile?.vehicleType ?? "Motorcycle";
+    const plateNumber = propPlateNumber ?? fetchedProfile?.vehiclePlateNumber ?? "N/A";
+    const color = propColor ?? fetchedProfile?.vehicleColor ?? "N/A";
+    const profileImage = propProfileImage ?? fetchedProfile?.profileImage;
 
     const handleBack = () => {
         if (onClose) {
@@ -53,13 +94,13 @@ export const DriverDetails = ({
                 {/* Driver Profile Section */}
                 <View style={styles.profileSection}>
                     <Image
-                        source={{ uri: profileImage || 'https://i.pravatar.cc/150?img=12' }}
+                        source={profileImage ? { uri: profileImage } : require('@/assets/images/icon.png')}
                         style={styles.driverImage}
                     />
-                    <Text style={styles.driverName}>{driverName}</Text>
+                    <Text style={styles.driverName}>{name}</Text>
                     <View style={styles.ratingContainer}>
                         <MaterialCommunityIcons name="star" size={16} color="#FFC107" />
-                        <Text style={styles.ratingText}>{rating.toFixed(1)} ({totalRatings} reviews)</Text>
+                        <Text style={styles.ratingText}>{typeof rating === 'number' ? rating.toFixed(1) : rating} ({totalRatings} reviews)</Text>
                     </View>
                 </View>
 
@@ -71,10 +112,6 @@ export const DriverDetails = ({
                     </View>
 
                     <View style={styles.vehicleDetailsCard}>
-                        <Image
-                            source={{ uri: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80' }}
-                            style={styles.motorcycleImage}
-                        />
                         <View style={styles.vehicleInfoContainer}>
                             <View style={styles.vehicleInfoRow}>
                                 <Text style={styles.vehicleLabel}>Vehicle Type:</Text>
@@ -127,15 +164,16 @@ export const DriverDetails = ({
                 {/* Statistics Section */}
                 <View style={styles.statsContainer}>
                     <View style={styles.statCard}>
-                        <Text style={styles.statNumber}>245</Text>
+                        {/* We use fetched 'totalRatings' as a proxy for completed rides for now if 'completedRides' is missing */}
+                        <Text style={styles.statNumber}>{totalRatings || 0}</Text>
                         <Text style={styles.statLabel}>Completed Rides</Text>
                     </View>
                     <View style={styles.statCard}>
-                        <Text style={styles.statNumber}>99%</Text>
+                        <Text style={styles.statNumber}>100%</Text>
                         <Text style={styles.statLabel}>Acceptance Rate</Text>
                     </View>
                     <View style={styles.statCard}>
-                        <Text style={styles.statNumber}>4.9</Text>
+                        <Text style={styles.statNumber}>{typeof rating === 'number' ? rating.toFixed(1) : rating}</Text>
                         <Text style={styles.statLabel}>Rating</Text>
                     </View>
                 </View>
@@ -241,10 +279,6 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         overflow: 'hidden',
         marginBottom: 10,
-    },
-    motorcycleImage: {
-        width: '100%',
-        height: 150,
     },
     vehicleInfoContainer: {
         padding: 15,
