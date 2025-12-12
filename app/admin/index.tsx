@@ -1,14 +1,78 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useState } from 'react';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { BASE_URL } from '../../config';
+
+interface DashboardStats {
+    totalUsers: number;
+    activeDrivers: number;
+    completedRides: number;
+    pendingComplaints: number;
+}
 
 export default function AdminDashboard() {
-    const stats = [
-        { label: 'Total Users', value: '1,234', icon: 'people', color: '#4A90E2', description: 'Riders + Drivers' },
-        { label: 'Active Drivers', value: '150', icon: 'two-wheeler', color: '#2ECC71', description: 'Currently active' },
-        { label: 'Completed Rides', value: '5,678', icon: 'check-circle', color: '#9B59B6', description: 'All time' },
-        { label: 'Complaints', value: '12', icon: 'report-problem', color: '#E74C3C', description: 'Pending review' },
-    ];
+    const [stats, setStats] = useState<DashboardStats | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    const fetchStats = useCallback(async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                console.log('No token found');
+                setLoading(false);
+                Alert.alert('Error', 'No authentication token found');
+                return;
+            }
+
+            console.log('Fetching dashboard stats...');
+            const response = await fetch(`${BASE_URL}/api/profile/admin/dashboard/stats`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            const data = await response.json();
+            console.log('Dashboard stats response:', data);
+
+            if (response.ok) {
+                setStats(data);
+            } else {
+                console.error('Dashboard stats error:', data);
+                Alert.alert('Error', data.message || 'Failed to fetch dashboard stats');
+            }
+        } catch (error) {
+            console.error('Fetch stats error:', error);
+            Alert.alert('Error', 'Network error. Please check your connection.');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchStats();
+        }, [fetchStats])
+    );
+
+    const formatNumber = (num: number) => {
+        return num.toLocaleString();
+    };
+
+    const statsData = stats ? [
+        { label: 'Total Users', value: formatNumber(stats.totalUsers), icon: 'people', color: '#4A90E2', description: 'Riders + Drivers' },
+        { label: 'Approved Drivers', value: formatNumber(stats.activeDrivers), icon: 'two-wheeler', color: '#2ECC71', description: 'Verified drivers' },
+        { label: 'Completed Rides', value: formatNumber(stats.completedRides), icon: 'check-circle', color: '#9B59B6', description: 'All time' },
+        { label: 'Pending Complaints', value: formatNumber(stats.pendingComplaints), icon: 'report-problem', color: '#E74C3C', description: 'Awaiting review' },
+    ] : [];
+
+    if (loading) {
+        return (
+            <View style={[styles.container, styles.centerContent]}>
+                <ActivityIndicator size="large" color="#534889" />
+                <Text style={styles.loadingText}>Loading dashboard...</Text>
+            </View>
+        );
+    }
 
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
@@ -19,7 +83,7 @@ export default function AdminDashboard() {
 
             {/* Stats Grid */}
             <View style={styles.statsContainer}>
-                {stats.map((stat, index) => (
+                {statsData.map((stat, index) => (
                     <View key={index} style={styles.statCard}>
                         <View style={[styles.iconCircle, { backgroundColor: stat.color + '20' }]}>
                             <MaterialIcons name={stat.icon as any} size={28} color={stat.color} />
@@ -30,40 +94,6 @@ export default function AdminDashboard() {
                     </View>
                 ))}
             </View>
-
-            {/* System Status */}
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>System Status</Text>
-                <View style={styles.statusCard}>
-                    <View style={styles.statusRow}>
-                        <MaterialIcons name="check-circle" size={20} color="#2ECC71" />
-                        <Text style={styles.statusText}>All systems operational</Text>
-                    </View>
-                    <View style={styles.statusRow}>
-                        <MaterialIcons name="update" size={20} color="#3498DB" />
-                        <Text style={styles.statusText}>Last updated: Just now</Text>
-                    </View>
-                </View>
-            </View>
-
-            {/* Quick Info */}
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Management Sections</Text>
-                <View style={styles.infoCard}>
-                    <View style={styles.infoItem}>
-                        <MaterialIcons name="people" size={20} color="#4A90E2" />
-                        <Text style={styles.infoText}>Users: Manage riders and drivers</Text>
-                    </View>
-                    <View style={styles.infoItem}>
-                        <MaterialIcons name="two-wheeler" size={20} color="#2ECC71" />
-                        <Text style={styles.infoText}>Rides: Monitor motorcycle rides</Text>
-                    </View>
-                    <View style={styles.infoItem}>
-                        <MaterialIcons name="report-problem" size={20} color="#E74C3C" />
-                        <Text style={styles.infoText}>Complaints: Handle user complaints</Text>
-                    </View>
-                </View>
-            </View>
         </ScrollView>
     );
 }
@@ -72,6 +102,16 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F5F7FA',
+    },
+    centerContent: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingText: {
+        marginTop: 10,
+        fontSize: 16,
+        color: '#7F8C8D',
+        fontFamily: 'Poppins',
     },
     contentContainer: {
         padding: 20,
@@ -139,49 +179,5 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins',
         textAlign: 'center',
         marginTop: 4,
-    },
-    section: {
-        marginBottom: 20,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#2C3E50',
-        marginBottom: 15,
-        fontFamily: 'Poppins',
-    },
-    statusCard: {
-        backgroundColor: '#fff',
-        padding: 15,
-        borderRadius: 12,
-        elevation: 2,
-    },
-    statusRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-    statusText: {
-        fontSize: 14,
-        color: '#34495E',
-        fontFamily: 'Poppins',
-        marginLeft: 10,
-    },
-    infoCard: {
-        backgroundColor: '#fff',
-        padding: 15,
-        borderRadius: 12,
-        elevation: 2,
-    },
-    infoItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 12,
-    },
-    infoText: {
-        fontSize: 14,
-        color: '#34495E',
-        fontFamily: 'Poppins',
-        marginLeft: 12,
     },
 });

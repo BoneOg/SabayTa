@@ -141,9 +141,9 @@ export default function DriverHome() {
 
           const data = await response.json();
 
-          // Check if booking was cancelled by rider
-          if (data.booking && data.booking.status === 'cancelled') {
-            console.log('❌ Rider cancelled the booking');
+          // Check if booking was cancelled (by rider or admin)
+          if (data.booking && data.booking.status && data.booking.status.toLowerCase() === 'cancelled') {
+            console.log('❌ Booking was cancelled');
             clearInterval(pollInterval);
 
             setShowOnTheWay(false);
@@ -153,7 +153,7 @@ export default function DriverHome() {
 
             Alert.alert(
               "Booking Cancelled",
-              "The rider has cancelled the booking.",
+              "The booking has been cancelled.",
               [{ text: "OK" }]
             );
           }

@@ -52,6 +52,11 @@ const driverProfileSchema = new mongoose.Schema({
     vehiclePlateNumber: {
         type: String,
         default: ""
+    },
+
+    isApproved: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 

@@ -206,7 +206,8 @@ router.patch('/admin/:id', protect, async (req, res) => {
                 postalCode: userProfile?.postalCode || '',
                 vehiclePlateNumber: application.plateNumber || '',
                 vehicleType: application.motorcycleModel || '',
-                licenseNumber: ''
+                licenseNumber: '',
+                isApproved: true
             };
 
             // Use findOneAndUpdate with upsert to create or update driver profile
@@ -235,6 +236,86 @@ router.patch('/admin/:id', protect, async (req, res) => {
         console.error('Error stack:', error.stack);
         res.status(500).json({
             message: 'Failed to update application',
+            error: error.message
+        });
+    }
+});
+
+// ADMIN: One-time migration to set isApproved for existing drivers
+router.post('/admin/migrate-approved-drivers', protect, async (req, res) => {
+    try {
+        // Check if user is admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Access denied. Admin only.' });
+        }
+
+        const DriverProfile = (await import('../models/DriverProfile.js')).default;
+        const UserProfile = (await import('../models/UserProfile.js')).default;
+
+        // Step 1: Update existing DriverProfiles to set isApproved = true
+        const updateResult = await DriverProfile.updateMany(
+            { isApproved: { $exists: false } },
+            { $set: { isApproved: true } }
+        );
+
+        // Step 2: Find approved applications without DriverProfiles
+        const approvedApplications = await DriverApplication.find({
+            applicationStatus: 'approved'
+        }).populate('userId');
+
+        let created = 0;
+        for (const application of approvedApplications) {
+            // Check if DriverProfile exists
+            const existingProfile = await DriverProfile.findOne({
+                userId: application.userId._id
+            });
+
+            if (!existingProfile) {
+                // Get user profile data
+                const userProfile = await UserProfile.findOne({
+                    userId: application.userId._id
+                });
+
+                // Create DriverProfile
+                await DriverProfile.create({
+                    userId: application.userId._id,
+                    profileImage: userProfile?.profileImage || '',
+                    street: userProfile?.street || '',
+                    barangay: userProfile?.barangay || '',
+                    city: userProfile?.city || '',
+                    province: userProfile?.province || '',
+                    postalCode: userProfile?.postalCode || '',
+                    vehiclePlateNumber: application.plateNumber || '',
+                    vehicleType: application.motorcycleModel || '',
+                    licenseNumber: '',
+                    isApproved: true
+                });
+
+                // Update user role
+                await User.findByIdAndUpdate(application.userId._id, {
+                    role: 'driver'
+                });
+
+                // Delete UserProfile if exists
+                if (userProfile) {
+                    await UserProfile.findByIdAndDelete(userProfile._id);
+                }
+
+                created++;
+            }
+        }
+
+        res.status(200).json({
+            message: 'Migration completed successfully',
+            updatedExisting: updateResult.modifiedCount,
+            createdMissing: created,
+            total: updateResult.modifiedCount + created
+        });
+
+    } catch (error) {
+        console.error('Migration error:', error);
+        res.status(500).json({
+            message: 'Migration failed',
             error: error.message
         });
     }

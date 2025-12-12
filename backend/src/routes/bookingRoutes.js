@@ -354,4 +354,93 @@ router.get('/driver-history/:driverId', async (req, res) => {
     }
 });
 
+/* ================== ADMIN ENDPOINTS ================== */
+
+// Get all bookings (admin)
+router.get('/admin/all', async (req, res) => {
+    try {
+        const bookings = await Booking.find()
+            .populate('userId', 'name email phone')
+            .populate('driverId', 'name email phone')
+            .sort({ createdAt: -1 });
+
+        // Format the data for admin panel
+        const formattedBookings = bookings.map(booking => ({
+            id: booking._id.toString(),
+            rider: booking.userId?.name || 'Unknown',
+            riderEmail: booking.userId?.email || 'N/A',
+            driver: booking.driverId?.name || 'Not Assigned',
+            driverEmail: booking.driverId?.email || 'N/A',
+            pickup: booking.pickupLocation?.name || 'Unknown',
+            dropoff: booking.dropoffLocation?.name || 'Unknown',
+            status: booking.status.charAt(0).toUpperCase() + booking.status.slice(1),
+            date: new Date(booking.createdAt).toLocaleDateString(),
+            time: new Date(booking.createdAt).toLocaleTimeString(),
+            distance: booking.distance,
+            estimatedTime: booking.estimatedTime
+        }));
+
+        res.status(200).json(formattedBookings);
+    } catch (error) {
+        console.error("Error fetching all bookings:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// Get specific booking (admin)
+router.get('/admin/:id', async (req, res) => {
+    try {
+        const booking = await Booking.findById(req.params.id)
+            .populate('userId', 'name email phone')
+            .populate('driverId', 'name email phone');
+
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+
+        res.status(200).json(booking);
+    } catch (error) {
+        console.error("Error fetching booking:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// Update booking status (admin)
+router.patch('/admin/:id', async (req, res) => {
+    try {
+        const { status } = req.body;
+
+        const booking = await Booking.findByIdAndUpdate(
+            req.params.id,
+            { status: status.toLowerCase(), updatedAt: new Date() },
+            { new: true, runValidators: true }
+        );
+
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+
+        res.status(200).json({ message: "Booking updated successfully", booking });
+    } catch (error) {
+        console.error("Error updating booking:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// Delete booking (admin)
+router.delete('/admin/:id', async (req, res) => {
+    try {
+        const booking = await Booking.findByIdAndDelete(req.params.id);
+
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+
+        res.status(200).json({ message: "Booking deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting booking:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
 export default router;

@@ -2,6 +2,8 @@ import { v2 as cloudinary } from "cloudinary";
 import express from "express";
 import jwt from "jsonwebtoken";
 import multer from "multer";
+import Booking from "../models/Booking.js";
+import Complaint from "../models/Complaint.js";
 import DriverProfile from "../models/DriverProfile.js";
 import User from "../models/User.js";
 import UserProfile from "../models/UserProfile.js";
@@ -236,6 +238,127 @@ router.put("/photo", protect, upload.single("profileImage"), async (req, res) =>
       return res.status(500).json({ message: "Failed to upload image to Cloudinary" });
     }
 
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+/* ================== ADMIN: UPDATE USER ================== */
+router.patch("/admin/:userId", protect, adminProtect, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { name, email, phone, role, status } = req.body;
+
+    // Validate required fields
+    if (!name || !email || !phone) {
+      return res.status(400).json({ message: "Name, email, and phone are required" });
+    }
+
+    // Validate role
+    if (role && !['user', 'driver', 'admin'].includes(role)) {
+      return res.status(400).json({ message: "Invalid role. Must be 'user', 'driver', or 'admin'" });
+    }
+
+    // Validate status
+    if (status && !['Active', 'Suspended'].includes(status)) {
+      return res.status(400).json({ message: "Invalid status. Must be 'Active' or 'Suspended'" });
+    }
+
+    // Build update object with only provided fields
+    const updateData = { name, email, phone };
+    if (role) updateData.role = role;
+    if (status) updateData.status = status;
+
+    // Update user using findByIdAndUpdate to avoid password hashing middleware
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      updateData,
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      message: "User updated successfully",
+      user: {
+        id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        phone: updatedUser.phone,
+        role: updatedUser.role,
+        status: updatedUser.status
+      }
+    });
+  } catch (error) {
+    console.error("Update user error:", error);
+
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "Email or phone already exists" });
+    }
+
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+/* ================== ADMIN: DELETE USER ================== */
+router.delete("/admin/:userId", protect, adminProtect, async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Find and delete the user
+    const user = await User.findByIdAndDelete(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Delete associated profiles
+    await UserProfile.findOneAndDelete({ userId });
+    await DriverProfile.findOneAndDelete({ userId });
+
+    res.json({
+      message: "User deleted successfully",
+      deletedUser: {
+        id: user._id,
+        name: user.name,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    console.error("Delete user error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+/* ================== ADMIN DASHBOARD STATS ================== */
+router.get("/admin/dashboard/stats", protect, adminProtect, async (req, res) => {
+  try {
+    // Total Users (all users regardless of role)
+    const totalUsers = await User.countDocuments();
+
+    // Active Drivers (users with role 'driver' and driverProfile.isApproved = true)
+    const activeDrivers = await DriverProfile.countDocuments({
+      isApproved: true
+    });
+
+    // Completed Rides
+    const completedRides = await Booking.countDocuments({
+      status: "completed"
+    });
+
+    // Pending Complaints
+    const pendingComplaints = await Complaint.countDocuments({
+      status: "Pending"
+    });
+
+    res.json({
+      totalUsers,
+      activeDrivers,
+      completedRides,
+      pendingComplaints
+    });
+  } catch (error) {
+    console.error("Dashboard stats error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });

@@ -25,8 +25,10 @@ export default function UsersManagement() {
     const [searchQuery, setSearchQuery] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
     const [viewModalVisible, setViewModalVisible] = useState(false);
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [viewingUser, setViewingUser] = useState<User | null>(null);
+    const [deletingUser, setDeletingUser] = useState<User | null>(null);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -115,23 +117,39 @@ export default function UsersManagement() {
     };
 
     // DELETE
-    const handleDelete = (id: string) => {
-        Alert.alert(
-            'Delete User',
-            'Are you sure you want to delete this user?',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Delete',
-                    style: 'destructive',
-                    onPress: async () => {
-                        // Implement delete API call here if backend supports it
-                        // For now, just update local state
-                        setUsers(users.filter(u => u.id !== id));
-                    }
-                }
-            ]
-        );
+    const handleDelete = (user: User) => {
+        setDeletingUser(user);
+        setDeleteModalVisible(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!deletingUser) return;
+
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                Alert.alert('Error', 'No authentication token found');
+                return;
+            }
+
+            const response = await fetch(`${BASE_URL}/api/profile/admin/${deletingUser.id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setUsers(users.filter(u => u.id !== deletingUser.id));
+                setDeleteModalVisible(false);
+                setDeletingUser(null);
+            } else {
+                Alert.alert('Error', data.message || 'Failed to delete user');
+            }
+        } catch (error) {
+            console.error('Delete user error:', error);
+            Alert.alert('Error', 'Network error');
+        }
     };
 
     const handleSave = async () => {
@@ -140,17 +158,61 @@ export default function UsersManagement() {
             return;
         }
 
-        // Implement Save API call here
-        // For now, we'll just update local state to simulate
-        // In a real app, you'd POST/PUT to backend
-
         if (editingUser) {
-            setUsers(users.map(u => u.id === editingUser.id ? {
-                ...editingUser,
-                ...formData,
-                vehicleInfo: formData.role === 'driver' ? formData.vehicleInfo : undefined
-            } : u));
+            // UPDATE existing user via backend
+            try {
+                const token = await AsyncStorage.getItem('token');
+                if (!token) {
+                    Alert.alert('Error', 'No authentication token found');
+                    return;
+                }
+
+                console.log('Updating user:', editingUser.id);
+                console.log('URL:', `${BASE_URL}/api/profile/admin/${editingUser.id}`);
+                console.log('Data:', { name: formData.name, email: formData.email, phone: formData.phone, role: formData.role, status: formData.status });
+
+                const response = await fetch(`${BASE_URL}/api/profile/admin/${editingUser.id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        name: formData.name,
+                        email: formData.email,
+                        phone: formData.phone,
+                        role: formData.role,
+                        status: formData.status
+                    })
+                });
+
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+
+                if (response.ok) {
+                    // Update local state with the updated user
+                    setUsers(users.map(u => u.id === editingUser.id ? {
+                        ...u,
+                        name: formData.name,
+                        email: formData.email,
+                        phone: formData.phone,
+                        role: formData.role,
+                        status: formData.status,
+                        vehicleInfo: formData.role === 'driver' ? formData.vehicleInfo : undefined
+                    } : u));
+                    setModalVisible(false);
+                } else {
+                    console.error('Update failed:', data);
+                    Alert.alert('Error', data.message || 'Failed to update user');
+                }
+            } catch (error) {
+                console.error('Update user error:', error);
+                const errorMessage = error instanceof Error ? error.message : 'Network error';
+                Alert.alert('Error', `Network error: ${errorMessage}`);
+            }
         } else {
+            // CREATE new user (local only for now - no backend endpoint)
             const newUser: User = {
                 id: Date.now().toString(),
                 ...formData,
@@ -162,8 +224,8 @@ export default function UsersManagement() {
                 })
             };
             setUsers([...users, newUser]);
+            setModalVisible(false);
         }
-        setModalVisible(false);
     };
 
     const renderUserItem = ({ item }: { item: User }) => (
@@ -195,7 +257,7 @@ export default function UsersManagement() {
                 <TouchableOpacity style={styles.actionButton} onPress={() => handleEdit(item)}>
                     <MaterialIcons name="edit" size={20} color="#3498DB" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.actionButton} onPress={() => handleDelete(item.id)}>
+                <TouchableOpacity style={styles.actionButton} onPress={() => handleDelete(item)}>
                     <MaterialIcons name="delete" size={20} color="#E74C3C" />
                 </TouchableOpacity>
             </View>
@@ -241,7 +303,7 @@ export default function UsersManagement() {
             />
 
             {/* View Documents Modal */}
-            <Modal visible={viewModalVisible} animationType="slide" transparent={true}>
+            <Modal visible={viewModalVisible} animationType="fade" transparent={true}>
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
                         <View style={styles.modalHeader}>
@@ -320,7 +382,7 @@ export default function UsersManagement() {
             </Modal>
 
             {/* Create/Edit Modal */}
-            <Modal visible={modalVisible} animationType="slide" transparent={true}>
+            <Modal visible={modalVisible} animationType="fade" transparent={true}>
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
                         <View style={styles.modalHeader}>
@@ -408,6 +470,39 @@ export default function UsersManagement() {
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
                                 <Text style={styles.saveButtonText}>Save</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Delete Confirmation Modal */}
+            <Modal visible={deleteModalVisible} animationType="fade" transparent={true}>
+                <View style={styles.modalOverlay}>
+                    <View style={styles.deleteModalContainer}>
+                        <Text style={styles.deleteModalTitle}>Delete User</Text>
+                        <Text style={styles.deleteModalMessage}>
+                            Are you sure you want to delete <Text style={styles.deleteModalUserName}>{deletingUser?.name}</Text>?
+                        </Text>
+                        <Text style={styles.deleteModalWarning}>
+                            This action cannot be undone.
+                        </Text>
+
+                        <View style={styles.deleteModalButtons}>
+                            <TouchableOpacity
+                                style={[styles.deleteModalBtn, styles.deleteCancelBtn]}
+                                onPress={() => {
+                                    setDeleteModalVisible(false);
+                                    setDeletingUser(null);
+                                }}
+                            >
+                                <Text style={styles.deleteCancelText}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.deleteModalBtn, styles.deleteConfirmBtn]}
+                                onPress={confirmDelete}
+                            >
+                                <Text style={styles.deleteConfirmText}>Delete</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -667,5 +762,76 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: 'bold',
         fontFamily: 'Poppins',
+    },
+    // Delete Modal styles (matching logout modal)
+    deleteModalContainer: {
+        width: '80%',
+        backgroundColor: '#fff',
+        padding: 20,
+        borderRadius: 15,
+        alignItems: 'center',
+    },
+    modalOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 99,
+    },
+    deleteModalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        fontFamily: 'Poppins',
+        marginBottom: 10,
+    },
+    deleteModalMessage: {
+        fontSize: 15,
+        color: '#444',
+        fontFamily: 'Poppins',
+        textAlign: 'center',
+        marginBottom: 8,
+    },
+    deleteModalWarning: {
+        fontSize: 14,
+        color: '#E74C3C',
+        fontFamily: 'Poppins',
+        textAlign: 'center',
+        marginBottom: 20,
+    },
+    deleteModalUserName: {
+        fontWeight: 'bold',
+        color: '#2C3E50',
+    },
+    deleteModalButtons: {
+        flexDirection: 'row',
+        width: '100%',
+    },
+    deleteModalBtn: {
+        flex: 1,
+        paddingVertical: 12,
+        alignItems: 'center',
+        borderRadius: 10,
+    },
+    deleteCancelBtn: {
+        backgroundColor: '#E5E5E5',
+        marginRight: 10,
+    },
+    deleteCancelText: {
+        color: '#333',
+        fontFamily: 'Poppins',
+        fontSize: 15,
+    },
+    deleteConfirmBtn: {
+        backgroundColor: '#E74C3C',
+        marginLeft: 10,
+    },
+    deleteConfirmText: {
+        color: '#fff',
+        fontFamily: 'Poppins',
+        fontSize: 15,
     },
 });

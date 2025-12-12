@@ -83,6 +83,20 @@ export const useBookingPolling = ({
                 const data = await response.json();
                 console.log("📱 Booking status:", data);
 
+                if (data.booking && data.booking.status && data.booking.status.toLowerCase() === 'cancelled') {
+                    console.log('❌ Booking was cancelled while waiting for driver');
+                    clearInterval(pollInterval);
+                    setDriverSearchVisible(false);
+                    await resetBookingState();
+
+                    Alert.alert(
+                        "Booking Cancelled",
+                        "Your booking has been cancelled.",
+                        [{ text: "OK" }]
+                    );
+                    return;
+                }
+
                 if (data.booking && data.booking.status === 'accepted') {
                     console.log('✅ Driver accepted booking!');
                     setDriverSearchVisible(false);
@@ -231,9 +245,9 @@ export const useBookingPolling = ({
                     }
                 }
 
-                // Check if driver cancelled the booking
-                if (data.booking && data.booking.status === 'cancelled') {
-                    console.log('❌ Driver cancelled the booking');
+                // Check if booking was cancelled (by driver or admin)
+                if (data.booking && data.booking.status && data.booking.status.toLowerCase() === 'cancelled') {
+                    console.log('❌ Booking was cancelled');
                     clearInterval(pollDriverLocation);
 
                     // Clear booking state
@@ -245,7 +259,7 @@ export const useBookingPolling = ({
 
                     Alert.alert(
                         "Booking Cancelled",
-                        "The driver has cancelled your booking. Please try again.",
+                        "Your booking has been cancelled.",
                         [{ text: "OK" }]
                     );
                     return;

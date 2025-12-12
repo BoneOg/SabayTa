@@ -1,6 +1,9 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import React, { useState } from 'react';
-import { Alert, FlatList, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { BASE_URL } from '../../config';
 
 type Complaint = {
     id: string;
@@ -12,16 +15,46 @@ type Complaint = {
     status: 'Pending' | 'Resolved';
 };
 
-const INITIAL_COMPLAINTS: Complaint[] = [
-    { id: '1', reporter: 'Alice Smith', reportedUser: 'Bob Jones', reason: 'Rude behavior', description: 'Driver was very rude during the ride', date: '2023-10-27', status: 'Pending' },
-    { id: '2', reporter: 'Charlie Brown', reportedUser: 'Eve White', reason: 'No show', description: 'Rider did not show up at pickup location', date: '2023-10-26', status: 'Pending' },
-];
-
 export default function ComplaintsManagement() {
-    const [complaints, setComplaints] = useState<Complaint[]>(INITIAL_COMPLAINTS);
+    const [complaints, setComplaints] = useState<Complaint[]>([]);
+    const [loading, setLoading] = useState(true);
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
     const [actionNote, setActionNote] = useState('');
+
+    // Fetch all complaints
+    const fetchComplaints = useCallback(async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                Alert.alert('Error', 'No authentication token found');
+                return;
+            }
+
+            const response = await fetch(`${BASE_URL}/api/complaints/admin/all`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setComplaints(data);
+            } else {
+                Alert.alert('Error', data.message || 'Failed to fetch complaints');
+            }
+        } catch (error) {
+            console.error('Fetch complaints error:', error);
+            Alert.alert('Error', 'Network error');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchComplaints();
+        }, [fetchComplaints])
+    );
 
     const handleView = (complaint: Complaint) => {
         setSelectedComplaint(complaint);
@@ -29,14 +62,37 @@ export default function ComplaintsManagement() {
         setModalVisible(true);
     };
 
-    const handleResolve = () => {
+    const handleResolve = async () => {
         if (!selectedComplaint) return;
 
-        setComplaints(complaints.map(r =>
-            r.id === selectedComplaint.id ? { ...r, status: 'Resolved' } : r
-        ));
-        Alert.alert('Success', 'Complaint marked as resolved');
-        setModalVisible(false);
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) return;
+
+            const response = await fetch(`${BASE_URL}/api/complaints/admin/${selectedComplaint.id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    status: 'Resolved',
+                    adminNotes: actionNote || undefined
+                })
+            });
+
+            if (response.ok) {
+                Alert.alert('Success', 'Complaint marked as resolved');
+                setModalVisible(false);
+                fetchComplaints(); // Refresh the list
+            } else {
+                const data = await response.json();
+                Alert.alert('Error', data.message || 'Failed to resolve complaint');
+            }
+        } catch (error) {
+            console.error('Resolve complaint error:', error);
+            Alert.alert('Error', 'Network error');
+        }
     };
 
     const handleDelete = (id: string) => {
@@ -48,7 +104,28 @@ export default function ComplaintsManagement() {
                 {
                     text: 'Delete',
                     style: 'destructive',
-                    onPress: () => setComplaints(complaints.filter(r => r.id !== id))
+                    onPress: async () => {
+                        try {
+                            const token = await AsyncStorage.getItem('token');
+                            if (!token) return;
+
+                            const response = await fetch(`${BASE_URL}/api/complaints/admin/${id}`, {
+                                method: 'DELETE',
+                                headers: { Authorization: `Bearer ${token}` }
+                            });
+
+                            if (response.ok) {
+                                Alert.alert('Success', 'Complaint deleted successfully');
+                                fetchComplaints(); // Refresh the list
+                            } else {
+                                const data = await response.json();
+                                Alert.alert('Error', data.message || 'Failed to delete complaint');
+                            }
+                        } catch (error) {
+                            console.error('Delete complaint error:', error);
+                            Alert.alert('Error', 'Network error');
+                        }
+                    }
                 }
             ]
         );
@@ -65,6 +142,15 @@ export default function ComplaintsManagement() {
         Alert.alert('User Suspended', `${selectedComplaint.reportedUser} has been suspended`);
         handleResolve();
     };
+
+    if (loading) {
+        return (
+            <View style={[styles.container, styles.centerContent]}>
+                <ActivityIndicator size="large" color="#534889" />
+                <Text style={styles.loadingText}>Loading complaints...</Text>
+            </View>
+        );
+    }
 
     const renderItem = ({ item }: { item: Complaint }) => (
         <View style={styles.card}>
@@ -188,6 +274,16 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F5F7FA',
+    },
+    centerContent: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingText: {
+        marginTop: 10,
+        fontSize: 16,
+        color: '#7F8C8D',
+        fontFamily: 'Poppins',
     },
     list: {
         padding: 15,
