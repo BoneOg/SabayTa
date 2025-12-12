@@ -19,6 +19,7 @@ interface MapComponentProps {
     selectingLocation?: 'from' | 'to' | null;
     driverLocation?: { latitude: number; longitude: number } | null;
     showDriverRoute?: boolean;
+    passengerPickedUp?: boolean;
 }
 
 export const MapComponent = ({
@@ -30,7 +31,8 @@ export const MapComponent = ({
     routeCoords = [],
     selectingLocation,
     driverLocation,
-    showDriverRoute
+    showDriverRoute,
+    passengerPickedUp
 }: MapComponentProps) => {
     return (
         <MapView
@@ -88,8 +90,8 @@ export const MapComponent = ({
                 </Marker>
             )}
 
-            {/* Pickup location marker (GREEN) when driver is on the way */}
-            {fromLocation && showDriverRoute && (
+            {/* Pickup location marker (GREEN) when driver is on the way - Hide if passenger picked up */}
+            {fromLocation && showDriverRoute && !passengerPickedUp && (
                 <Marker coordinate={{ latitude: fromLocation.lat, longitude: fromLocation.lon }} title="Pickup Location">
                     <View style={[styles.userMarker, { backgroundColor: "#34A853" }]}>
                         <Ionicons name="location-sharp" size={24} color="#fff" />

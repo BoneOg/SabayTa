@@ -11,6 +11,7 @@ import { useBookingManager } from "../../components/driver/hooks/useBookingManag
 import { useDriverLocation } from "../../components/driver/hooks/useDriverLocation";
 import { useRouteCalculator } from "../../components/driver/hooks/useRouteCalculator";
 import OnTheWay from "../../components/driver/OnTheWay";
+import { RidePopups } from "../../components/user/RidePopups";
 import { BASE_URL } from "../../config";
 import ChooseBookedRider from "./booked/choose_booked_rider";
 import DriverChatScreen from "./chat";
@@ -39,6 +40,7 @@ export default function DriverHome() {
   const [showOnTheWay, setShowOnTheWay] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [passengerPickedUp, setPassengerPickedUp] = useState(false);
+  const [showDropoffPopup, setShowDropoffPopup] = useState(false);
 
   // Animations
   const slideAnim = useRef(new Animated.Value(height)).current;
@@ -174,6 +176,35 @@ export default function DriverHome() {
     };
   }, [showOnTheWay, selectedUser]);
 
+  // 🔥 Update route periodically as driver moves
+  useEffect(() => {
+    let routeInterval: any;
+
+    if (showOnTheWay && selectedUser) {
+      const updateRoute = () => {
+        const currentLoc = driverLocationRef.current;
+        if (passengerPickedUp) {
+          if (selectedUser.destinationCoords) {
+            fetchRoute(currentLoc, selectedUser.destinationCoords);
+          }
+        } else {
+          if (selectedUser.pickupCoords) {
+            fetchRoute(currentLoc, selectedUser.pickupCoords);
+          }
+        }
+      };
+
+      // Initial update NOT needed here as it's handled by handleAccept and handlePickedUp
+      // We just want to keep it fresh.
+      // 5 seconds interval for route recalculation
+      routeInterval = setInterval(updateRoute, 5000);
+    }
+
+    return () => {
+      if (routeInterval) clearInterval(routeInterval);
+    };
+  }, [showOnTheWay, selectedUser, passengerPickedUp]);
+
   // Show modal on screen focus
   useFocusEffect(
     useCallback(() => {
@@ -288,9 +319,9 @@ export default function DriverHome() {
         console.error("Failed to notify backend:", error);
       }
 
-      // Update route to show pickup → destination
-      console.log("🗺️ Fetching route from pickup to destination");
-      fetchRoute(selectedUser.pickupCoords, selectedUser.destinationCoords);
+      // Update route to show driver's location → destination
+      console.log("🗺️ Fetching route from driver location to destination");
+      fetchRoute(driverLocation, selectedUser.destinationCoords);
       setPassengerPickedUp(true);
     }
   };
@@ -310,7 +341,12 @@ export default function DriverHome() {
       }
     }
 
+    setShowDropoffPopup(true);
     setShowOnTheWay(false);
+  };
+
+  const handleDropoffDone = async () => {
+    setShowDropoffPopup(false);
     setPassengerPickedUp(false);
     setSelectedUser(null);
     clearRoute();
@@ -389,6 +425,13 @@ export default function DriverHome() {
           userImage={selectedUser?.profileImage}
         />
       )}
+
+      {/* Ride Completion Popup */}
+      <RidePopups
+        visible={showDropoffPopup}
+        type="dropoff"
+        onClose={handleDropoffDone}
+      />
     </View>
   );
 }

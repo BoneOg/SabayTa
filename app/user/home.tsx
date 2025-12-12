@@ -47,6 +47,7 @@ export default function HomeScreen() {
   const [driverLocation, setDriverLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [showDriverRoute, setShowDriverRoute] = useState(false);
   const [isBookingAccepted, setIsBookingAccepted] = useState(false);
+  const [passengerPickedUp, setPassengerPickedUp] = useState(false);
 
   // Verification State
   const [verificationStatus, setVerificationStatus] = useState<'none' | 'pending' | 'verified' | 'rejected'>('verified');
@@ -156,6 +157,7 @@ export default function HomeScreen() {
           selectingLocation={selectingLocation}
           driverLocation={driverLocation}
           showDriverRoute={showDriverRoute}
+          passengerPickedUp={passengerPickedUp}
         />
 
         {/* BOOKING COMPONENT - Contains all booking logic */}
@@ -171,6 +173,7 @@ export default function HomeScreen() {
           onDriverLocationChange={setDriverLocation}
           onDriverRouteChange={setShowDriverRoute}
           onBookingAccepted={setIsBookingAccepted}
+          onPassengerPickedUp={setPassengerPickedUp}
         />
 
         {/* BUTTONS */}
