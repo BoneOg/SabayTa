@@ -1,7 +1,7 @@
 import { BASE_URL } from '@/config';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as ImagePicker from 'expo-image-picker';
+
 import { Href, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -25,7 +25,7 @@ export default function DriverProfileScreen() {
     const [rating, setRating] = useState(0);
     const [totalRatings, setTotalRatings] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [uploading, setUploading] = useState(false);
+
 
     const [selectedRole, setSelectedRole] = useState<'rider' | 'driver'>('driver');
     const [logoutVisible, setLogoutVisible] = useState(false);
@@ -66,66 +66,7 @@ export default function DriverProfileScreen() {
         }
     };
 
-    const handleUpdatePhoto = async () => {
-        try {
-            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-            if (status !== 'granted') {
-                Alert.alert(
-                    'Permission Denied',
-                    'We need camera roll permissions to update your photo'
-                );
-                return;
-            }
 
-            const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                allowsEditing: true,
-                aspect: [1, 1],
-                quality: 0.8,
-            });
-
-            if (!result.canceled && result.assets[0]) {
-                setUploading(true);
-                const imageUri = result.assets[0].uri;
-
-                const token = await AsyncStorage.getItem('token');
-                if (!token) {
-                    Alert.alert('Error', 'No authentication token found');
-                    setUploading(false);
-                    return;
-                }
-
-                const formData = new FormData();
-                formData.append('profileImage', {
-                    uri: imageUri,
-                    type: 'image/jpeg',
-                    name: 'profile.jpg',
-                } as any);
-
-                const response = await fetch(`${BASE_URL}/api/driver/profile/photo`, {
-                    method: 'PUT',
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: formData,
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    setProfileImage(data.profileImage);
-                    Alert.alert('Success', 'Profile photo updated successfully');
-                } else {
-                    Alert.alert('Error', data.message || 'Failed to update photo');
-                }
-            }
-        } catch (error) {
-            console.error('Error updating photo:', error);
-            Alert.alert('Error', 'Failed to update photo');
-        } finally {
-            setUploading(false);
-        }
-    };
 
     const menuItems = [
         {
@@ -194,17 +135,7 @@ export default function DriverProfileScreen() {
                                     }
                                     style={styles.profileImage}
                                 />
-                                <TouchableOpacity
-                                    style={styles.updatePhotoButton}
-                                    onPress={handleUpdatePhoto}
-                                    disabled={uploading}
-                                >
-                                    {uploading ? (
-                                        <ActivityIndicator size="small" color="#fff" />
-                                    ) : (
-                                        <MaterialIcons name="camera-alt" size={20} color="#fff" />
-                                    )}
-                                </TouchableOpacity>
+
                             </View>
 
                             <Text style={styles.name} numberOfLines={1}>
@@ -391,19 +322,7 @@ const styles = StyleSheet.create({
         borderRadius: 50,
     },
 
-    updatePhotoButton: {
-        position: 'absolute',
-        bottom: 0,
-        right: 0,
-        backgroundColor: '#534889',
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 3,
-        borderColor: '#fff',
-    },
+
 
     name: {
         fontSize: 22,
