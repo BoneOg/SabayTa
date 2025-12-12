@@ -1,6 +1,8 @@
 import express from 'express';
 import Booking from '../models/Booking.js';
+import DriverProfile from '../models/DriverProfile.js';
 import Rating from '../models/Rating.js';
+import UserProfile from '../models/UserProfile.js';
 import { createNotification } from './notificationRoutes.js';
 
 const router = express.Router();
@@ -48,7 +50,19 @@ router.get('/pending', async (req, res) => {
             .populate('userId', 'name phone gender')
             .sort({ createdAt: -1 });
 
-        res.status(200).json(bookings);
+        // Populate profile images
+        const bookingsWithImages = await Promise.all(bookings.map(async (booking) => {
+            const bookingObj = booking.toObject();
+            if (bookingObj.userId) {
+                import('../models/UserProfile.js'); // Ensure model is loaded or accessible
+                const UserProfile = (await import('../models/UserProfile.js')).default;
+                const userProfile = await UserProfile.findOne({ userId: bookingObj.userId._id });
+                bookingObj.userId.profileImage = userProfile ? userProfile.profileImage : null;
+            }
+            return bookingObj;
+        }));
+
+        res.status(200).json(bookingsWithImages);
     } catch (error) {
         console.error("Error fetching bookings:", error);
         res.status(500).json({ message: "Server error" });
@@ -59,11 +73,20 @@ router.get('/pending', async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const booking = await Booking.findById(req.params.id)
-            .populate('userId', 'name phone gender')
-            .populate('driverId', 'name phone vehicle');
+            .populate('userId', 'name phone gender profileImage')
+            .populate('driverId', 'name phone email');
 
         if (!booking) {
             return res.status(404).json({ message: "Booking not found" });
+        }
+
+        // Fetch user profile image
+        if (booking.userId && booking.userId._id) {
+            const userProfile = await UserProfile.findOne({ userId: booking.userId._id });
+            booking.userId = {
+                ...booking.userId.toObject(),
+                profileImage: userProfile ? userProfile.profileImage : null
+            };
         }
 
         // Calculate driver ratings if driver is assigned
@@ -75,11 +98,20 @@ router.get('/:id', async (req, res) => {
                 averageRating = parseFloat((sum / ratings.length).toFixed(1));
             }
 
-            // Add rating data to the driver object
+            // Fetch driver profile
+            const driverProfile = await DriverProfile.findOne({ userId: booking.driverId._id });
+
+            // Add rating and vehicle data to the driver object
             booking.driverId = {
                 ...booking.driverId.toObject(),
                 averageRating: averageRating,
-                totalRatings: ratings.length
+                totalRatings: ratings.length,
+                vehicle: driverProfile ? {
+                    plateNumber: driverProfile.vehiclePlateNumber,
+                    model: driverProfile.vehicleType,
+                    color: "Standard", // Default since not in schema
+                } : null,
+                profileImage: driverProfile ? driverProfile.profileImage : null
             };
         }
 

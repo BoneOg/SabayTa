@@ -137,7 +137,10 @@ export default function DriverHome() {
       const pollBookingStatus = async () => {
         try {
           const response = await fetch(`${BASE_URL}/api/bookings/${selectedUser.id}`);
-          if (!response.ok) return;
+          if (!response.ok) {
+            console.warn(`Booking status response not ok: ${response.status}`);
+            return;
+          }
 
           const data = await response.json();
 
@@ -379,7 +382,12 @@ export default function DriverHome() {
 
       {/* Chat Screen */}
       {showChat && (
-        <DriverChatScreen onClose={() => setShowChat(false)} />
+        <DriverChatScreen
+          onClose={() => setShowChat(false)}
+          userId={selectedUser?.riderId}
+          userName={selectedUser?.name}
+          userImage={selectedUser?.profileImage}
+        />
       )}
     </View>
   );

@@ -23,6 +23,10 @@ export default function DriverTrackingScreen() {
     const [destination, setDestination] = useState({ latitude: 8.4650, longitude: 124.6400 });
     const [routeCoordinates, setRouteCoordinates] = useState<{ latitude: number, longitude: number }[]>([]);
 
+    // Dynamic Booking Data
+    const [driver, setDriver] = useState<any>(null);
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
     // Poll for booking status to detect when passenger is picked up
     useEffect(() => {
         if (!bookingId) return;
@@ -41,6 +45,18 @@ export default function DriverTrackingScreen() {
                             latitude: booking.driverLocation.latitude,
                             longitude: booking.driverLocation.longitude
                         });
+                    }
+
+                    // Store Driver Info if assigned
+                    if (booking.driverId && typeof booking.driverId === 'object') {
+                        setDriver(booking.driverId);
+                    }
+
+                    // Store User ID (for chat)
+                    if (booking.userId && typeof booking.userId === 'object') {
+                        setCurrentUserId(booking.userId._id);
+                    } else if (booking.userId && typeof booking.userId === 'string') {
+                        setCurrentUserId(booking.userId);
                     }
 
                     // Update pickup and dropoff locations
@@ -112,7 +128,17 @@ export default function DriverTrackingScreen() {
     };
 
     const handleMessage = () => {
-        router.push('/user/chat');
+        if (currentUserId && driver?._id) {
+            router.push({
+                pathname: '/user/chat',
+                params: {
+                    userId: currentUserId,
+                    driverId: driver._id,
+                    driverName: driver.name,
+                    driverImage: driver.profileImage
+                }
+            });
+        }
     };
 
     const handleDriverArrived = () => {
@@ -179,19 +205,21 @@ export default function DriverTrackingScreen() {
 
                 <View style={styles.driverCard}>
                     <Image
-                        source={{ uri: 'https://i.pravatar.cc/150?img=12' }}
+                        source={{ uri: driver?.profileImage || 'https://i.pravatar.cc/150?img=12' }}
                         style={styles.driverImage}
                     />
                     <View style={styles.driverInfo}>
-                        <Text style={styles.driverName}>Sergio Ramasis</Text>
+                        <Text style={styles.driverName}>{driver?.name || "Searching for driver..."}</Text>
                         <View style={styles.ratingContainer}>
                             <Ionicons name="location" size={14} color="#666" />
                             <Text style={styles.distanceText}>800m (6mins away)</Text>
                         </View>
-                        <View style={styles.ratingContainer}>
-                            <Ionicons name="star" size={14} color="#FFB800" />
-                            <Text style={styles.ratingText}>4.9 (31 reviews)</Text>
-                        </View>
+                        {driver && (
+                            <View style={styles.ratingContainer}>
+                                <Ionicons name="star" size={14} color="#FFB800" />
+                                <Text style={styles.ratingText}>{driver.averageRating || 'New'} ({driver.totalRatings || 0} reviews)</Text>
+                            </View>
+                        )}
                     </View>
                 </View>
 
@@ -228,14 +256,14 @@ export default function DriverTrackingScreen() {
                         </TouchableOpacity>
 
                         <Image
-                            source={{ uri: 'https://i.pravatar.cc/300?img=12' }}
+                            source={{ uri: driver?.profileImage || 'https://i.pravatar.cc/300?img=12' }}
                             style={styles.detailsDriverImage}
                         />
 
-                        <Text style={styles.detailsDriverName}>Sergio Ramasis</Text>
+                        <Text style={styles.detailsDriverName}>{driver?.name || "Driver Name"}</Text>
                         <View style={styles.ratingContainer}>
                             <Ionicons name="star" size={16} color="#FFB800" />
-                            <Text style={styles.detailsRating}>4.9 (31 reviews)</Text>
+                            <Text style={styles.detailsRating}>{driver?.averageRating || 'New'} ({driver?.totalRatings || 0} reviews)</Text>
                         </View>
 
                         <View style={styles.vehicleCard}>
@@ -244,20 +272,22 @@ export default function DriverTrackingScreen() {
                                 style={styles.vehicleImage}
                             />
                             <View style={styles.vehicleInfo}>
-                                <Text style={styles.vehicleLabel}>Color: Race Blue</Text>
-                                <Text style={styles.vehicleLabel}>Plate no.: NA 45678</Text>
+                                <Text style={styles.vehicleLabel}>Model: {driver?.vehicle?.model || "Unknown"}</Text>
+                                <Text style={styles.vehicleLabel}>Plate no.: {driver?.vehicle?.plateNumber || "Unknown"}</Text>
+                                <Text style={styles.vehicleLabel}>Color: {driver?.vehicle?.color || "Unknown"}</Text>
                             </View>
                         </View>
 
                         <View style={styles.contactCard}>
                             <Text style={styles.contactTitle}>Contact Information :</Text>
+                            {/* Note: In a real app, maybe hide email for privacy/safety */}
                             <View style={styles.contactRow}>
                                 <MaterialIcons name="email" size={20} color="#000" />
-                                <Text style={styles.contactText}>Email: sergio.r@gmail.com</Text>
+                                <Text style={styles.contactText}>{driver?.email || "No email provided"}</Text>
                             </View>
                             <View style={styles.contactRow}>
                                 <MaterialIcons name="phone" size={20} color="#000" />
-                                <Text style={styles.contactText}>Contact number: 09563920915</Text>
+                                <Text style={styles.contactText}>{driver?.phone || "No contact info"}</Text>
                             </View>
                         </View>
                     </View>

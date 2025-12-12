@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, Image, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -14,22 +15,40 @@ interface Message {
 
 interface DriverChatScreenProps {
   onClose: () => void;
+  userId?: string;
+  userName?: string;
+  userImage?: string;
 }
 
-export default function DriverChatScreen({ onClose }: DriverChatScreenProps) {
+export default function DriverChatScreen({ onClose, userId, userName, userImage }: DriverChatScreenProps) {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const flatListRef = useRef<FlatList>(null);
+  const [driverId, setDriverId] = useState<string | null>(null);
 
-  const userId = "user123";
-  const driverId = "driver456";
+  const emojis = ['😊', '👍', '❤️', '😂', '🙏', '👋', '🚗', '⏰'];
 
-  const emojis = ['😊','👍','❤️','😂','🙏','👋','🚗','⏰'];
+  // Fetch Driver ID
+  useEffect(() => {
+    const getDriverId = async () => {
+      try {
+        const userStr = await AsyncStorage.getItem('user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          setDriverId(user._id || user.id);
+        }
+      } catch (e) {
+        console.error("Error fetching driver ID", e);
+      }
+    };
+    getDriverId();
+  }, []);
 
   // -------------------- Polling: fetch messages every 2s --------------------
   const loadMessages = async () => {
+    if (!driverId || !userId) return;
     try {
       const res = await fetch(`${BASE_URL}/api/conversations?user=${userId}&driver=${driverId}`);
       const data = await res.json();
@@ -46,13 +65,16 @@ export default function DriverChatScreen({ onClose }: DriverChatScreenProps) {
   };
 
   useEffect(() => {
-    loadMessages(); // load initially
-    const interval = setInterval(loadMessages, 2000); // poll every 2s
-    return () => clearInterval(interval);
-  }, []);
+    if (driverId && userId) {
+      loadMessages(); // load initially
+      const interval = setInterval(loadMessages, 2000); // poll every 2s
+      return () => clearInterval(interval);
+    }
+  }, [driverId, userId]);
 
   // -------------------- Send message --------------------
   const sendMessageToBackend = async (text?: string, image?: string) => {
+    if (!driverId || !userId) return;
     try {
       await fetch(`${BASE_URL}/api/conversations/message`, {
         method: "POST",
@@ -63,6 +85,8 @@ export default function DriverChatScreen({ onClose }: DriverChatScreenProps) {
       console.error(error);
     }
   };
+
+  // ... (keeping sendMessage, sendEmoji, pickImage as is, they call sendMessageToBackend which handles checks)
 
   const sendMessage = async () => {
     if (message.trim()) {
@@ -118,8 +142,8 @@ export default function DriverChatScreen({ onClose }: DriverChatScreenProps) {
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={styles.header}>
         <TouchableOpacity onPress={onClose} style={styles.backButton}><Ionicons name="arrow-back" size={24} color="#000" /></TouchableOpacity>
-        <Image source={{ uri: 'https://i.pravatar.cc/150?img=45' }} style={styles.headerImage} />
-        <View style={styles.headerInfo}><Text style={styles.headerName}>User Testing</Text><Text style={styles.headerStatus}>Online</Text></View>
+        <Image source={{ uri: userImage || 'https://i.pravatar.cc/150?img=45' }} style={styles.headerImage} />
+        <View style={styles.headerInfo}><Text style={styles.headerName}>{userName || "User"}</Text><Text style={styles.headerStatus}>Online</Text></View>
       </View>
 
       <FlatList

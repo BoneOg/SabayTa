@@ -15,6 +15,8 @@ export interface User {
     pickupCoords?: { latitude: number; longitude: number };
     destinationCoords?: { latitude: number; longitude: number };
     riderLocation?: { latitude: number; longitude: number };
+    riderId?: string;
+    profileImage?: string;
 }
 
 export const useBookingManager = () => {
@@ -47,7 +49,9 @@ export const useBookingManager = () => {
                     riderLocation: booking.userId?.currentLocation ? {
                         latitude: booking.userId.currentLocation.lat,
                         longitude: booking.userId.currentLocation.lon
-                    } : undefined
+                    } : undefined,
+                    riderId: booking.userId?._id,
+                    profileImage: booking.userId?.profileImage
                 }));
                 setUsers(mappedUsers);
             }

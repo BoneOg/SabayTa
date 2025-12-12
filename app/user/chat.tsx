@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, Image, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { BASE_URL } from "../../config";
@@ -19,18 +19,24 @@ interface ChatScreenProps {
 
 export default function ChatScreen({ onClose }: ChatScreenProps = {}) {
   const router = useRouter();
+  const params = useLocalSearchParams();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
-  const userId = "user123";
-  const driverId = "driver456";
-  const emojis = ['😊','👍','❤️','😂','🙏','👋','🚗','⏰'];
+  // Get IDs from params or props
+  const userId = params.userId as string; // This user's ID
+  const driverId = params.driverId as string;
+  const driverName = params.driverName as string || "Driver";
+  const driverImage = params.driverImage as string || 'https://i.pravatar.cc/150?img=12';
+
+  const emojis = ['😊', '👍', '❤️', '😂', '🙏', '👋', '🚗', '⏰'];
 
   // -------------------- Polling --------------------
   const loadMessages = async () => {
+    if (!userId || !driverId) return;
     try {
       const res = await fetch(`${BASE_URL}/api/conversations?user=${userId}&driver=${driverId}`);
       const data = await res.json();
@@ -42,18 +48,21 @@ export default function ChatScreen({ onClose }: ChatScreenProps = {}) {
       setMessages(updatedMessages);
       setTimeout(() => flatListRef.current?.scrollToEnd(), 100);
     } catch (error) {
-      console.error(error);
+      console.error("Error loading messages:", error);
     }
   };
 
   useEffect(() => {
-    loadMessages(); // load on mount
-    const interval = setInterval(loadMessages, 2000); // poll every 2s
-    return () => clearInterval(interval);
-  }, []);
+    if (userId && driverId) {
+      loadMessages(); // load on mount
+      const interval = setInterval(loadMessages, 2000); // poll every 2s
+      return () => clearInterval(interval);
+    }
+  }, [userId, driverId]);
 
   // -------------------- Send message --------------------
   const sendMessageToBackend = async (text?: string, image?: string) => {
+    if (!userId || !driverId) return;
     try {
       await fetch(`${BASE_URL}/api/conversations/message`, {
         method: "POST",
@@ -61,7 +70,7 @@ export default function ChatScreen({ onClose }: ChatScreenProps = {}) {
         body: JSON.stringify({ user: userId, driver: driverId, sender: "user", text, image }),
       });
     } catch (error) {
-      console.error(error);
+      console.error("Error sending message:", error);
     }
   };
 
@@ -124,8 +133,8 @@ export default function ChatScreen({ onClose }: ChatScreenProps = {}) {
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}><Ionicons name="arrow-back" size={24} color="#000" /></TouchableOpacity>
-        <Image source={{ uri: 'https://i.pravatar.cc/150?img=12' }} style={styles.headerImage} />
-        <View style={styles.headerInfo}><Text style={styles.headerName}>Sergio Ramasis</Text><Text style={styles.headerStatus}>Online</Text></View>
+        <Image source={{ uri: driverImage }} style={styles.headerImage} />
+        <View style={styles.headerInfo}><Text style={styles.headerName}>{driverName}</Text><Text style={styles.headerStatus}>Online</Text></View>
       </View>
 
       <FlatList
