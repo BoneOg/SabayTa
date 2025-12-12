@@ -246,8 +246,8 @@ export const useBookingPolling = ({
                     }
                 }
 
-                // Update driver location and route (only if passenger not picked up yet)
-                if (data.booking && data.booking.driverLocation && !passengerPickedUpFlag) {
+                // Update driver location and route
+                if (data.booking && data.booking.driverLocation) {
                     const driverLoc = {
                         latitude: data.booking.driverLocation.latitude || data.booking.driverLocation.lat,
                         longitude: data.booking.driverLocation.longitude || data.booking.driverLocation.lon
@@ -255,10 +255,26 @@ export const useBookingPolling = ({
 
                     if (onDriverLocationChange) onDriverLocationChange(driverLoc);
 
-                    // Update route if we have pickup location
-                    if (fromLocation) {
-                        const driverLocation = { lat: driverLoc.latitude, lon: driverLoc.longitude, name: "Driver" };
-                        fetchRoute(driverLocation, fromLocation, setRouteCoords, setTripDetails, mapRef);
+                    // Update route based on trip status
+                    // passengerPickedUpFlag is local to this effect closure and set above
+                    if (passengerPickedUpFlag) {
+                        // Trip in progress: Driver -> Dropoff
+                        if (data.booking.dropoffLocation) {
+                            const driverLocation = { lat: driverLoc.latitude, lon: driverLoc.longitude, name: "Driver" };
+                            const dropoffLocation = {
+                                lat: data.booking.dropoffLocation.lat,
+                                lon: data.booking.dropoffLocation.lon,
+                                name: data.booking.dropoffLocation.name || "Destination"
+                            };
+                            // We use fetchRoute here to keep the route updated as the driver moves
+                            fetchRoute(driverLocation, dropoffLocation, setRouteCoords, setTripDetails, mapRef);
+                        }
+                    } else {
+                        // Driver heading to pickup: Driver -> Pickup
+                        if (fromLocation) {
+                            const driverLocation = { lat: driverLoc.latitude, lon: driverLoc.longitude, name: "Driver" };
+                            fetchRoute(driverLocation, fromLocation, setRouteCoords, setTripDetails, mapRef);
+                        }
                     }
                 }
 

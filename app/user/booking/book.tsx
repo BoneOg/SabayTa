@@ -29,6 +29,7 @@ interface BookingComponentProps {
     onDriverLocationChange?: (location: { latitude: number; longitude: number } | null) => void;
     onDriverRouteChange?: (show: boolean) => void;
     onBookingAccepted?: (accepted: boolean) => void;
+    onPassengerPickedUp?: (pickedUp: boolean) => void;
 }
 
 export const BookingComponent = ({
@@ -42,7 +43,8 @@ export const BookingComponent = ({
     onRouteChange,
     onDriverLocationChange,
     onDriverRouteChange,
-    onBookingAccepted
+    onBookingAccepted,
+    onPassengerPickedUp
 }: BookingComponentProps) => {
     const router = useRouter();
     const params = useLocalSearchParams();
@@ -216,6 +218,13 @@ export const BookingComponent = ({
             onRouteChange(routeCoords);
         }
     }, [routeCoords]);
+
+    // Notify parent of passenger pickup status
+    useEffect(() => {
+        if (onPassengerPickedUp) {
+            onPassengerPickedUp(passengerPickedUp);
+        }
+    }, [passengerPickedUp]);
 
     // Driver Search & Booking Logic
     useEffect(() => {

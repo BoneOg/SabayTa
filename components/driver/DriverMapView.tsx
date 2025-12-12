@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
@@ -25,10 +25,10 @@ export const DriverMapView = ({ driverLocation, routeCoordinates, onTheWay, pass
             }}
             userInterfaceStyle="light"
         >
-            {/* Driver marker - always show as purple */}
+            {/* Driver marker - updated to motorcycle icon */}
             <Marker coordinate={driverLocation} title="Your Location">
-                <View style={styles.driverMarker}>
-                    <Ionicons name="location-sharp" size={24} color="#fff" />
+                <View style={[styles.driverMarker, { backgroundColor: "#534889" }]}>
+                    <FontAwesome name="motorcycle" size={24} color="#fff" />
                 </View>
             </Marker>
 
@@ -44,15 +44,8 @@ export const DriverMapView = ({ driverLocation, routeCoordinates, onTheWay, pass
                     />
                     {passengerPickedUp ? (
                         // Passenger picked up - show pickup (green) and destination (red)
+                        // Passenger picked up - show ONLY destination (red)
                         <>
-                            <Marker
-                                coordinate={routeCoordinates[0]}
-                                title="Pickup Location"
-                            >
-                                <View style={[styles.driverMarker, { backgroundColor: "green" }]}>
-                                    <Ionicons name="location-sharp" size={24} color="#fff" />
-                                </View>
-                            </Marker>
                             <Marker
                                 coordinate={routeCoordinates[routeCoordinates.length - 1]}
                                 title="Destination"
