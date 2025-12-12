@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { BASE_URL } from "../../config";
 
 interface RideCardProps {
@@ -131,18 +131,21 @@ export default function DriverHistory() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff",
-        paddingTop: 50, // Status bar spacing
+        backgroundColor: '#fff',
+        paddingTop: Platform.OS === 'android' ? 20 : 0,
     },
     header: {
-        paddingHorizontal: 20,
-        marginBottom: 20,
+        height: 60,
+        justifyContent: 'center',
         alignItems: 'center',
+        position: 'relative',
+        borderBottomWidth: 1,
+        borderBottomColor: '#F0F0F0',
     },
     headerTitle: {
         fontSize: 20,
-        fontWeight: 'bold',
-        color: '#534889',
+        color: '#000',
+        fontWeight: '600',
     },
     loadingContainer: {
         flex: 1,
@@ -162,6 +165,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     scrollContent: {
+        paddingTop: 20,
         paddingHorizontal: 20,
         paddingBottom: 100, // Space for bottom tab bar
     },
