@@ -1,4 +1,5 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Dimensions, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -29,6 +30,23 @@ export default function DriverTrackingScreen() {
 
     // Poll for booking status to detect when passenger is picked up
     useEffect(() => {
+        // Fetch current user from storage immediately
+        const fetchUser = async () => {
+            try {
+                const userStr = await AsyncStorage.getItem('user');
+                if (userStr) {
+                    const u = JSON.parse(userStr);
+                    const parsedId = u._id || u.id;
+                    if (parsedId) setCurrentUserId(parsedId);
+                }
+            } catch (e) {
+                console.error("Error fetching user from storage in tracking:", e);
+            }
+        };
+        fetchUser();
+    }, []);
+
+    useEffect(() => {
         if (!bookingId) return;
 
         const pollBookingStatus = async () => {
@@ -52,11 +70,13 @@ export default function DriverTrackingScreen() {
                         setDriver(booking.driverId);
                     }
 
-                    // Store User ID (for chat)
-                    if (booking.userId && typeof booking.userId === 'object') {
-                        setCurrentUserId(booking.userId._id);
-                    } else if (booking.userId && typeof booking.userId === 'string') {
-                        setCurrentUserId(booking.userId);
+                    // Fallback for currentUserId if not set from storage
+                    if (!currentUserId) {
+                        if (booking.userId && typeof booking.userId === 'object') {
+                            setCurrentUserId(booking.userId._id);
+                        } else if (booking.userId && typeof booking.userId === 'string') {
+                            setCurrentUserId(booking.userId);
+                        }
                     }
 
                     // Update pickup and dropoff locations
@@ -129,15 +149,20 @@ export default function DriverTrackingScreen() {
 
     const handleMessage = () => {
         if (currentUserId && driver?._id) {
+            const paramsToSend = {
+                userId: currentUserId,
+                driverId: driver._id,
+                driverName: driver.name,
+                driverImage: driver.profileImage
+            };
+            console.log("Navigating to chat with params:", paramsToSend);
+
             router.push({
                 pathname: '/user/chat',
-                params: {
-                    userId: currentUserId,
-                    driverId: driver._id,
-                    driverName: driver.name,
-                    driverImage: driver.profileImage
-                }
+                params: paramsToSend
             });
+        } else {
+            console.warn("Cannot open chat: Missing IDs", { currentUserId, driverId: driver?._id });
         }
     };
 

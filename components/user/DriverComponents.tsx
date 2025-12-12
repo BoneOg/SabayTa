@@ -26,6 +26,8 @@ interface DriverComponentsProps {
     profileImage?: string;
     distance?: string | null;
     duration?: string | null;
+    driverId?: string | null;
+    userId?: string | null;
 }
 
 export const DriverComponents: React.FC<DriverComponentsProps> = ({
@@ -49,7 +51,9 @@ export const DriverComponents: React.FC<DriverComponentsProps> = ({
     color,
     profileImage,
     distance,
-    duration
+    duration,
+    driverId,
+    userId
 }) => {
     return (
         <>
@@ -95,7 +99,13 @@ export const DriverComponents: React.FC<DriverComponentsProps> = ({
 
             {/* CHAT SCREEN */}
             {showChat && (
-                <ChatScreen onClose={onCloseChat} />
+                <ChatScreen
+                    onClose={onCloseChat}
+                    driverId={driverId}
+                    userId={userId}
+                    driverName={driverName}
+                    driverImage={profileImage}
+                />
             )}
         </>
     );

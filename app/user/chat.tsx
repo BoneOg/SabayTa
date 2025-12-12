@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
@@ -15,9 +16,19 @@ interface Message {
 
 interface ChatScreenProps {
   onClose?: () => void;
+  driverId?: string | null;
+  userId?: string | null;
+  driverName?: string;
+  driverImage?: string;
 }
 
-export default function ChatScreen({ onClose }: ChatScreenProps = {}) {
+export default function ChatScreen({
+  onClose,
+  driverId: propDriverId,
+  userId: propUserId,
+  driverName: propDriverName,
+  driverImage: propDriverImage
+}: ChatScreenProps = {}) {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [message, setMessage] = useState('');
@@ -26,19 +37,56 @@ export default function ChatScreen({ onClose }: ChatScreenProps = {}) {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
-  // Get IDs from params or props
-  const userId = params.userId as string; // This user's ID
-  const driverId = params.driverId as string;
-  const driverName = params.driverName as string || "Driver";
-  const driverImage = params.driverImage as string || 'https://i.pravatar.cc/150?img=12';
+  // State for IDs (initialized from props if available)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(propUserId || null);
+  const [currentDriverId, setCurrentDriverId] = useState<string | null>(propDriverId || null);
+
+  // Get display info (prefer props, then params, then defaults)
+  const driverName = propDriverName || params.driverName as string || "Driver";
+  const driverImage = propDriverImage || params.driverImage as string || 'https://i.pravatar.cc/150?img=12';
 
   const emojis = ['😊', '👍', '❤️', '😂', '🙏', '👋', '🚗', '⏰'];
 
+  // Initialize User & Driver IDs (if not passed as props)
+  useEffect(() => {
+    const initializeIds = async () => {
+      // 1. Get User ID (Props -> Params -> Storage)
+      if (propUserId) {
+        setCurrentUserId(propUserId);
+      } else {
+        let uId = params.userId as string;
+        if (!uId) {
+          try {
+            const userStr = await AsyncStorage.getItem('user');
+            if (userStr) {
+              const userObj = JSON.parse(userStr);
+              uId = userObj._id || userObj.id;
+            }
+          } catch (e) {
+            console.error("Error fetching user from storage:", e);
+          }
+        }
+        setCurrentUserId(uId);
+      }
+
+      // 2. Get Driver ID (Props -> Params)
+      if (propDriverId) {
+        setCurrentDriverId(propDriverId);
+      } else if (params.driverId) {
+        setCurrentDriverId(params.driverId as string);
+      } else {
+        console.warn("No driverId provided to ChatScreen via props or params");
+      }
+    };
+
+    initializeIds();
+  }, [propUserId, propDriverId, params.userId, params.driverId]);
+
   // -------------------- Polling --------------------
   const loadMessages = async () => {
-    if (!userId || !driverId) return;
+    if (!currentUserId || !currentDriverId) return;
     try {
-      const res = await fetch(`${BASE_URL}/api/conversations?user=${userId}&driver=${driverId}`);
+      const res = await fetch(`${BASE_URL}/api/conversations?user=${currentUserId}&driver=${currentDriverId}`);
       const data = await res.json();
       const updatedMessages = (data.messages || []).map((m: any) => ({
         ...m,
@@ -46,39 +94,52 @@ export default function ChatScreen({ onClose }: ChatScreenProps = {}) {
         id: m._id || Date.now().toString(),
       }));
       setMessages(updatedMessages);
-      setTimeout(() => flatListRef.current?.scrollToEnd(), 100);
+      // Optional: Only scroll if new message? For now kept simple.
     } catch (error) {
       console.error("Error loading messages:", error);
     }
   };
 
   useEffect(() => {
-    if (userId && driverId) {
-      loadMessages(); // load on mount
+    if (currentUserId && currentDriverId) {
+      loadMessages(); // load on mount/ids ready
       const interval = setInterval(loadMessages, 2000); // poll every 2s
       return () => clearInterval(interval);
     }
-  }, [userId, driverId]);
+  }, [currentUserId, currentDriverId]);
 
   // -------------------- Send message --------------------
   const sendMessageToBackend = async (text?: string, image?: string) => {
-    if (!userId || !driverId) return;
+    if (!currentUserId || !currentDriverId) {
+      console.error("sendMessageToBackend ABORTED: Missing IDs", { currentUserId, currentDriverId });
+      return;
+    }
     try {
-      await fetch(`${BASE_URL}/api/conversations/message`, {
+      console.log("Sending message to backend...", { user: currentUserId, driver: currentDriverId, sender: "user", text_len: text?.length, has_image: !!image });
+      const response = await fetch(`${BASE_URL}/api/conversations/message`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user: userId, driver: driverId, sender: "user", text, image }),
+        body: JSON.stringify({ user: currentUserId, driver: currentDriverId, sender: "user", text, image }),
       });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Backend refused message:", response.status, errorText);
+      } else {
+        console.log("Message sent successfully!");
+      }
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("Network error in sendMessageToBackend:", error);
     }
   };
 
   const sendMessage = async () => {
     if (message.trim()) {
+      // Optimistic update
       const newMessage: Message = { id: Date.now().toString(), text: message, sender: "user", timestamp: new Date() };
-      setMessages([...messages, newMessage]);
+      setMessages(prev => [...prev, newMessage]);
       setMessage('');
+
       await sendMessageToBackend(message);
       setTimeout(() => flatListRef.current?.scrollToEnd(), 100);
     }
@@ -86,7 +147,7 @@ export default function ChatScreen({ onClose }: ChatScreenProps = {}) {
 
   const sendEmoji = async (emoji: string) => {
     const newMessage: Message = { id: Date.now().toString(), text: emoji, sender: "user", timestamp: new Date() };
-    setMessages([...messages, newMessage]);
+    setMessages(prev => [...prev, newMessage]);
     setShowEmojiPicker(false);
     await sendMessageToBackend(emoji);
     setTimeout(() => flatListRef.current?.scrollToEnd(), 100);
@@ -101,7 +162,7 @@ export default function ChatScreen({ onClose }: ChatScreenProps = {}) {
 
     if (!result.canceled && result.assets[0]) {
       const newMessage: Message = { id: Date.now().toString(), text: '', image: result.assets[0].uri, sender: "user", timestamp: new Date() };
-      setMessages([...messages, newMessage]);
+      setMessages(prev => [...prev, newMessage]);
       await sendMessageToBackend('', result.assets[0].uri);
       setTimeout(() => flatListRef.current?.scrollToEnd(), 100);
     }

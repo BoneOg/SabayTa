@@ -33,6 +33,7 @@ export const useBookingState = () => {
     const [toText, setToText] = useState('');
     const [passengerPickedUp, setPassengerPickedUp] = useState(false);
     const [userId, setUserId] = useState<string | null>(null);
+    const [driverId, setDriverId] = useState<string | null>(null); // Added driverId
     const isInitialized = useRef(false);
 
     // Restore active booking on mount
@@ -143,6 +144,9 @@ export const useBookingState = () => {
         setToText,
         passengerPickedUp,
         setPassengerPickedUp,
+        driverId,
+        setDriverId,
+        userId, // Expose userId too
         resetBookingState,
     };
 };
