@@ -149,7 +149,7 @@ export const DriverArrival = ({
                 <View style={styles.driverInfoContainer}>
                     <View style={styles.driverProfileSection}>
                         <Image
-                            source={{ uri: 'https://i.pravatar.cc/150?img=12' }}
+                            source={{ uri: profileImage || 'https://i.pravatar.cc/150?img=12' }}
                             style={styles.driverImage}
                             resizeMode="cover"
                         />

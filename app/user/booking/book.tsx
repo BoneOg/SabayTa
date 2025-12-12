@@ -87,6 +87,7 @@ export const BookingComponent = ({
     const [driverName, setDriverName] = React.useState("Your Driver");
     const [driverRating, setDriverRating] = React.useState(0);
     const [driverTotalRatings, setDriverTotalRatings] = React.useState(0);
+    const [driverProfileImage, setDriverProfileImage] = React.useState("");
 
     // Ride Popup States
     const [showPickupPopup, setShowPickupPopup] = React.useState(false);
@@ -180,6 +181,7 @@ export const BookingComponent = ({
         setDriverName,
         setDriverRating,
         setDriverTotalRatings,
+        setDriverProfileImage,
         resetBookingState,
     });
 
@@ -394,6 +396,7 @@ export const BookingComponent = ({
                 driverName={driverName}
                 rating={driverRating}
                 totalRatings={driverTotalRatings}
+                profileImage={driverProfileImage}
                 distance={tripDetails?.distance || null}
                 duration={tripDetails?.duration || null}
             />
