@@ -75,6 +75,9 @@ export const BookingComponent = ({
         setToText,
         passengerPickedUp,
         setPassengerPickedUp,
+        driverId,
+        setDriverId,
+        userId,
         resetBookingState,
     } = useBookingState();
 
@@ -182,6 +185,7 @@ export const BookingComponent = ({
         setDriverRating,
         setDriverTotalRatings,
         setDriverProfileImage,
+        setDriverId, // Pass setDriverId
         resetBookingState,
     });
 
@@ -399,6 +403,8 @@ export const BookingComponent = ({
                 profileImage={driverProfileImage}
                 distance={tripDetails?.distance || null}
                 duration={tripDetails?.duration || null}
+                driverId={driverId}
+                userId={userId}
             />
         </>
     );

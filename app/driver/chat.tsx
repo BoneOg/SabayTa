@@ -74,15 +74,26 @@ export default function DriverChatScreen({ onClose, userId, userName, userImage 
 
   // -------------------- Send message --------------------
   const sendMessageToBackend = async (text?: string, image?: string) => {
-    if (!driverId || !userId) return;
+    if (!driverId || !userId) {
+      console.error("sendMessageToBackend ABORTED: Missing IDs", { driverId, userId });
+      return;
+    }
     try {
-      await fetch(`${BASE_URL}/api/conversations/message`, {
+      console.log("Sending message to backend...", { user: userId, driver: driverId, sender: "driver", text_len: text?.length, has_image: !!image });
+      const response = await fetch(`${BASE_URL}/api/conversations/message`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user: userId, driver: driverId, sender: "driver", text, image }),
       });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Backend refused message:", response.status, errorText);
+      } else {
+        console.log("Message sent successfully!");
+      }
     } catch (error) {
-      console.error(error);
+      console.error("Network error in sendMessageToBackend:", error);
     }
   };
 

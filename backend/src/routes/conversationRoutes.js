@@ -20,6 +20,8 @@ router.get("/", async (req, res) => {
 // Add a message
 router.post("/message", async (req, res) => {
   const { user, driver, sender, text, image } = req.body;
+  console.log("Received message request:", JSON.stringify(req.body, null, 2));
+
   try {
     let convo = await Conversation.findOne({ user, driver });
     if (!convo) {
@@ -31,6 +33,7 @@ router.post("/message", async (req, res) => {
     await convo.save();
     res.json(newMessage);
   } catch (error) {
+    console.error("Error saving message:", error);
     res.status(500).json({ message: error.message });
   }
 });

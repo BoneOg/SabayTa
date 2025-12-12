@@ -106,10 +106,6 @@ export default function CompleteProfile() {
       if (result.assets && result.assets.length > 0 && result.assets[0].uri) {
         // Assertion: result.assets[0].uri is a string
         setImage(result.assets[0].uri);
-      } else if (result.uri) {
-        // This 'else if' is technically not needed for modern ImagePicker, 
-        // but if it runs, we ensure the type is string.
-        setImage(result.uri);
       }
     } catch (err) {
       console.log("Image picker error DETAILS:", err);
