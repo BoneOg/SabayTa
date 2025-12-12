@@ -27,7 +27,7 @@ export default function DriverProfileScreen() {
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
 
-    const [selectedRole, setSelectedRole] = useState<'rider' | 'driver'>('driver');
+
     const [logoutVisible, setLogoutVisible] = useState(false);
 
     useEffect(() => {
@@ -236,45 +236,7 @@ export default function DriverProfileScreen() {
                         </>
                     )}
 
-                    {/* Role Toggle */}
-                    <View style={styles.toggleContainer}>
-                        <TouchableOpacity
-                            style={[
-                                styles.toggleButton,
-                                selectedRole === 'rider' ? styles.activeToggle : {},
-                            ]}
-                            onPress={() => {
-                                setSelectedRole('rider');
-                                router.push("/user/home"); // Navigate to user home
-                            }}
-                        >
-                            <Text
-                                style={[
-                                    styles.toggleText,
-                                    selectedRole === 'rider' ? styles.activeToggleText : {},
-                                ]}
-                            >
-                                Rider
-                            </Text>
-                        </TouchableOpacity>
 
-                        <TouchableOpacity
-                            style={[
-                                styles.toggleButton,
-                                selectedRole === 'driver' ? styles.activeToggle : {},
-                            ]}
-                            onPress={() => setSelectedRole('driver')}
-                        >
-                            <Text
-                                style={[
-                                    styles.toggleText,
-                                    selectedRole === 'driver' ? styles.activeToggleText : {},
-                                ]}
-                            >
-                                Driver
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
                 </View>
 
                 {/* Menu Items */}
@@ -446,34 +408,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins',
     },
 
-    toggleContainer: {
-        flexDirection: 'row',
-        marginTop: 5,
-        backgroundColor: '#f1e8ff',
-        padding: 5,
-        borderRadius: 25,
-    },
 
-    toggleButton: {
-        paddingVertical: 8,
-        paddingHorizontal: 60,
-        borderRadius: 20,
-    },
-
-    activeToggle: {
-        backgroundColor: '#534889',
-    },
-
-    toggleText: {
-        fontSize: 15,
-        color: '#534889',
-        fontFamily: 'Poppins',
-    },
-
-    activeToggleText: {
-        color: '#fff',
-        fontWeight: 'bold',
-    },
 
     menuContainer: {
         paddingHorizontal: 20,

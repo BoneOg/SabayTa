@@ -25,7 +25,7 @@ export default function ProfileScreen() {
   const [isVerified, setIsVerified] = useState(false);
   const [userRole, setUserRole] = useState<string>('user');
 
-  const [selectedRole, setSelectedRole] = useState<'rider' | 'driver'>('rider');
+
 
   // 🔥 NEW STATE FOR LOGOUT MODAL
   const [logoutVisible, setLogoutVisible] = useState(false);
@@ -42,12 +42,7 @@ export default function ProfileScreen() {
       if (userStr) {
         const user = JSON.parse(userStr);
         setUserRole(user.role || 'user');
-        // Set selectedRole based on actual user role
-        if (user.role === 'driver') {
-          setSelectedRole('driver');
-        } else {
-          setSelectedRole('rider');
-        }
+
       }
     } catch (error) {
       console.error('Error checking user role:', error);
@@ -238,54 +233,7 @@ export default function ProfileScreen() {
             </>
           )}
 
-          {/* Role Toggle Buttons */}
-          {(userRole === 'driver' || isVerified) && (
-            <View style={styles.toggleContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.toggleButton,
-                  selectedRole === 'rider' ? styles.activeToggle : {},
-                ]}
-                onPress={() => {
-                  setSelectedRole('rider');
-                  router.push("/user/home");
-                }}
-              >
-                <Text
-                  style={[
-                    styles.toggleText,
-                    selectedRole === 'rider'
-                      ? styles.activeToggleText
-                      : {},
-                  ]}
-                >
-                  Rider
-                </Text>
-              </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[
-                  styles.toggleButton,
-                  selectedRole === 'driver' ? styles.activeToggle : {},
-                ]}
-                onPress={() => {
-                  setSelectedRole('driver');
-                  router.push("/driver/home");
-                }}
-              >
-                <Text
-                  style={[
-                    styles.toggleText,
-                    selectedRole === 'driver'
-                      ? styles.activeToggleText
-                      : {},
-                  ]}
-                >
-                  Driver
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
         </View>
 
         {/* Menu Items */}
@@ -449,34 +397,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins',
   },
 
-  toggleContainer: {
-    flexDirection: 'row',
-    marginTop: 15,
-    backgroundColor: '#f1e8ff',
-    padding: 5,
-    borderRadius: 25,
-  },
 
-  toggleButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 60,
-    borderRadius: 20,
-  },
-
-  activeToggle: {
-    backgroundColor: '#534889',
-  },
-
-  toggleText: {
-    fontSize: 15,
-    color: '#534889',
-    fontFamily: 'Poppins',
-  },
-
-  activeToggleText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
 
   menuContainer: {
     paddingHorizontal: 20,
