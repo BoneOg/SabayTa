@@ -2,11 +2,11 @@ import 'dotenv/config';
 
 export default {
     expo: {
-        name: "sabayta",
+        name: "SabayTa",
         slug: "sabayta",
         version: "1.0.0",
         orientation: "portrait",
-        icon: "./assets/images/icon.png",
+        icon: "./assets/images/SabayTa_logo...png",
         scheme: "sabayta",
         userInterfaceStyle: "light",
         newArchEnabled: true,
@@ -16,9 +16,9 @@ export default {
         android: {
             adaptiveIcon: {
                 backgroundColor: "#E6F4FE",
-                foregroundImage: "./assets/images/android-icon-foreground.png",
-                backgroundImage: "./assets/images/android-icon-background.png",
-                monochromeImage: "./assets/images/android-icon-monochrome.png"
+                foregroundImage: "./assets/images/SabayTa_logo...png",
+                backgroundImage: "./assets/images/SabayTa_logo...png",
+                monochromeImage: "./assets/images/SabayTa_logo...png"
             },
             edgeToEdgeEnabled: true,
             predictiveBackGestureEnabled: false,
@@ -31,7 +31,7 @@ export default {
         },
         web: {
             output: "static",
-            favicon: "./assets/images/favicon.png"
+            favicon: "./assets/images/SabayTa_logo...png"
         },
         plugins: [
             "expo-router",
