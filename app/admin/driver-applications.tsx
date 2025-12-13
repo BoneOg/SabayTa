@@ -50,7 +50,11 @@ export default function DriverApplications() {
 
             if (response.ok) {
                 const data = await response.json();
-                setApplications(data);
+                // Filter out any applications with missing or invalid userId
+                const validData = data.filter((app: DriverApplication) =>
+                    app.userId && app.userId._id && app.userId.name
+                );
+                setApplications(validData);
             }
         } catch (error) {
             console.error('Error fetching applications:', error);

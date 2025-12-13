@@ -109,10 +109,17 @@ export default function DriverApplicationDetails() {
         );
     }
 
-    if (!application) {
+    if (!application || !application.userId || !application.userId._id) {
         return (
             <SafeAreaView style={styles.container}>
-                <Text style={styles.errorText}>Application not found</Text>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                        <MaterialIcons name="arrow-back" size={24} color="#333" />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Application Details</Text>
+                    <View style={{ width: 24 }} />
+                </View>
+                <Text style={styles.errorText}>Application not found or user account has been deleted</Text>
             </SafeAreaView>
         );
     }
