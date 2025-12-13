@@ -254,8 +254,6 @@ const styles = StyleSheet.create({
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 6,
   },
   backText: {
     fontSize: 16,
@@ -272,7 +270,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   headerSpacer: {
-    width: 32,
+    width: 70,
   },
   scrollView: {
     flex: 1,

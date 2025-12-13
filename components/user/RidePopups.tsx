@@ -86,7 +86,7 @@ export function RidePopups({
                         </Text>
 
                         <TouchableOpacity style={[styles.primaryButton, { marginTop: 20 }]} onPress={onClose}>
-                            <Text style={styles.primaryButtonText}>Rate</Text>
+                            <Text style={styles.primaryButtonText}>Back To Home</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
