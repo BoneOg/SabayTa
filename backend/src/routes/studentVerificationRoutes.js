@@ -147,6 +147,12 @@ router.get('/admin/all', protect, async (req, res) => {
 
         const verificationsWithProfile = await Promise.all(
             verifications.map(async (verification) => {
+                // Skip if user has been deleted
+                if (!verification.userId) {
+                    console.log('Skipping verification with deleted user:', verification._id);
+                    return null;
+                }
+
                 const userProfile = await UserProfile.findOne({ userId: verification.userId._id });
                 return {
                     ...verification.toObject(),
@@ -158,7 +164,10 @@ router.get('/admin/all', protect, async (req, res) => {
             })
         );
 
-        res.status(200).json(verificationsWithProfile);
+        // Filter out verifications with deleted users
+        const validVerifications = verificationsWithProfile.filter(v => v !== null);
+
+        res.status(200).json(validVerifications);
 
     } catch (error) {
         console.error('Error fetching verifications:', error);
