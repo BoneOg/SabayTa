@@ -70,7 +70,7 @@ export default function OfferARideMap() {
 
   if (!region) {
     return (
-    <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <Text>Fetching location...</Text>
       </View>
     );

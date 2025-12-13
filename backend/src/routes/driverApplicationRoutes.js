@@ -140,23 +140,34 @@ router.get('/admin/all', protect, async (req, res) => {
             .populate('userId', 'name email phone')
             .sort({ createdAt: -1 });
 
+        // Filter out applications where userId is null (deleted accounts)
+        const validApplications = applications.filter(app => app.userId !== null);
+
         // Get UserProfile for each application to include profilePicture
         const UserProfile = (await import('../models/UserProfile.js')).default;
 
         const applicationsWithProfile = await Promise.all(
-            applications.map(async (application) => {
-                const userProfile = await UserProfile.findOne({ userId: application.userId._id });
-                return {
-                    ...application.toObject(),
-                    userId: {
-                        ...application.userId.toObject(),
-                        profilePicture: userProfile?.profileImage || null
-                    }
-                };
+            validApplications.map(async (application) => {
+                try {
+                    const userProfile = await UserProfile.findOne({ userId: application.userId._id });
+                    return {
+                        ...application.toObject(),
+                        userId: {
+                            ...application.userId.toObject(),
+                            profilePicture: userProfile?.profileImage || null
+                        }
+                    };
+                } catch (error) {
+                    console.error(`Error processing application ${application._id}:`, error);
+                    return null;
+                }
             })
         );
 
-        res.status(200).json(applicationsWithProfile);
+        // Filter out any null results from errors
+        const finalApplications = applicationsWithProfile.filter(app => app !== null);
+
+        res.status(200).json(finalApplications);
 
     } catch (error) {
         console.error('Error fetching applications:', error);
