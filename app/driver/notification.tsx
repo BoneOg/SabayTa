@@ -72,7 +72,7 @@ export default function DriverNotificationScreen() {
     if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
     if (diffDays === 1) return 'Yesterday';
     if (diffDays < 7) return `${diffDays} days ago`;
-    
+
     return date.toLocaleDateString();
   };
 
@@ -120,7 +120,7 @@ export default function DriverNotificationScreen() {
           style={styles.backButton}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Ionicons name="chevron-back" size={24} color="#fff" />
+          <Ionicons name="chevron-back" size={24} color="#000" />
           <Text style={styles.backText}>Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Notifications</Text>
@@ -128,8 +128,8 @@ export default function DriverNotificationScreen() {
       </View>
 
       {/* Content */}
-      <ScrollView 
-        style={styles.scrollView} 
+      <ScrollView
+        style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#534889']} />
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 10,
     fontSize: 14,
-    color: '#fff',
+    color: '#666',
     fontFamily: 'Poppins',
   },
   emptyState: {
@@ -233,13 +233,13 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#534889',
+    color: '#666',
     marginTop: 20,
     fontFamily: 'Poppins',
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#534889',
+    color: '#999',
     marginTop: 8,
     textAlign: 'center',
     fontFamily: 'Poppins',
@@ -250,17 +250,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 15,
-    paddingTop: 50,
   },
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 6,
   },
   backText: {
     fontSize: 16,
-    color: '#534889',
+    color: '#000',
     marginLeft: 4,
     fontFamily: 'Poppins',
   },
@@ -268,12 +265,12 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#534889',
+    color: '#000',
     fontFamily: 'Poppins',
     textAlign: 'center',
   },
   headerSpacer: {
-    width: 32,
+    width: 70,
   },
   scrollView: {
     flex: 1,
@@ -285,7 +282,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#534889',
+    color: '#000',
     marginBottom: 15,
     fontFamily: 'Poppins',
   },
@@ -293,34 +290,32 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   notificationCard: {
-    backgroundColor: '#534889',
-    borderRadius: 12,
+    backgroundColor: '#fff',
+    borderRadius: 8,
     padding: 15,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#534889',
+    marginBottom: 6,
   },
   notificationCardHighlighted: {
-    backgroundColor: '#f1e8ff',
-    borderColor: '#534889',
+    backgroundColor: 'rgba(198,185,229,0.5)',
   },
   notificationTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#534889',
+    color: '#000',
     marginBottom: 8,
     fontFamily: 'Poppins',
   },
   notificationContent: {
     fontSize: 14,
-    color: '#534889',
+    color: '#666',
     marginBottom: 10,
     lineHeight: 20,
     fontFamily: 'Poppins',
   },
   notificationTimestamp: {
     fontSize: 12,
-    color: '#534889',
+    color: '#999',
     fontFamily: 'Poppins',
   },
 });
+

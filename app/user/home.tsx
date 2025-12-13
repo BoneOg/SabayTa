@@ -181,7 +181,7 @@ export default function HomeScreen() {
           style={styles.notificationButton}
           onPress={() => router.push('/user/notification')}
         >
-          <Ionicons name="notifications-outline" size={24} color="#000000ff" />
+          <Ionicons name="notifications-outline" size={24} color="#fff" />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -230,9 +230,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 50,
     right: 20,
-    backgroundColor: 'white',
-    borderRadius: 50,
-    padding: 12,
+    backgroundColor: '#534889',
+    borderRadius: 8,
+    padding: 8,
     elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
