@@ -360,7 +360,10 @@ router.get('/history/:userId', async (req, res) => {
             .populate('userId', 'name phone gender')
             .sort({ updatedAt: -1 });
 
-        res.status(200).json(bookings);
+        // Filter out bookings where user has been deleted
+        const validBookings = bookings.filter(booking => booking.userId !== null);
+
+        res.status(200).json(validBookings);
     } catch (error) {
         console.error("Error fetching user history:", error);
         res.status(500).json({ message: "Server error" });
@@ -379,7 +382,10 @@ router.get('/driver-history/:driverId', async (req, res) => {
             .populate('userId', 'name phone gender')
             .sort({ updatedAt: -1 });
 
-        res.status(200).json(bookings);
+        // Filter out bookings where user (rider) has been deleted
+        const validBookings = bookings.filter(booking => booking.userId !== null);
+
+        res.status(200).json(validBookings);
     } catch (error) {
         console.error("Error fetching driver history:", error);
         res.status(500).json({ message: "Server error" });
