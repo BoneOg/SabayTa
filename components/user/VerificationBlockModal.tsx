@@ -1,4 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -61,6 +62,15 @@ export const VerificationBlockModal: React.FC<VerificationBlockModalProps> = ({
 
     const content = getModalContent();
 
+    const handleLogout = async () => {
+        try {
+            await AsyncStorage.multiRemove(['token', 'user']);
+            router.replace('/auth/Welcome');
+        } catch (error) {
+            console.error('Error logging out:', error);
+        }
+    };
+
     return (
         <Modal
             visible={visible}
@@ -89,6 +99,15 @@ export const VerificationBlockModal: React.FC<VerificationBlockModalProps> = ({
                     >
                         <Text style={styles.buttonText}>{content.buttonText}</Text>
                         <MaterialIcons name="arrow-forward" size={20} color="#fff" />
+                    </TouchableOpacity>
+
+                    {/* Logout Button */}
+                    <TouchableOpacity
+                        style={styles.logoutButton}
+                        onPress={handleLogout}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={styles.logoutText}>Logout</Text>
                     </TouchableOpacity>
 
                     {/* Info Text */}
@@ -170,5 +189,16 @@ const styles = StyleSheet.create({
         color: '#999',
         textAlign: 'center',
         fontFamily: 'Poppins',
+    },
+    logoutButton: {
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        marginBottom: 10,
+    },
+    logoutText: {
+        fontSize: 14,
+        color: '#666',
+        fontFamily: 'Poppins',
+        textDecorationLine: 'underline',
     },
 });

@@ -237,34 +237,49 @@ export default function FavoritesScreen() {
                 ) : (
                     favorites.map((favorite) => (
                         <View key={favorite._id} style={styles.card}>
+                            {/* Main Content - Clickable */}
                             <TouchableOpacity
                                 style={styles.cardContent}
                                 onPress={() => openEditModal(favorite)}
                                 activeOpacity={0.7}
                             >
-                                <View style={styles.cardMainRow}>
-                                    <View style={styles.titleContainer}>
-                                        <View style={styles.titleRow}>
-                                            <View style={styles.iconContainer}>
-                                                {renderIcon(getIconForFavorite(favorite), 24, '#534889')}
-                                            </View>
-                                            <Text style={styles.cardTitle}>{getDisplayName(favorite)}</Text>
-                                        </View>
-                                        <Text style={styles.cardSubtext} numberOfLines={2} ellipsizeMode="tail">
+                                <View style={styles.cardHeader}>
+                                    <View style={styles.iconCircle}>
+                                        {renderIcon(getIconForFavorite(favorite), 22, '#534889')}
+                                    </View>
+                                    <View style={styles.textContainer}>
+                                        <Text style={styles.cardTitle} numberOfLines={1}>
+                                            {getDisplayName(favorite)}
+                                        </Text>
+                                        <Text style={styles.cardSubtext} numberOfLines={2}>
                                             {favorite.placeAddress}
                                         </Text>
                                     </View>
-                                    <TouchableOpacity
-                                        style={styles.removeButton}
-                                        onPress={() => confirmRemove(favorite._id, getDisplayName(favorite))}
-                                    >
-                                        <Ionicons name="heart" size={24} color="#534889" />
-                                    </TouchableOpacity>
-                                </View>
-                                <View style={styles.cardFooter}>
-                                    <Text style={styles.customizeText}>Customize</Text>
                                 </View>
                             </TouchableOpacity>
+
+                            {/* Action Buttons Row */}
+                            <View style={styles.actionRow}>
+                                <TouchableOpacity
+                                    style={styles.editButton}
+                                    onPress={() => openEditModal(favorite)}
+                                    activeOpacity={0.7}
+                                >
+                                    <Ionicons name="pencil" size={16} color="#534889" />
+                                    <Text style={styles.editButtonText}>Edit</Text>
+                                </TouchableOpacity>
+                                
+                                <View style={styles.buttonDivider} />
+                                
+                                <TouchableOpacity
+                                    style={styles.removeButtonNew}
+                                    onPress={() => confirmRemove(favorite._id, getDisplayName(favorite))}
+                                    activeOpacity={0.7}
+                                >
+                                    <Ionicons name="heart" size={16} color="#FF4757" />
+                                    <Text style={styles.removeButtonText}>Remove</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     ))
                 )}
@@ -390,62 +405,86 @@ const styles = StyleSheet.create({
     },
     card: {
         backgroundColor: '#fff',
-        borderRadius: 15,
-        padding: 15,
-        marginBottom: 15,
+        borderRadius: 12,
+        marginBottom: 12,
         borderWidth: 1,
-        borderColor: '#D0D0D0',
+        borderColor: '#E0E0E0',
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-        elevation: 2,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        elevation: 3,
+        overflow: 'hidden',
     },
     cardContent: {
-        flexDirection: 'column',
+        padding: 16,
     },
-    cardMainRow: {
+    cardHeader: {
         flexDirection: 'row',
         alignItems: 'flex-start',
+        gap: 12,
     },
-    cardFooter: {
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        marginTop: 8,
-    },
-    iconContainer: {
-        marginRight: 12,
-    },
-    titleContainer: {
-        flex: 1,
-        flexDirection: 'column',
-    },
-    titleRow: {
-        flexDirection: 'row',
+    iconCircle: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: '#F3F0F8',
+        justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 4,
+        flexShrink: 0,
     },
-    customizeText: {
-        fontSize: 16,
-        color: '#534889',
-        fontFamily: 'Poppins_400Regular',
-    },
-    removeButton: {
-        marginLeft: 10,
-        padding: 4,
+    textContainer: {
+        flex: 1,
+        gap: 4,
     },
     cardTitle: {
         fontSize: 16,
-        fontWeight: '600',
-        color: '#000000',
+        fontWeight: '700',
+        color: '#1A1A1A',
         fontFamily: 'Poppins_700Bold',
-        flex: 1,
     },
     cardSubtext: {
         fontSize: 13,
         color: '#666',
         fontFamily: 'Poppins_400Regular',
         lineHeight: 18,
+    },
+    actionRow: {
+        flexDirection: 'row',
+        borderTopWidth: 1,
+        borderTopColor: '#F0F0F0',
+    },
+    editButton: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 12,
+        gap: 6,
+    },
+    editButtonText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#534889',
+        fontFamily: 'Poppins_700Bold',
+    },
+    buttonDivider: {
+        width: 1,
+        backgroundColor: '#F0F0F0',
+    },
+    removeButtonNew: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 12,
+        gap: 6,
+    },
+    removeButtonText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#FF4757',
+        fontFamily: 'Poppins_700Bold',
     },
     modalOverlay: {
         flex: 1,

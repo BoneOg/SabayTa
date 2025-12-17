@@ -44,6 +44,12 @@ export default function DriverLayout() {
 
     const hiddenRoutes = new Set([
         "notification",
+        "editprofile",
+        "settings",
+        "changepassword",
+        "privacypolicy",
+        "contactus",
+        "deleteaccount",
     ]);
     const shouldShowTabBar = !hiddenRoutes.has(currentRoute);
 

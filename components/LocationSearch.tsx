@@ -98,8 +98,39 @@ export const useLocationSearch = () => {
         }
     };
 
+    const getFullAddressFromCoords = async (latitude: number, longitude: number): Promise<NominatimResult | null> => {
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
+                {
+                    headers: {
+                        'User-Agent': 'SabayTa-Mobile-App',
+                        'Referer': 'https://sabayta.app'
+                    }
+                }
+            );
+
+            if (!response.ok) return null;
+
+            const data = await response.json();
+            if (data && data.place_id) {
+                return {
+                    place_id: data.place_id,
+                    lat: data.lat,
+                    lon: data.lon,
+                    display_name: data.display_name
+                };
+            }
+            return null;
+        } catch (error) {
+            console.error('Error fetching full address:', error);
+            return null;
+        }
+    };
+
     return {
         debouncedFetchSuggestions,
-        getAddressFromCoords
+        getAddressFromCoords,
+        getFullAddressFromCoords
     };
 };

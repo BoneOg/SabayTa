@@ -16,35 +16,53 @@ interface RideCardProps {
 const HistoryCard: React.FC<RideCardProps> = ({ name, date, time, from, to, status }) => {
     return (
         <View style={styles.card}>
-            {/* Name and Status */}
-            <View style={styles.nameRow}>
-                <Text style={styles.name}>{name}</Text>
+            {/* Header with Name and Status */}
+            <View style={styles.header}>
+                <View style={styles.nameContainer}>
+                    <Ionicons name="person-circle-outline" size={20} color="#6A4C93" />
+                    <Text style={styles.name}>{name}</Text>
+                </View>
                 <View style={[styles.statusBadge, status === 'cancelled' ? styles.cancelledBadge : styles.completedBadge]}>
                     <Text style={styles.statusText}>{status === 'cancelled' ? 'Cancelled' : 'Completed'}</Text>
                 </View>
             </View>
 
             {/* Date and Time */}
-            <View style={styles.row}>
-                <Ionicons name="calendar-outline" size={16} color="#555" style={styles.icon} />
-                <Text style={styles.dateTime}>{date} at {time}</Text>
+            <View style={styles.dateTimeContainer}>
+                <Ionicons name="calendar-outline" size={14} color="#888" />
+                <Text style={styles.dateTimeText}>{date}</Text>
+                <View style={styles.dot} />
+                <Ionicons name="time-outline" size={14} color="#888" />
+                <Text style={styles.dateTimeText}>{time}</Text>
             </View>
 
-            {/* Locations - Stacked Vertically */}
-            <View style={styles.locationContainer}>
+            {/* Divider */}
+            <View style={styles.divider} />
+
+            {/* Route Section */}
+            <View style={styles.routeContainer}>
+                {/* From Location */}
                 <View style={styles.locationRow}>
-                    <Ionicons name="location-outline" size={18} color="green" style={styles.locationIcon} />
-                    <View style={styles.locationTextContainer}>
-                        <Text style={styles.locationLabel}>From</Text>
-                        <Text style={styles.locationText}>{from}</Text>
+                    <View style={styles.iconContainer}>
+                        <View style={styles.fromDot} />
+                    </View>
+                    <View style={styles.locationContent}>
+                        <Text style={styles.locationLabel}>Pickup</Text>
+                        <Text style={styles.locationText} numberOfLines={2}>{from}</Text>
                     </View>
                 </View>
 
+                {/* Connecting Line */}
+                <View style={styles.connectingLine} />
+
+                {/* To Location */}
                 <View style={styles.locationRow}>
-                    <Ionicons name="location-sharp" size={18} color="red" style={styles.locationIcon} />
-                    <View style={styles.locationTextContainer}>
-                        <Text style={styles.locationLabel}>To</Text>
-                        <Text style={styles.locationText}>{to}</Text>
+                    <View style={styles.iconContainer}>
+                        <Ionicons name="location-sharp" size={20} color="#FF4757" />
+                    </View>
+                    <View style={styles.locationContent}>
+                        <Text style={styles.locationLabel}>Dropoff</Text>
+                        <Text style={styles.locationText} numberOfLines={2}>{to}</Text>
                     </View>
                 </View>
             </View>
@@ -97,20 +115,26 @@ export default function DriverHistory() {
 
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.headerTitle}>History</Text>
+            <View style={styles.headerBar}>
+                <Text style={styles.headerTitle}>Ride History</Text>
             </View>
 
             {loading ? (
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#534889" />
+                    <ActivityIndicator size="large" color="#6A4C93" />
+                    <Text style={styles.loadingText}>Loading history...</Text>
                 </View>
             ) : bookings.length === 0 ? (
                 <View style={styles.emptyContainer}>
-                    <Text style={styles.emptyText}>No history</Text>
+                    <Ionicons name="time-outline" size={64} color="#DDD" />
+                    <Text style={styles.emptyTitle}>No Ride History</Text>
+                    <Text style={styles.emptySubtitle}>Your completed and cancelled rides will appear here</Text>
                 </View>
             ) : (
-                <ScrollView contentContainerStyle={styles.scrollContent}>
+                <ScrollView 
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                >
                     {bookings.map((booking) => (
                         <HistoryCard
                             key={booking._id}
@@ -131,123 +155,176 @@ export default function DriverHistory() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: '#F8F9FA',
         paddingTop: Platform.OS === 'android' ? 20 : 0,
     },
-    header: {
+    headerBar: {
         height: 60,
         justifyContent: 'center',
         alignItems: 'center',
-        position: 'relative',
+        backgroundColor: '#fff',
         borderBottomWidth: 1,
-        borderBottomColor: '#F0F0F0',
+        borderBottomColor: '#E8E8E8',
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 2,
     },
     headerTitle: {
-        fontSize: 20,
-        color: '#000',
-        fontWeight: '600',
+        fontSize: 18,
+        color: '#1A1A1A',
+        fontWeight: '700',
+        letterSpacing: 0.3,
     },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        gap: 12,
+    },
+    loadingText: {
+        fontSize: 14,
+        color: '#888',
+        marginTop: 8,
     },
     emptyContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 40,
+        gap: 12,
     },
-    emptyText: {
-        fontSize: 16,
-        color: '#666',
-        fontFamily: 'Poppins',
+    emptyTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#333',
+        marginTop: 16,
+    },
+    emptySubtitle: {
+        fontSize: 14,
+        color: '#888',
         textAlign: 'center',
+        lineHeight: 20,
     },
     scrollContent: {
-        paddingTop: 20,
-        paddingHorizontal: 20,
-        paddingBottom: 100, // Space for bottom tab bar
+        padding: 16,
+        paddingBottom: 100,
     },
     card: {
         backgroundColor: "#fff",
-        borderRadius: 16,
-        padding: 14,
-        marginBottom: 16,
-        borderWidth: 2,
-        borderColor: "#6A4C93", // Purple border
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: "#E0E0E0",
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
         elevation: 3,
     },
-    nameRow: {
+    header: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        marginBottom: 4,
+        marginBottom: 12,
+    },
+    nameContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        flex: 1,
     },
     name: {
         fontSize: 16,
-        fontWeight: "bold",
-        color: "#333",
+        fontWeight: "700",
+        color: "#1A1A1A",
         flex: 1,
-        marginRight: 8,
     },
     statusBadge: {
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 6,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
     },
     cancelledBadge: {
-        backgroundColor: "#FF4747",
+        backgroundColor: "#FF4757",
     },
     completedBadge: {
-        backgroundColor: "#41B341",
+        backgroundColor: "#2ECC71",
     },
     statusText: {
         fontSize: 11,
-        fontWeight: "600",
+        fontWeight: "700",
         color: "#fff",
-        textTransform: "capitalize",
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
     },
-    row: {
+    dateTimeContainer: {
         flexDirection: "row",
         alignItems: "center",
-        marginBottom: 5,
+        gap: 6,
+        marginBottom: 12,
     },
-    icon: {
-        marginRight: 6,
-    },
-    dateTime: {
-        fontSize: 13,
+    dateTimeText: {
+        fontSize: 12,
         color: "#666",
+        fontWeight: "500",
     },
-    locationContainer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
+    dot: {
+        width: 3,
+        height: 3,
+        borderRadius: 1.5,
+        backgroundColor: "#BBB",
+    },
+    divider: {
+        height: 1,
+        backgroundColor: "#F0F0F0",
+        marginBottom: 16,
+    },
+    routeContainer: {
+        gap: 0,
     },
     locationRow: {
         flexDirection: "row",
         alignItems: "flex-start",
-        flex: 1,
+        gap: 12,
     },
-    locationIcon: {
-        marginRight: 8,
-        marginTop: 1,
+    iconContainer: {
+        width: 24,
+        alignItems: "center",
+        paddingTop: 2,
     },
-    locationTextContainer: {
+    fromDot: {
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        backgroundColor: "#2ECC71",
+        borderWidth: 3,
+        borderColor: "#A8E6CF",
+    },
+    connectingLine: {
+        width: 2,
+        height: 20,
+        backgroundColor: "#DDD",
+        marginLeft: 11,
+        marginVertical: 4,
+    },
+    locationContent: {
         flex: 1,
+        gap: 4,
     },
     locationLabel: {
         fontSize: 11,
         color: "#888",
-        marginBottom: 1,
+        fontWeight: "600",
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
     },
     locationText: {
         fontSize: 13,
         fontWeight: "500",
         color: "#333",
+        lineHeight: 18,
     },
 });

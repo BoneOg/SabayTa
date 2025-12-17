@@ -26,6 +26,7 @@ interface BookingModalsProps {
     selectLocationFromSearch: (item: NominatimResult) => void;
     openDropPin: () => void;
     searchInputRef: React.RefObject<any>;
+    selectedSearchItem?: NominatimResult | null;
 }
 
 export const BookingModals: React.FC<BookingModalsProps> = ({
@@ -50,6 +51,7 @@ export const BookingModals: React.FC<BookingModalsProps> = ({
     selectLocationFromSearch,
     openDropPin,
     searchInputRef,
+    selectedSearchItem,
 }) => {
     return (
         <LocationModals
@@ -74,6 +76,7 @@ export const BookingModals: React.FC<BookingModalsProps> = ({
             selectLocationFromSearch={selectLocationFromSearch}
             openDropPin={openDropPin}
             searchInputRef={searchInputRef}
+            selectedSearchItem={selectedSearchItem}
         />
     );
 };

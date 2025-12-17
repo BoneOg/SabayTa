@@ -131,6 +131,7 @@ export const BookingComponent = ({
         openDropPin,
         cancelDropPin,
         confirmPinLocation,
+        selectedSearchItem,
     } = useLocationSelection(
         region,
         setFromLocation,
@@ -366,6 +367,7 @@ export const BookingComponent = ({
                 selectLocationFromSearch={selectLocationFromSearch}
                 openDropPin={openDropPin}
                 searchInputRef={searchInputRef}
+                selectedSearchItem={selectedSearchItem}
             />
 
             {/* RIDE STATUS POPUPS */}

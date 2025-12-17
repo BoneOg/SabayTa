@@ -54,6 +54,7 @@ interface LocationModalsProps {
     selectLocationFromSearch: (item: NominatimResult) => void;
     openDropPin: () => void;
     searchInputRef: React.RefObject<TextInput | null>;
+    selectedSearchItem?: NominatimResult | null;
 }
 
 export const LocationModals = ({
@@ -77,7 +78,8 @@ export const LocationModals = ({
     searchSuggestions,
     selectLocationFromSearch,
     openDropPin,
-    searchInputRef
+    searchInputRef,
+    selectedSearchItem
 }: LocationModalsProps) => {
     const [favorites, setFavorites] = useState<FavoriteLocation[]>([]);
     const [favoritedPlaces, setFavoritedPlaces] = useState<Set<string>>(new Set());
@@ -242,6 +244,7 @@ export const LocationModals = ({
                         <View style={styles.searchInputContainer}>
                             <View style={styles.searchInputWrapper}>
                                 <Ionicons name="search" size={20} color="#534889" style={{ marginRight: 8 }} />
+
                                 <TextInput
                                     ref={searchInputRef}
                                     style={styles.searchInput}
@@ -250,6 +253,21 @@ export const LocationModals = ({
                                     onChangeText={handleSearchTextChange}
                                     autoFocus={true}
                                 />
+
+                                {/* Heart Icon for Selected Search Item */}
+                                {selectedSearchItem && (
+                                    <TouchableOpacity
+                                        style={{ marginRight: 12, marginLeft: 8 }}
+                                        onPress={() => toggleFavorite(selectedSearchItem)}
+                                    >
+                                        <Ionicons
+                                            name={favoritedPlaces.has(selectedSearchItem.place_id.toString()) ? "heart" : "heart-outline"}
+                                            size={22}
+                                            color={favoritedPlaces.has(selectedSearchItem.place_id.toString()) ? "#534889" : "#666"}
+                                        />
+                                    </TouchableOpacity>
+                                )}
+
                                 {searchText.length > 0 && (
                                     <TouchableOpacity onPress={clearSearchText}>
                                         <Ionicons name="close-circle" size={20} color="#a2a2a2" />
@@ -380,7 +398,7 @@ const styles = StyleSheet.create({
     closeSearchButton: { padding: 5 },
     searchModalTitle: { fontSize: 18, fontWeight: 'bold', marginLeft: 15 },
     searchInputContainer: { padding: 15, paddingBottom: 10 },
-    searchInputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f5f5f5', borderRadius: 10, paddingHorizontal: 12, height: 45 },
+    searchInputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f5f5f5', borderRadius: 14, paddingHorizontal: 16, height: 54 },
     searchInput: { flex: 1, fontSize: 16, color: '#333' },
     currentLocationRow: { flexDirection: 'row', alignItems: 'center', padding: 15, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
     currentLocationIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#F8F6FC', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
