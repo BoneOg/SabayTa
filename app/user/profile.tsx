@@ -1,5 +1,5 @@
 import { BASE_URL } from '@/config';
-import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -118,12 +118,6 @@ export default function ProfileScreen() {
       text: 'Student Verification',
       library: MaterialIcons,
       route: '/user/profile/studentverification',
-    },
-    {
-      icon: 'exclamation-triangle',
-      text: 'Complain',
-      library: FontAwesome,
-      route: '/user/profile/complain',
     },
     {
       icon: 'info-outline',

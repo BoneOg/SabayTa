@@ -3,7 +3,6 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import multer from "multer";
 import Booking from "../models/Booking.js";
-import Complaint from "../models/Complaint.js";
 import DriverProfile from "../models/DriverProfile.js";
 import User from "../models/User.js";
 import UserProfile from "../models/UserProfile.js";
@@ -346,16 +345,10 @@ router.get("/admin/dashboard/stats", protect, adminProtect, async (req, res) => 
       status: "completed"
     });
 
-    // Pending Complaints
-    const pendingComplaints = await Complaint.countDocuments({
-      status: "Pending"
-    });
-
     res.json({
       totalUsers,
       activeDrivers,
-      completedRides,
-      pendingComplaints
+      completedRides
     });
   } catch (error) {
     console.error("Dashboard stats error:", error);

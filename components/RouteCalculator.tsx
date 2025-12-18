@@ -16,7 +16,7 @@ export const useRouteCalculator = () => {
     ) => {
         try {
             const response = await fetch(
-                `http://router.project-osrm.org/route/v1/driving/${start.lon},${start.lat};${end.lon},${end.lat}?overview=full&geometries=geojson`
+                `https://router.project-osrm.org/route/v1/driving/${start.lon},${start.lat};${end.lon},${end.lat}?overview=full&geometries=geojson`
             );
             const data = await response.json();
 

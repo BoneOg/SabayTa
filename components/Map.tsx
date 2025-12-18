@@ -127,7 +127,7 @@ export const MapComponent = ({
 const styles = StyleSheet.create({
     userMarker: {
         backgroundColor: "#534889",
-        padding: 10,
+        padding: 4,
         borderRadius: 25,
         borderWidth: 2,
         borderColor: "#fff",

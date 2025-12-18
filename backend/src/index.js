@@ -3,7 +3,6 @@ import express from 'express';
 import { connectDB } from './lib/db.js';
 import authRoutes from './routes/authRoutes.js';
 import bookingRoutes from './routes/bookingRoutes.js';
-import complaintRoutes from './routes/complaintRoutes.js';
 import conversationRoutes from './routes/conversationRoutes.js';
 import driverApplicationRoutes from './routes/driverApplicationRoutes.js';
 import driverProfileRoutes from './routes/driverProfileRoutes.js';
@@ -27,7 +26,6 @@ app.use('/api/conversations', conversationRoutes);
 app.use('/api/driver-application', driverApplicationRoutes);
 app.use('/api/ratings', ratingRoutes);
 app.use('/api/notifications', notificationRoutes);
-app.use('/api/complaints', complaintRoutes);
 
 connectDB()
     .then(() => {
