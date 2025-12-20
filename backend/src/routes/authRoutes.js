@@ -9,7 +9,6 @@ const generateToken = (userId) => {
     return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "15d" });
 };
 
-// ---------------- REGISTER ----------------
 router.post("/register", async (req, res) => {
     try {
         const { name, email, phone, gender, password } = req.body;
@@ -57,7 +56,6 @@ router.post("/register", async (req, res) => {
     }
 });
 
-// ---------------- LOGIN ----------------
 router.post("/login", async (req, res) => {
     try {
         let { emailOrPhone, password } = req.body;
@@ -66,13 +64,11 @@ router.post("/login", async (req, res) => {
             return res.status(400).json({ message: "Email/Phone and password are required" });
         }
 
-        // Clean input
         emailOrPhone = emailOrPhone.trim();
 
-        // Helper to escape regex special characters for safe searching
         const escapeRegex = (text) => text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 
-        // Find user by email (case-insensitive) or phone
+
         const user = await User.findOne({
             $or: [
                 { email: { $regex: new RegExp(`^${escapeRegex(emailOrPhone)}$`, 'i') } },
